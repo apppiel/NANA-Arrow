@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NanaArrow.Data;
 using NanaArrow.Gameplay;
 using UnityEngine;
@@ -48,8 +49,17 @@ namespace NanaArrow.Core
             return result;
         }
 
-        /// <summary>레인 미리보기 (길게 누르기, GAME_RULES v0.6 §0). 판정만 하고 상태는 바꾸지 않는다.</summary>
+        /// <summary>레인 미리보기 (길게 누르기, GAME_RULES §2-7). 판정만 하고 상태는 바꾸지 않는다.</summary>
         public FireResult Preview(Arrow arrow) => FireResolver.Resolve(Board, arrow);
+
+        /// <summary>치트 "즉시 클리어": 남은 Arrow 를 전부 제거하고 Cleared 를 낸다 (Tapped 는 안 냄).</summary>
+        public void ForceClear()
+        {
+            if (Board.IsCleared) return;
+            foreach (var arrow in new List<Arrow>(Board.Arrows))
+                Board.Remove(arrow);
+            Cleared?.Invoke();
+        }
 
         /// <summary>빈 칸이면 Ignored.</summary>
         public TapResult TapAt(Vector2Int cell)
