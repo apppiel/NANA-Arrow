@@ -172,7 +172,7 @@ public enum FingerAnchor { Head, Middle, Tail }
 | 2 | FirstBlock | tut.block | (비움) | - | None (3초) |
 | 4 | LevelStart | tut.long_press | (비움) | - | FirstLongPress |
 | 16 | LevelStart | tut.frozen | a2 | Head | FirstIceBreak |
-| 26 | LevelStart | tut.key | (W-013 에서 확정) | Head | FirstExit |
+| 26 | LevelStart | tut.key | a12 | Head | FirstExit |
 
 ## 8. 광고 연결 지점 (GAME_RULES §7, §11)
 | UI 동작 | UI 이벤트 | AdsManager 판단 | 끝난 뒤 |

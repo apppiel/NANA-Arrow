@@ -136,6 +136,16 @@ namespace NanaArrow.Core
             SceneLoader.Load(SceneId.Main);
         }
 
+        /// <summary>이어하기 (보상형 광고 시청 뒤, AdsController 가 호출): 보드·Marked 그대로, 목숨만 회복. 회복 후 목숨을 돌려준다.</summary>
+        public int Continue(int lives)
+        {
+            if (Session == null) return 0;
+            Session.Lives.AddLives(lives);
+            _stats.CountContinue();
+            boardView.Refresh(Session.Board, Session.Lives);
+            return Session.Lives.Lives;
+        }
+
         /// <summary>치트: 즉시 클리어.</summary>
         public void CheatClear() => Session?.ForceClear();
 
