@@ -2,9 +2,11 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
-### W-015 완료 (2026-09-17) — 브랜치 `feat/path-arrows` → **PR #30** (base main, 단독 PR)
+### W-015 완료 (2026-09-17) — 브랜치 `feat/path-arrows` → **PR #30 → main 머지 완료** (`2a9d2c4`, 브랜치 삭제)
 - 테스트 **155/155 통과**, 컴파일 에러 0. `FireResolver`·`TapHandler`·`LivesTracker`·`GameSession` 로직은 바꾸지 않았고 기존 테스트가 그대로 통과함 (Lane 추가만)
-- **W-010 / W-011 은 착수하지 않음**: 선행 W-015 + "스택 PR 금지" 규칙 → 이 PR 이 main 에 머지된 뒤 다음 지시에서 진행
+- **상태 (디렉터용)**: W-015 는 main 에 들어갔으니 "완료" 로 옮겨도 됨. **W-010 착수 가능** — 다음 "WORK.md 읽고 처리" 지시 때 `feat/services-infra` 로 시작. W-011 은 W-010 뒤
+- 팀장 에디터 할 일 1~3 완료 확인 (TapInput Config 연결, Area Width Fraction 0.5, 카메라 배경 흰색). 4(길게 누르기·Level Jump)는 설명해 드림. HUD(하트·뒤로가기·다시하기)는 W-015 범위 밖(#13) 이라 아직 화면에 없음
+- **PR 머지 권한 해결**: 자동 모드가 `gh pr merge` 를 매번 차단하던 문제 → 팀장이 `.claude/settings.json` 에 `Bash(gh pr merge *)` 허용 규칙 추가. 다음 세션부터 프로그래머가 PR 을 직접 머지함 (WORK.md 팀장 항목 "PR 머지" 는 이제 불필요). 이 파일은 아직 미커밋 → W-010 브랜치에 `chore:` 로 포함 예정
 
 **변경 요약 (PR)**
 - **Gameplay**: `Arrow` = 꼬리→머리 순서 경로. `Head = cells[^1]`, `Tail`, `Length`. `Direction` 은 길이≥2 면 마지막 두 칸에서 계산(인자 dir 과 불일치·비인접이면 `ArgumentException` → 로더가 `FormatException` 으로 감쌈), 길이 1 이면 인자. `ArrowType.Long` 삭제, `ArrowTypeConfig` 의 long* 필드 삭제, `GameConfig.maxArrowLength`(12) 추가

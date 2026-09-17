@@ -1,123 +1,112 @@
-# NANA-Arrow — GAME_RULES.md (v0.6.1 — 레퍼런스 스크린샷 반영: 격자 없음, 보드 작게, HUD 미니멀, 꺾임 Lv2 부터)
-> **레퍼런스: Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)** — 5천만+ DL, 퍼즐 1위. 아래 §0 이 v0.5 까지의 "직선 막대" 모델을 대체한다. §0 과 충돌하는 이전 조항은 §0 이 우선.
+# NANA-Arrow — GAME_RULES.md (v0.7 — 2026-09-17 전면 재작성. v0.4~v0.6.1 결정을 한 문서로 통합)
+> 작성: 디렉터. **이 파일이 유일한 규칙 기준.** 이전 버전 문구와 충돌하면 이 파일이 우선.
+> 레퍼런스: **Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)**. 스크린샷 docs/reference/.
+> 모든 수치는 ScriptableObject(GameConfig / ArrowTypeConfig / AdsConfig / ArrowViewStyle / RewardConfig) 인스펙터 값. 여기 적힌 값은 기본값.
 
-## 0. 코어 전환 (v0.6) — 화살표는 그리드를 따라 꺾이는 선
-- **Arrow = 순서 있는 셀 경로** `cells[0]`(꼬리) → `cells[n-1]`(머리). 인접 셀은 상하좌우로 연결, 직각 꺾임 자유, 자기 자신과 겹치지 않음. 길이 1~`maxArrowLength`(=12)
-- **Dir = 머리의 진행 방향** = 마지막 두 셀의 방향 (길이 1이면 JSON 의 `dir` 사용, 길이 2 이상이면 `dir` 은 검증용으로 일치해야 함)
-- **Fire**: 머리가 Dir 방향으로 직진하고 몸통은 자기 경로를 따라 뱀처럼 따라간다. 꼬리까지 보드 밖으로 나가면 Exit
-- **Block 판정은 v0.5 와 동일**: 머리 앞 칸부터 보드 가장자리까지 직선 레인이 비어 있어야 한다 (다른 Arrow 의 어떤 셀도 없어야 함). 몸통은 자기 경로로만 이동하므로 레인만 검사하면 충분
-- **레인 미리보기 (레퍼런스 기능)**: Arrow 를 길게 누르면 그 Arrow 의 레인(머리 앞 직선 + 자기 경로)이 하이라이트. 목숨 차감 없음, 손 떼면 사라짐. `longPressSeconds`(=0.35)
-- 타입 정리: `Long` 삭제 (모든 Arrow 가 경로). 남는 타입 = Basic / Frozen / Locked / Key
-- **그래픽 (레퍼런스 스크린샷 docs/reference/ 기준, 2026-09-17 팀장 제공)**
-  - **격자 없음, 셀 배경 없음.** 순백(#FFFFFF) 배경에 선만 그린다
-  - 선: 짙은 남색(#141A33 근처), 굵기 = 셀의 약 15% (`lineWidthCellRatio` 0.15), **꺾임은 둥근 모서리**(round join), 꼬리 끝도 둥글게(round cap)
-  - 머리: 선 끝에 삼각 화살촉 (`arrowHeadLengthCellRatio` 0.45, `arrowHeadWidthCellRatio` 0.45)
-  - 선 사이 간격 = 셀 1칸. 인접한 두 Arrow 가 나란히 붙어 있어도 구분되게 굵기 여유 둘 것
-  - **보드는 작게, 여백 크게**: 보드 폭이 화면 폭의 약 40~50% (`areaWidthFraction` 0.5). 세로 중앙. 큰 보드(10칸)도 이 안에 축소
-  - 색은 `ArrowViewStyle` 로 교체 가능 (v1 은 단색 클래식만)
-- **HUD (레퍼런스 그대로)**: 좌상단 원형 버튼 2개 — 뒤로가기, 다시하기 (연한 보라 배경). 상단 중앙 하트 3개(빨강). **레벨 번호·설정 버튼은 게임 화면에 없음** (설정은 Main 에서). 튜토리얼 문구는 하단 말풍선 (문구: 이동하려면 탭하세요)
-- 나중(v1.1): 하트·별 모양 등 비직사각 보드 마스크 — LEVEL_FORMAT 에 `mask` 예약
-- 레퍼런스 확인된 룰 (그대로 채택): 하트 3개/레벨, 막히면 레인이 빨갛게 번쩍 + 하트 -1, 타이머·이동 제한 없음, 하트 0 → 광고 보고 +1 이어하기, 힌트 있음(우리는 v1 제외 유지)
-
-> 작성: 클로드 데스크탑 / **v1 범위 확정** (2026-09-17). 변경 시 버전 올리고 CLAUDE.md 담당에게 알릴 것.
-> 모든 수치는 `GameConfig` ScriptableObject에서 인스펙터로 조정한다. 여기 적힌 값은 초기 기본값.
+## 0. 한눈에
+- 보드 위 화살표(Arrow)는 **그리드를 따라 꺾이는 선**. 탭하면 머리 방향으로 빠져나감. 앞이 다른 Arrow 에 막히면 하트 -1
+- 하트 3개, 타이머·이동 제한 없음. 하트 0 → 광고 보고 +1 이어하기 / 다시하기
+- 모든 Arrow 가 나가면 클리어. 100단계 클리어 시 응모 코드
+- v1 에 없는 것: 힌트·Undo·Shuffle 등 부스터 전부, 코인, 별점, 인앱결제, Bomb
 
 ## 1. 용어
 | 용어 | 정의 |
 |---|---|
-| Board | N×M 셀 그리드. 원점 (0,0)은 좌하단, x는 오른쪽, y는 위 |
-| Cell | 그리드 한 칸. 비어 있거나 Arrow 한 개의 일부를 담는다 |
-| Arrow | 1칸 이상을 차지하는 블록. `Dir` 하나를 가진다 (Up/Down/Left/Right) |
-| Head | Arrow에서 Dir 방향의 맨 앞 칸 |
-| Fire | Arrow를 탭해 Dir 방향으로 발사하는 행위 |
-| Exit | Arrow가 보드 밖으로 완전히 나가 제거되는 것 |
-| Block | Head 앞 칸에 다른 Arrow가 있어 Fire가 실패하는 것 |
+| Board | W×H 셀 그리드 (가로≠세로 허용). 원점 (0,0) 좌하단, x 오른쪽, y 위 |
+| Arrow | **순서 있는 셀 경로** `cells[0]`(꼬리) → `cells[n-1]`(머리). 인접 셀은 상하좌우 연결, 직각 꺾임 자유, 자기 겹침 금지 |
+| Head / Tail | 경로의 마지막 / 첫 셀 |
+| Dir | 머리의 진행 방향 = 마지막 두 셀의 방향. 길이 1 이면 JSON `dir` |
+| Lane | 머리 앞 칸부터 보드 가장자리까지의 직선 칸들 |
+| Fire | Arrow 를 탭해 발사. 머리는 Lane 을 직진, 몸통은 자기 경로를 따라 뱀처럼 따라감 |
+| Exit | 꼬리까지 보드 밖으로 나가 제거됨 |
+| Block | Lane 에 다른 Arrow 의 셀이 있어 Fire 실패 |
+| Marked | Block 당한 뒤 빨간색으로 표시된 상태 |
 
 ## 2. 코어 룰
-1. 플레이어가 Arrow를 탭하면 Head 앞 칸부터 보드 가장자리까지 검사한다.
-2. 경로가 모두 비어 있으면 Arrow는 보드 밖으로 날아가 Exit 된다.
-3. 경로에 다른 Arrow가 있으면 Block: Arrow는 그 앞까지 밀렸다가 원위치로 튕긴다 (연출), 상태 변화 없음.
-4. 보드의 모든 Arrow가 Exit 되면 레벨 클리어.
-5. ~~Undo~~ — v1 미포함 (부스터 전체 제외). 목숨+Marked 규칙이 실수를 흡수하므로 불필요.
-6. **실패 조건: 목숨 3개** (`maxLives` = 3). 시간 제한 없음, 이동 횟수 제한 없음.
-   - Block 된 Arrow를 탭하면 목숨 -1 하고 그 Arrow는 **빨간색(Marked)** 상태가 된다
-   - Marked 상태의 Arrow를 다시 탭해서 또 Block 되어도 **목숨은 깎이지 않는다** (배려 규칙)
-   - Marked 는 보드가 바뀌면(어떤 Arrow든 Exit 되면) 전부 해제된다 — 막힘 상황이 달라졌으므로 다시 판단해야 함 (`markedResetOnExit` = true)
-   - Marked Arrow가 Fire에 성공하면 그냥 Exit 된다
-   - 목숨 0 → 레벨 실패 팝업 (아래 두 버튼)
-     - **광고 보고 이어하기**: 보상형 광고 시청 → 현재 보드 유지, 목숨 +`continueLives`(=1). 레벨당 `maxContinues`(=1)회. 모든 값 AdsConfig 인스펙터
-     - **다시하기**: 무료, 레벨 처음부터. 목숨 3 리셋
-   - 목숨은 레벨 시작 시 항상 3으로 리셋 (레벨 간 공유 없음)
+1. 탭 → Lane 검사. 비어 있으면 Exit, 다른 Arrow 가 있으면 Block
+2. **자기 몸통은 Lane 을 막지 않는다.** 단, 검증기가 "자기 Lane 위에 자기 몸통이 있는 레벨" 을 금지하므로 실제로는 발생하지 않음 (규칙 2-e)
+3. Block → Lane 이 빨갛게 번쩍(`laneFlashDuration` 0.35) + 머리 살짝 튕김 + **하트 -1** + 그 Arrow 는 Marked
+4. **Marked Arrow 를 다시 탭해 또 Block 되어도 하트는 깎이지 않는다** (배려 규칙). 어떤 Arrow 든 Exit 되면 Marked 전부 해제 (`markedResetOnExit` true). Marked Arrow 가 성공하면 그냥 Exit
+5. 모든 Arrow Exit → 클리어
+6. **하트 (`maxLives` 3)**: 레벨 시작 시 3 리셋, 레벨 간 공유 없음. 0 → 실패 팝업 (§7)
+7. **Lane 미리보기**: Arrow 를 `longPressSeconds`(0.35) 이상 누르면 선 강조 + Lane 하이라이트. 하트 차감 없음, 놓으면 해제. 미리보기로 시작된 누름은 탭으로 세지 않음
+8. 탭 히트 영역 = Arrow 의 모든 셀
+9. **연속 탭 허용** (`allowInputDuringFire` true): 판정은 탭 즉시 논리 보드에서 확정, 연출은 뒤따라감. Fire 중인 Arrow 는 재탭 불가
+10. Undo 없음, 시간·이동 제한 없음
 
-## 3. Arrow 종류 (도입 순서)
-| 타입 | 설명 | 도입 레벨(초안) |
+## 3. Arrow 종류
+| 타입 | 설명 | 도입 레벨 |
 |---|---|---|
-| Basic | 경로 1~N칸, 꺾임 자유 | 1 (직선 3개, 튜토리얼) / **2 (첫 꺾임)** |
-| ~~Long~~ | v0.6 에서 삭제 — 모든 Arrow 가 경로 | - |
-| Frozen | 탭 1회로 얼음 해제, 2회째 Fire | 16 |
-| Locked | 같은 색 Key Arrow가 Exit 되어야 해제 | 26 |
-| Bomb | Fire 시 인접 8칸 Arrow 강제 Exit | **보류** (v1 미포함) |
+| Basic | 경로 1~N칸 | 1 (직선 3개 튜토리얼) / **2 (첫 꺾임)** |
+| Frozen | `hits`(기본 2) 회 탭. 마지막 탭 전 "얼음 깨기" 탭은 Lane 무관·하트 차감 없음. 마지막 탭만 Block 판정. Block 돼도 얼음은 다시 얼지 않음 | 16 |
+| Key | Basic 과 같고 `keyGroup` 을 가짐. Exit 되면 같은 그룹 Locked 해제 | 26 |
+| Locked | 같은 `keyGroup` 의 Key 가 **모두** Exit 되어야 해제. 잠긴 상태에서 탭 → **하트 차감 없음** + 자물쇠 흔들림(`lockShakeDuration` 0.2, `lockShakeDistance` 0.08셀) | 26 |
+| ~~Long~~ / ~~Bomb~~ | 없음. enum 에도 넣지 않음 | - |
 
-각 타입은 `ArrowType` enum + 타입별 설정은 `ArrowTypeConfig` ScriptableObject.
+`ArrowType` enum: Basic, Frozen, Locked, Key. 타입 표시는 머리 위 아이콘.
 
 ## 4. 레벨 구조
-- 보드 크기: 5×5 (Lv1~10) → 6×6 → 7×7 → 8×8 (Lv40+). 최대 `maxBoardSize` = 10
-- 셀 크기와 간격은 `cellSize`, `cellGap` 으로 화면에 맞춰 자동 스케일
-- 레벨 데이터: `Assets/_Project/Levels/level_###.json` (스키마는 LEVEL_FORMAT.md)
-- 정답 보장: 모든 레벨은 검증기가 "해결 가능" 판정을 통과해야 저장 가능
+- 보드: 가로·세로 독립. `minBoardSize` 3, **`maxBoardWidth` 10, `maxBoardHeight` 14**
+- 구간 (LEVEL_DESIGN v1.0 승인): 1~3 소형(5×6·5×5·4×5) → 4~10 6×7~7×9 → 11~20 7×9→8×10 → 21~30 8×10~8×11 → 이후 기획자 제안. 기믹 도입 레벨(16 Frozen, 26 Key/Locked)과 보드 확대 레벨은 겹치지 않게
+- **`maxArrowLength` 40** (레퍼런스 Lv4 에 34칸 Arrow)
+- 점유율: 3레벨부터 90~100% 가 표준 (레퍼런스와 동일)
+- 레벨 파일 `Assets/_Project/Levels/level_###.json`, 스키마 LEVEL_FORMAT v0.5. 작성·저장 담당 = 기획자
+- 검증기 필수 통과 규칙: 0 스키마 / 1 범위·Arrow 간 겹침 없음 / 2 경로: (a) 인접 (b) 자기 겹침 없음 (c) dir = 마지막 세그먼트 (d) 길이 ≤ maxArrowLength **(e) 자기 Lane 위에 자기 몸통 없음** / 3 Locked↔Key / 4 해결 가능(탐욕 시뮬) / 5 solution·minTaps 기록
+- 향후 v1.1: 비직사각 보드 `mask`
 
-## 5. 별점 (재플레이)
-- ⭐⭐⭐: 최소 탭 수 이하 / ⭐⭐: +`star2Tolerance`(=3) 이내 / ⭐: 클리어
-- **별점 시스템은 v1 미포함** (보류). 위 기준은 도입 시 초안
+## 5. 별점 — v1 미포함
+도입 시 기준은 "잃은 하트 수" (0=⭐⭐⭐, 1=⭐⭐, 2+=⭐). minTaps 기준 아님.
 
-## 6. 힌트 / 부스터
-**v1 전체 제외.** (Hint, Undo, Shuffle 모두 미포함) 이후 리텐션 지표 보고 Hint 부터 검토.
-- 보상형 광고는 "목숨 0 → 이어하기" 한 곳에만 사용
+## 6. 힌트 / 부스터 / 코인 — v1 전체 제외
+Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고는 §7 이어하기 한 곳에만.
 
-## 7. 진행 / 보상
-- 레벨 클리어 → `coinPerClear` 코인, 별 3개 시 보너스
-- **100단계 클리어 → 응모 코드 표시 (확정)**. 기존 홈페이지 Firebase 응모 구조 재사용, 코드 생성 규칙은 Water Sort/Block Fill 과 동일하게
-- 광고 정책 (확정, 전부 `AdsConfig` ScriptableObject)
+## 7. 실패 / 광고 (확정, 전부 AdsConfig)
+- 하트 0 → 실패 팝업: **광고 보고 이어하기**(보드 유지, 하트 +`continueLives` 1, 레벨당 `maxContinues` 1회) / **다시하기**(무료, 처음부터, 하트 3)
 
 | 위치 | 종류 | 값 | 기본 |
 |---|---|---|---|
-| 목숨 0 → 이어하기 | 보상형 | `continueLives`, `maxContinues` | 1, 1 |
-| 레벨 클리어 후 | 전면 | `interstitialEveryNLevels`, `adFreeLevels` | 3, 5 (1~5레벨 광고 없음) |
-| 다시하기 반복 | 전면 | `interstitialAfterFails` | 2 (같은 레벨 2번 실패마다) |
-| 광고 제거 IAP | - | **v1 미포함** (인앱 결제 없음) | - |
+| 하트 0 → 이어하기 | 보상형 | continueLives / maxContinues | 1 / 1 |
+| 레벨 클리어 후 | 전면 | interstitialEveryNLevels / adFreeLevels | 3 / 5 (1~5레벨 없음) |
+| 다시하기 반복 | 전면 | interstitialAfterFails | 2 (같은 레벨 2번 실패마다) |
+| 광고 제거 IAP | - | v1 미포함 | - |
 
-- 광고 로직은 `AdsManager` 한 곳에서만 판단. 게임플레이 코드는 "클리어됨/실패됨/다시하기 눌림" 이벤트만 보낸다
+- 이미 깬 레벨 재클리어도 전면 카운트 포함. HUD 다시하기·설정 다시하기는 실패로 세지 않고 광고 없음
+- 광고 판단은 `AdsManager` 한 곳. 게임플레이는 이벤트만 발행. SDK: **AdMob 단독 + Unity Ads 미디에이션** (기존 게임과 동일, ID 는 신규 발급)
+- **100단계 클리어 → 응모 코드** (XXXX-XXXX, 0/O/1/I 제외 32자). 기존 RewardCode/RewardCodeService 이식, 홈페이지 `https://nanabox.co.kr/reward-claim.html` 은 `RewardConfig` SO
 
-## 8. 연출 타이밍 (모두 GameConfig)
+## 8. 연출 (GameConfig)
 | 값 | 기본 |
 |---|---|
-| fireSpeedCellsPerSec | 14 (경로 길이에 비례, 고정 시간 아님) |
-| blockBounceDuration | 0.15s |
-| blockBounceDistance | 0.2 cell |
-| clearPopupDelay | 0.6s |
-| cellSpawnStagger | 0.03s |
-| cellSpawnDuration | 0.15s |
+| fireSpeedCellsPerSec | 24 (경로 길이 비례) |
+| laneFlashDuration | 0.35s |
+| blockBounceDuration / Distance | 0.15s / 0.2 cell |
 | iceBreakDuration | 0.15s |
-| lockShakeDuration | 0.2s |
-| lockShakeDistance | 0.08 cell |
+| lockShakeDuration / Distance | 0.2s / 0.08 cell |
+| clearPopupDelay | 0.6s |
+| cellSpawnStagger / Duration | 0.03s / 0.15s |
+| longPressSeconds | 0.35s |
 
-- Block 튕김: 막은 Arrow 직전(FreeCells)까지 + blockBounceDistance 전진 후 복귀, 편도 blockBounceDuration
+## 9. 그래픽 (ArrowViewStyle, 레퍼런스 스크린샷 기준)
+- **격자·셀 배경 없음.** 순백 #FFFFFF 배경에 선만
+- 선: #141A33, `lineWidthCellRatio` 0.13~0.15, 둥근 꺾임(round join)·둥근 꼬리(round cap). 머리 삼각 화살촉 `arrowHead*CellRatio` 0.45~0.55
+- Marked = 선·머리 빨강 / Block = Lane 빨간 번쩍 / 미리보기 = 선 파랑 + Lane 하이라이트
+- **셀 크기 규칙 (기획자 W-016 제안 승인)**: 보드 크기와 무관하게 셀 간격 일정. `cell = min(화면폭 × cellWidthFraction(0.052), 화면폭 × maxAreaFraction(0.9) ÷ 가로칸수)`. 세로 중앙. (기존 `areaWidthFraction 0.5` 방식 폐기)
+- 길이 1 Arrow 는 머리 뒤 반 칸 짧은 선
+- 색·비율은 전부 인스펙터. v1 은 단색 클래식만
 
-## 9. 화면 / 입력
-- 세로 고정, 보드는 화면 중앙, 상단 HUD(레벨·코인·설정), 하단 부스터 바
-- 입력: Input System, 탭만 사용 (드래그 없음). **연속 탭 허용** (`allowInputDuringFire` = true)
-  - 판정은 탭 즉시 논리 보드에서 확정하고, 연출은 뒤따라감 (논리와 연출 분리 필수)
-  - 이미 Fire 중인 Arrow는 다시 탭 불가. 날아가는 중인 Arrow가 차지했던 칸은 논리상 이미 비어 있음
+## 10. 화면 / UI (UI_FLOW v0.2 기준)
+- 세로 고정
+- **게임 화면 HUD**: 좌상단 원형 버튼 2개(뒤로가기=메인으로 확인 팝업, 다시하기=즉시 재시작) + 상단 중앙 하트 3개. **레벨 번호·설정 버튼 없음**. 게임 중 사운드 끄기 없음 (레퍼런스와 동일, 승인)
+- 설정은 Main 전용: 사운드·**진동**(기본 켜짐, 하트 감소 시만 `vibrateOnLifeLost`)
+- 튜토리얼: 하단 말풍선 + 손가락. `TutorialConfig` SO. Lv1 탭 안내, Lv2 꺾임, **Lv4 길게 누르기 안내(승인)**, Lv16 Frozen, Lv26 Key
+- 팝업: 클리어 / 실패 / 메인으로 확인 / 설정 / 응모 코드 / 종료 확인
+- 언어: v1 한국어만. 문구는 키로 분리 (`Strings` SO)
+- 레벨 중간 저장 없음. 레벨 로드는 `LevelCatalog` SO
+- 치트(에디터·개발 빌드): 레벨 점프, 즉시 클리어, 하트 채우기
 
-## 10. 씬 흐름
-Boot(설정·저장 로드) → Main(시작·설정·레벨 선택) → Game(레벨 N) → 클리어 팝업 → 다음 레벨 / Main
+## 11. 씬 흐름
+Boot(설정·저장 로드) → Main(시작·레벨 선택·설정) → Game → 클리어 팝업 → 다음 레벨 / 실패 팝업 → 이어하기·다시하기 / 뒤로가기 → Main
 
-## 11. UI / 진행 결정 (UI_FLOW v0.1 확인 요청에 대한 답, 2026-09-17)
-- 진동 토글: **추가**. 기본 켜짐, 하트 감소 시에만 진동 (`vibrateOnLifeLost`, 설정 저장)
-- 설정 팝업의 "다시하기": 실패 횟수에 **포함하지 않음**, 광고 없음
-- 레벨 중간 저장: **없음**. 앱 종료 시 그 레벨 처음부터
-- 언어: v1 **한국어만**. 단, 문구는 UI_FLOW 의 키 표대로 코드와 분리해 둘 것 (나중에 영어 추가 대비)
-- 이미 깬 레벨 재클리어: 전면 광고 카운트에 **포함**
-- 레벨 로드: `LevelCatalog` ScriptableObject (TextAsset 목록, 인스펙터에서 순서 편집) — Resources 폴더 사용 안 함
-- 치트 (에디터/개발 빌드 전용): 레벨 점프 + 즉시 클리어 + 목숨 채우기
-- Lv20 depth 6: 허용. 플레이 테스트 후 조정
+## 변경 이력
+- v0.7 (09-17) 전면 재작성. maxArrowLength 40, 보드 가로·세로 분리, 셀 크기 규칙, 규칙 2-e, Lv4 튜토리얼, 게임 중 설정 없음 확정
+- v0.6.x 레퍼런스 확정, 경로형 전환 / v0.5.x Key·Frozen·Locked 세부, 코인 삭제, 보드 11/21/40 / v0.4 광고 확정 / v0.3 하트·Marked / v0.2 부스터 제외
