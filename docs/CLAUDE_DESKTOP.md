@@ -15,7 +15,7 @@
 | docs/STATUS.md | 진행 현황·이슈 목록 (디렉터가 보고서로 정리) | 디렉터 |
 
 ## 매 작업 순서
-0. **항상 docs/WORK.md 를 먼저 읽고 "기획자" 항목만 수행한다. 결과는 WORK.md 의 "기획자 보고" 섹션에만 쓴다. 다른 섹션은 수정 금지**
+0. **항상 docs/WORK.md 를 먼저 읽고 "기획자" 항목만 수행한다. WORK.md 는 절대 수정하지 않는다. 결과 보고는 docs/REPORT_PLANNER.md 맨 위에 추가한다 (이 파일만 쓴다)**
 1. 이 대화에서 Unity MCP로 에디터 상태 확인 (씬, 설정, 콘솔 에러)
 2. 문서 작성/수정은 프로젝트 `docs/` 폴더에 직접 저장
 3. 클로드 코드의 PR diff를 받으면 코드 리뷰: 버그, 구조, GAME_RULES 위반 여부
@@ -39,9 +39,13 @@
 - [x] docs/LEVEL_FORMAT.md v0.2 (2026-09-17: 풀 수 없던 예시 레벨 교체, 검증 규칙 보강)
 - [x] 디렉터 확인 요청 7건 답변 완료 → GAME_RULES v0.5 반영됨 (아래 답변 참고)
 - [x] LEVEL_FORMAT v0.3 (GAME_RULES v0.5 반영) → 클로드 코드 전달 가능
-- [ ] GAME_RULES §9·§5 잔여 불일치 확인 (아래)
-- [ ] GitHub 이슈 목록 (체크리스트 → 이슈)
-- [ ] docs/LEVEL_DESIGN.md 초안 (레벨 1~20)
+- [x] GAME_RULES §9·§5 잔여 불일치 → v0.5.1 해결
+- [x] GitHub 이슈 초안 → docs/ISSUES.md (21건 + 기획 트랙 5건). **GitHub 등록은 팀장/클로드 코드**
+- [x] docs/LEVEL_DESIGN.md v0.1 (난이도 곡선 + 레벨 1~10 JSON, 프로젝트 코드로 풀이 검증)
+- [ ] 디렉터 확인: 보드 크기 전환 레벨 11 / 21 / 40 (LEVEL_DESIGN §3)
+- [ ] 팀장 확인: CLAUDE.md 의 Undo·힌트 비용 잔재 (ISSUES.md 하단)
+- [ ] LEVEL_DESIGN 11~20
+- [ ] UI_FLOW.md
 
 ## v0.5 검토 잔여 → **해결됨 (v0.5.1)**. 디렉터 실수였음: v0.3 치환이 §9 한 줄에 붙어 있어 미적용. §9 HUD·§5 별점 모두 수정 완료. GitHub 이슈 정리 진행 OK.
 

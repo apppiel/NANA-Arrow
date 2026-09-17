@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.5.1 — §9 HUD·§5 별점 잔여 불일치 수정)
+# NANA-Arrow — GAME_RULES.md (v0.5.2 — §4 보드 크기 구간 확정 11/21/40)
 > 작성: 클로드 데스크탑 / **v1 범위 확정** (2026-09-17). 변경 시 버전 올리고 CLAUDE.md 담당에게 알릴 것.
 > 모든 수치는 `GameConfig` ScriptableObject에서 인스펙터로 조정한다. 여기 적힌 값은 초기 기본값.
 
@@ -44,7 +44,7 @@
 각 타입은 `ArrowType` enum + 타입별 설정은 `ArrowTypeConfig` ScriptableObject.
 
 ## 4. 레벨 구조
-- 보드 크기: 5×5 (Lv1~10) → 6×6 → 7×7 → 8×8 (Lv40+). 최대 `maxBoardSize` = 10
+- 보드 크기: 5×5 (Lv1~10) → 6×6 (Lv11~20) → 7×7 (Lv21~39) → 8×8 (Lv40+). 기믹 도입 레벨(16 Frozen, 26 Key/Locked)과 크기 변경 레벨을 겹치지 않게 한다. 최소 `minBoardSize`=3, 최대 `maxBoardSize`=10
 - 셀 크기와 간격은 `cellSize`, `cellGap` 으로 화면에 맞춰 자동 스케일
 - 레벨 데이터: `Assets/_Project/Levels/level_###.json` (스키마는 LEVEL_FORMAT.md)
 - 정답 보장: 모든 레벨은 검증기가 "해결 가능" 판정을 통과해야 저장 가능

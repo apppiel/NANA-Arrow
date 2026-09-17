@@ -1,68 +1,63 @@
-# WORK.md — 작업 보드
-> 팀장은 각 AI에게 "docs/WORK.md 읽고 네 담당 섹션 처리해줘" 만 말한다.
-> 규칙: "현재 작업" 은 디렉터만 수정. 프로그래머·기획자는 **자기 보고 섹션만** 쓴다. 끝난 항목은 디렉터가 "완료" 로 옮긴다.
-> 작업 번호 W-### 은 GitHub 이슈 번호와 별개. 항목이 없으면 그 역할은 할 일 없음.
+# WORK.md — 작업 지시 (디렉터만 작성)
+> 팀장은 각 AI에게 "docs/WORK.md 읽고 네 항목 처리해줘" 만 말한다.
+> **이 파일은 디렉터만 수정한다.** 보고는 각자 파일에: 프로그래머 → docs/REPORT_PROGRAMMER.md, 기획자 → docs/REPORT_PLANNER.md
+> 항목이 없으면 그 역할은 할 일 없음. W-### 은 GitHub 이슈 번호와 별개.
 
 ---
 
-## 현재 작업 (디렉터 작성)
+## 프로그래머
 
-### W-003 규칙 v0.5.1 반영 — 프로그래머
-- 선행: W-002(LevelLoader/Validator) 끝난 뒤
-- GAME_RULES v0.5.1, LEVEL_FORMAT v0.3 다시 읽기
-- ArrowType enum 에 Key 추가 (Basic + keyGroup)
-- GameConfig 에서 coinPerClear 제거
-- Frozen: hits 회 탭. 마지막 탭 전 "얼음 깨기" 탭은 경로 무관·목숨 차감 없음. 마지막 탭만 Block 판정
-- Locked: 같은 keyGroup 의 Key 가 모두 Exit 되기 전 탭 → 목숨 차감 없음, 흔들림용 결과값만 반환
-- 탭 처리 로직(TapHandler, 순수 C#) + 테스트
-- 끝나면 아래 "프로그래머 보고" 에 PR 요약 + 팀장이 에디터에서 할 일
+### W-005 머지 + 이슈 등록 + 보드 뷰 (Game 씬)
+- `feat/level-data-validator` 를 PR 로 main 에 머지, origin 푸시
+- docs/ISSUES.md 의 21+5건을 `gh issue create` 로 GitHub 에 등록 (라벨·마일스톤 포함). 이미 끝난 항목은 등록 후 바로 close
+- **v1 에 없는 것 주의**: Undo·힌트·코인·별점 구현 금지 (CLAUDE.md 갱신됨)
+- 프로그래머 보고의 가정 3건은 디렉터 승인: (1) Long 외 타입은 1칸 (2) 얼음 탭은 잠금 무관 (3) 파일 저장은 에디터 툴에서
+- 새 브랜치 `feat/board-view`:
+  - `Gameplay/View/BoardView` : LevelData → 셀·Arrow 스프라이트 생성, GameConfig.cellSize/cellGap 으로 화면 중앙 배치 (보드 크기 따라 자동 스케일)
+  - `Gameplay/View/ArrowView` : 타입·방향별 표시, Marked(빨강)/Frozen(얼음 레이어)/Locked(자물쇠) 상태 표시, Fire·Bounce·IceBreak·Shake 연출 (시간은 GameConfig)
+  - `Core/GameSession` : LevelLoader → TapHandler 연결, 클리어·실패 이벤트 발행. 광고 판단은 하지 않음
+  - `Gameplay/Input/TapInput` : Input System 으로 탭 → 셀 좌표 → GameSession.Tap. `allowInputDuringFire` 준수 (Fire 중인 Arrow 만 잠금)
+  - 스프라이트는 임시 (단색 사각형 + 삼각형 화살촉, 코드로 생성) — 아트는 나중에 교체
+  - 팀장이 Game 씬에서 연결할 오브젝트·컴포넌트 목록을 보고에 명시
 
-### W-004 GitHub 이슈 목록 + 레벨 설계 — 기획자
-- docs/CLAUDE_DESKTOP.md 의 "v0.5 검토 잔여" 는 해결됨 확인
-- 체크리스트 → GitHub 이슈 목록 (docs/ISSUES.md 로 저장, 제목·본문·라벨)
-- docs/LEVEL_DESIGN.md 초안: 난이도 곡선 + 레벨 1~10 을 LEVEL_FORMAT v0.3 JSON 으로 Assets/_Project/Levels/ 에 저장
-- 끝나면 아래 "기획자 보고" 에 요약
+### W-009 이전 프로젝트 조사 (W-005 와 병행 가능, 조사만 — 코드 이식은 아직 금지)
+- 참고 프로젝트 (읽기 전용): 
+  - Block Fill Puzzle: `/Users/choiseungjin/letme/unity_/NANA_puzzle`
+  - Water Sort Puzzle: `/Users/choiseungjin/letme/unity_/WaterSortPuzzle`
+- 조사 항목 → docs/REPORT_PROGRAMMER.md 에 정리
+  1. **광고**: AdMob + Unity Ads 를 어떻게 썼는지 (AdMob 단독 + Unity Ads 미디에이션인지, 둘 다 직접 호출인지), SDK 버전, 전면/보상형 호출 코드 위치, 앱 ID·유닛 ID 가 어디에 있는지
+  2. **응모 코드**: 100단계 클리어 시 코드 생성·표시 스크립트 경로, 코드 생성 규칙(형식·시드), 홈페이지 URL, Firebase 관련 코드 유무
+  3. 두 프로젝트 사이에 차이가 있으면 어느 쪽이 최신인지
+  4. NANA-Arrow 에 이식할 때 어셈블리·네임스페이스 어떻게 나눌지 제안
+- 이식 자체는 디렉터가 조사 결과 보고 W-010 으로 지시
 
----
-
-## 프로그래머 보고 (프로그래머만 작성)
-
-### W-002 + W-003 완료 보고 (2026-09-17) — 브랜치 `feat/level-data-validator`
-- `feat/gameplay-core` 는 main 에 fast-forward 머지 후 origin 푸시 완료 (`d22312f`)
-- 테스트 **110/110 통과** (Unity MCP EditMode), 컴파일 에러 0
-
-**변경 요약 (PR)**
-- **Data**: `LevelData` / `ArrowData` — LEVEL_FORMAT v0.3 과 1:1, 필수 필드 누락·미지 enum(`Bomb`)·version≠1 은 파싱 단계에서 예외. `LevelLoader.Parse(json)` → `CreateBoard(level, frozenDefaultHits)` (`CreateArrow`, `ToCells` 도 public). 파일 I/O 는 호출자 몫
-  - `Newtonsoft.Json 3.2.2` 를 manifest 직접 의존성으로 추가 (`JsonUtility` 는 `[[x,y]]` 중첩 배열을 못 읽음)
-- **Editor**: `LevelValidator.Validate(level, GameConfig, ArrowTypeConfig)` → `LevelValidationResult { Errors[(LevelRule, Message)], Solution, MinTaps }`
-  - 규칙 0 스키마(보드 `minBoardSize`~`maxBoardSize`, id 고유, 셀 `[x,y]` 형식, Frozen hits ≥ 2) → 1 범위·겹침 → 2 Long 직선·연속·축 일치·길이 `longMin~Max` (Long 외 타입은 1칸) → 3 Locked/Key keyGroup 및 Key 존재 → 4 탐욕 시뮬레이션(경로 비고 잠기지 않은 Arrow 를 레벨 순서대로 반복 Exit) → 5 `Solution` + `MinTaps = Σhits`
-  - `LevelValidator.Record(level, result)` 가 규칙 5·6: `solution` 과 `meta.minTaps` 덮어쓰기, `meta` 의 다른 키는 보존
-  - LEVEL_FORMAT v0.3 예시 → solution `[a1,a5,a4,a2,a3]`, minTaps 6 재현. v0.1 예시 → Solvable 실패 재현
-- **Gameplay (v0.5.1)**: `Arrow.Hits` / `Arrow.KeyGroup` 추가(기존 생성자 유지), `Board.IsLocked(arrow)` (같은 keyGroup 의 Key 가 보드에 남아 있으면 잠김 — Validator·TapHandler 공용)
-  - `TapHandler(board, lives).Tap(arrow)` → `TapResult { Outcome, FreeCells, BlockedBy, LifeLost, RemainingHits }`
-  - `Outcome`: `Exit` / `Blocked`(목숨·Marked 는 LivesTracker 규칙) / `IceBroken`(Frozen 얼음 탭: 경로 무관·목숨 차감 없음, 남은 탭 수 반환) / `Locked`(잠긴 Locked 탭: 목숨 차감 없음, 흔들림용) / `Ignored`(보드에 없는 Arrow 또는 목숨 0)
-  - Frozen 은 마지막 탭만 Block 판정. Block 돼도 얼음은 다시 얼지 않음
-- **Config**: `GameConfig.coinPerClear` 제거, `minBoardSize`(3) 추가. `ArrowTypeConfig.frozenDefaultHits` 최소 2. `ArrowType.Key` 는 W-001 에 이미 포함
-- **테스트**: `LevelLoaderTests` 12, `LevelValidatorTests` 27, `TapHandlerTests` 17, `ArrowTests`/`BoardTests` 보강 → 총 110
-
-**가정 (기획자 확인 요청)**
-- Long 이 아닌 타입(Basic/Frozen/Locked/Key)은 정확히 1칸으로 검증함 (LEVEL_FORMAT 은 Basic·Long 만 명시)
-- Frozen 의 얼음 탭은 잠금과 무관하게 항상 가능 (Locked+Frozen 조합은 타입이 하나라 존재하지 않음)
-- 검증기 파일 저장은 레벨 에디터/생성기 작업에서 (`JsonConvert.SerializeObject(level, Formatting.Indented)` 로 가능)
-
-**팀장 에디터 할 일**
-1. Package Manager 에 `Newtonsoft Json 3.2.2` 가 직접 의존성으로 보이는지 확인 (manifest 는 이미 수정됨, 별도 조작 없음)
-2. `Assets/_Project/Settings/GameConfig.asset` 인스펙터: `Min Board Size = 3` 가 보이고 `Coin Per Clear` 가 사라졌는지 확인 (stale 값은 제거해 둠)
-3. Window → General → Test Runner → EditMode → Run All → 110 통과 확인
-4. 씬·프리팹 연결은 아직 없음. `TapHandler` 를 쓰는 MonoBehaviour(보드 뷰·입력)는 다음 작업
+### W-006 레벨 에디터 툴 (선행: W-005)
+- `Editor/LevelValidatorWindow` : Levels/ 폴더 전체 검증, 결과 표시, `Record` 로 solution·minTaps 기록 저장
+- `Editor/LevelCheat` : 메뉴에서 레벨 점프
 
 ---
 
-## 기획자 보고 (기획자만 작성)
+## 기획자
 
+### W-004 마무리
+- 디렉터 답변: 보드 크기 11/21/40 **승인** → GAME_RULES v0.5.2 §4 반영됨. CLAUDE.md 의 Undo·힌트도 제거됨
+- LEVEL_FORMAT v0.3 에 "Long 외 타입은 정확히 1칸" 명시 (v0.4)
+- 레벨 10: 조건 완화해서 재생성 OK
+- 지난 보고(채팅으로 준 것)를 docs/REPORT_PLANNER.md 맨 위에 옮겨 적기. 앞으로 보고는 그 파일에만
+
+### W-007 UI 흐름 (W-004 마무리 다음, LEVEL_DESIGN 11~20 보다 먼저 — 프로그래머 W-005 가 곧 팝업을 필요로 함)
+- docs/UI_FLOW.md : Boot→Main→Game 화면 구성, HUD(레벨·설정·하트3), 클리어 팝업, 실패 팝업(광고 이어하기/다시하기), 설정(사운드 토글) 버튼 문구
+
+### W-008 LEVEL_DESIGN 11~20 (선행: W-007)
+- 6×6, Frozen 도입(16). JSON 저장 + 풀이 검증
 
 ---
+
+## 결정 사항 (참고)
+- 광고 SDK: **AdMob + Unity Ads** (기존 두 게임과 동일) — 팀장 확정 09-17
+- 응모 코드: 기존 프로젝트 코드 이식 (경로는 W-009)
 
 ## 완료
-- W-001 프로젝트 초기화·asmdef·Gameplay 코어·테스트 49개·ScriptableObject 3종 — 프로그래머 (2026-09-17)
-- 규칙 v0.4 검토 요청 7건 → v0.5.1 반영 — 기획자/디렉터 (2026-09-17)
+- W-001 초기화·asmdef·Gameplay 코어·테스트 49 — 프로그래머 (09-17)
+- W-002 LevelLoader/Validator + W-003 규칙 v0.5.1(Key·Frozen·Locked·TapHandler·코인 제거), 테스트 110 — 프로그래머 (09-17)
+- 규칙 v0.4 검토 7건 → v0.5.1 — 기획자/디렉터 (09-17)

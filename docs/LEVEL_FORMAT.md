@@ -1,10 +1,10 @@
-# NANA-Arrow — LEVEL_FORMAT.md (v0.3 — 2026-09-17 GAME_RULES v0.5 기준)
+# NANA-Arrow — LEVEL_FORMAT.md (v0.4 — 2026-09-17 Long 외 타입 1칸 명시, GAME_RULES v0.5.2 기준)
 > 레벨 파일: `Assets/_Project/Levels/level_###.json` (3자리 0패딩, 1부터)
 > 로더: `NanaArrow.Data.LevelLoader`, 데이터 클래스: `LevelData`, `ArrowData`
 
 ## 좌표계
 - 원점 (0,0) = 좌하단, x → 오른쪽, y → 위. 정수만.
-- `cells`는 Arrow가 차지하는 칸 목록. Basic은 1개, Long은 2~3개 (반드시 직선·연속).
+- `cells`는 Arrow가 차지하는 칸 목록. **Long 만 2~3개**(반드시 직선·연속), 그 외 타입(Basic / Frozen / Locked / Key)은 **정확히 1개**.
 - `dir`은 Up / Down / Left / Right. Long의 dir은 cells가 늘어선 축과 같아야 한다.
 
 ## 스키마
@@ -59,7 +59,7 @@ y0  a5 .  a3 .  .
 
 ## 검증 규칙 (LevelValidator, 저장 시 강제)
 1. 모든 cells가 보드 안에 있고 서로 겹치지 않는다
-2. Long의 cells는 같은 행 또는 열의 연속 칸이며 dir과 축이 일치
+2. Long의 cells는 같은 행 또는 열의 연속 칸이며 dir과 축이 일치. Long 외 타입은 cells 가 정확히 1개
 3. Locked에 대응하는 keyGroup의 Key가 최소 1개 존재
 4. **해결 가능**: 탐욕 시뮬레이션으로 판정 — "지금 Fire 가능한 Arrow를 아무거나 Exit" 를 반복해 보드가 비면 통과, 더 쏠 게 없는데 남아 있으면 실패
    - Exit 는 칸을 비우고 Key Exit 는 잠금을 풀 뿐, 상황을 나쁘게 만드는 행동이 없으므로 탐욕으로 충분 (백트래킹 불필요)
