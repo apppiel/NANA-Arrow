@@ -36,6 +36,18 @@ namespace NanaArrow.Gameplay
         public Arrow GetArrow(string id) =>
             _arrowsById.TryGetValue(id, out var arrow) ? arrow : null;
 
+        /// <summary>GAME_RULES §3 Locked: 같은 keyGroup 의 Key 가 하나라도 보드에 남아 있으면 잠김.</summary>
+        public bool IsLocked(Arrow arrow)
+        {
+            if (arrow.Type != ArrowType.Locked)
+                return false;
+
+            foreach (var other in _arrowsById.Values)
+                if (other.Type == ArrowType.Key && other.KeyGroup == arrow.KeyGroup)
+                    return true;
+            return false;
+        }
+
         public void Place(Arrow arrow)
         {
             if (_arrowsById.ContainsKey(arrow.Id))

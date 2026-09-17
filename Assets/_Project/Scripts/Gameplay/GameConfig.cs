@@ -16,8 +16,11 @@ namespace NanaArrow.Gameplay
         [SerializeField, Tooltip("어떤 Arrow 든 Exit 되면 Marked(빨간색) 전부 해제")]
         private bool markedResetOnExit = true;
 
-        [Header("보드 (GAME_RULES §4)")]
-        [SerializeField, Min(3), Tooltip("보드 한 변 최대 칸 수")]
+        [Header("보드 (GAME_RULES §4, LEVEL_FORMAT 3~10)")]
+        [SerializeField, Min(1), Tooltip("보드 한 변 최소 칸 수 (검증기)")]
+        private int minBoardSize = 3;
+
+        [SerializeField, Min(1), Tooltip("보드 한 변 최대 칸 수 (검증기)")]
         private int maxBoardSize = 10;
 
         [SerializeField, Min(0.01f), Tooltip("셀 한 칸 크기 (월드 단위). 화면에 맞춰 자동 스케일")]
@@ -46,12 +49,9 @@ namespace NanaArrow.Gameplay
         [SerializeField, Tooltip("Fire 연출 중에도 다른 Arrow 탭 허용 (연속 탭)")]
         private bool allowInputDuringFire = true;
 
-        [Header("보상 (GAME_RULES §7)")]
-        [SerializeField, Min(0), Tooltip("레벨 클리어 시 코인")]
-        private int coinPerClear = 10;
-
         public int MaxLives => maxLives;
         public bool MarkedResetOnExit => markedResetOnExit;
+        public int MinBoardSize => minBoardSize;
         public int MaxBoardSize => maxBoardSize;
         public float CellSize => cellSize;
         public float CellGap => cellGap;
@@ -61,6 +61,5 @@ namespace NanaArrow.Gameplay
         public float ClearPopupDelay => clearPopupDelay;
         public float CellSpawnStagger => cellSpawnStagger;
         public bool AllowInputDuringFire => allowInputDuringFire;
-        public int CoinPerClear => coinPerClear;
     }
 }
