@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.4 — 2026-09-17 광고 정책 확정)
+# NANA-Arrow — GAME_RULES.md (v0.5.1 — §9 HUD·§5 별점 잔여 불일치 수정)
 > 작성: 클로드 데스크탑 / **v1 범위 확정** (2026-09-17). 변경 시 버전 올리고 CLAUDE.md 담당에게 알릴 것.
 > 모든 수치는 `GameConfig` ScriptableObject에서 인스펙터로 조정한다. 여기 적힌 값은 초기 기본값.
 
@@ -34,9 +34,12 @@
 |---|---|---|
 | Basic | 1칸, Dir 하나 | 1 |
 | Long | 2~3칸 직선, Dir은 긴 축 방향 중 하나 | 6 |
-| Frozen | 탭 1회로 얼음 해제, 2회째 Fire | 16 |
-| Locked | 같은 색 Key Arrow가 Exit 되어야 해제 | 26 |
+| Frozen | 탭 1회로 얼음 해제(경로 무관, 목숨 차감 없음), 2회째 탭이 실제 Fire 로 Block 판정 | 16 |
+| Key | Basic과 동일, `keyGroup` 을 가짐. Exit 되면 같은 그룹 Locked 해제 | 26 |
+| Locked | 같은 `keyGroup` 의 Key 가 모두 Exit 되어야 해제. 잠긴 상태에서 탭하면 **목숨 차감 없음** + 자물쇠 흔들림 | 26 |
 | Bomb | Fire 시 인접 8칸 Arrow 강제 Exit | **보류** (v1 미포함) |
+
+`ArrowType` enum: Basic, Long, Frozen, Locked, Key (Bomb 은 enum 에도 넣지 않음)
 
 각 타입은 `ArrowType` enum + 타입별 설정은 `ArrowTypeConfig` ScriptableObject.
 
@@ -47,15 +50,14 @@
 - 정답 보장: 모든 레벨은 검증기가 "해결 가능" 판정을 통과해야 저장 가능
 
 ## 5. 별점 (재플레이)
-- ⭐⭐⭐: 최소 탭 수 이하 / ⭐⭐: +`star2Tolerance`(=3) 이내 / ⭐: 클리어
-- **별점 시스템은 v1 미포함** (보류). 위 기준은 도입 시 초안
+- **별점 시스템은 v1 미포함** (보류). 도입 시 기준은 minTaps 가 아니라 "잃은 목숨 수" (0=⭐⭐⭐, 1=⭐⭐, 2+=⭐) 로 할 것
 
 ## 6. 힌트 / 부스터
 **v1 전체 제외.** (Hint, Undo, Shuffle 모두 미포함) 이후 리텐션 지표 보고 Hint 부터 검토.
 - 보상형 광고는 "목숨 0 → 이어하기" 한 곳에만 사용
 
 ## 7. 진행 / 보상
-- 레벨 클리어 → `coinPerClear` 코인, 별 3개 시 보너스
+- **코인 없음 (v1 삭제)** — 부스터·IAP 가 없어 용처가 없음. 힌트 도입 시 함께 도입. `coinPerClear` 는 GameConfig 에서 제거
 - **100단계 클리어 → 응모 코드 표시 (확정)**. 기존 홈페이지 Firebase 응모 구조 재사용, 코드 생성 규칙은 Water Sort/Block Fill 과 동일하게
 - 광고 정책 (확정, 전부 `AdsConfig` ScriptableObject)
 
@@ -78,7 +80,7 @@
 | cellSpawnStagger | 0.03s |
 
 ## 9. 화면 / 입력
-- 세로 고정, 보드는 화면 중앙, 상단 HUD(레벨·코인·설정), 하단 부스터 바
+- 세로 고정, 보드는 화면 중앙, 상단 HUD(레벨 번호·설정 버튼), 상단 또는 보드 위에 목숨 하트 3개. 코인·부스터 UI 없음
 - 입력: Input System, 탭만 사용 (드래그 없음). **연속 탭 허용** (`allowInputDuringFire` = true)
   - 판정은 탭 즉시 논리 보드에서 확정하고, 연출은 뒤따라감 (논리와 연출 분리 필수)
   - 이미 Fire 중인 Arrow는 다시 탭 불가. 날아가는 중인 Arrow가 차지했던 칸은 논리상 이미 비어 있음
