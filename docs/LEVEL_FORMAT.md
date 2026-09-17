@@ -1,4 +1,4 @@
-# NANA-Arrow — LEVEL_FORMAT.md (v0.5 — 2026-09-17 경로형 Arrow, GAME_RULES v0.6 §0 기준)
+# NANA-Arrow — LEVEL_FORMAT.md (v0.6 — 2026-09-17 GAME_RULES v0.7 기준: 규칙 2-e, 길이 40, 보드 가로 10·세로 14)
 > 레벨 파일: `Assets/_Project/Levels/level_###.json` (3자리 0패딩, 1부터). **레벨 파일 저장은 기획자 담당**
 > 로더: `NanaArrow.Data.LevelLoader`, 데이터 클래스: `LevelData`, `ArrowData`
 > v0.4 → v0.5 변경: `Long` 삭제, **모든 타입의 cells 가 꼬리→머리 순서의 경로**, 검증 규칙 2 교체, meta 권장 키 추가, `mask` 예약
@@ -8,11 +8,12 @@
 - `cells` 는 **순서 있는 경로**: `cells[0]` = 꼬리, `cells[n-1]` = 머리
   - 이웃한 두 칸은 상하좌우로 붙어 있어야 한다 (대각선 불가). 직각 꺾임은 몇 번이든 가능
   - 같은 칸을 두 번 지나지 않는다
-  - 길이 1 ~ `GameConfig.maxArrowLength`
+  - 길이 1 ~ `GameConfig.maxArrowLength` (기본 **40**)
 - `dir` = 머리의 진행 방향 (Up / Down / Left / Right)
   - 길이 2 이상: **마지막 두 칸(cells[n-2] → cells[n-1])의 방향과 같아야 한다.** 다르면 로더/검증기 오류
   - 길이 1: `dir` 그대로 사용
-- **레인** = 머리 앞 칸부터 보드 가장자리까지의 직선. Fire 는 레인에 다른 Arrow 칸이 하나도 없을 때만 성공 (GAME_RULES §0). 자기 몸이 레인에 있어도 막힌 것으로 본다 → 그런 레벨은 풀 수 없으므로 만들지 않는다
+- **레인** = 머리 앞 칸부터 보드 가장자리까지의 직선. Fire 는 레인에 **다른** Arrow 칸이 하나도 없을 때만 성공 (GAME_RULES v0.7 §2-1·2-2)
+- **자기 레인 위에 자기 몸통이 있는 Arrow 는 금지** (검증 규칙 2-e). 게임 판정상 자기 몸통은 레인을 막지 않지만, 연출에서 머리와 몸통이 겹치므로 레벨에 두지 않는다
 
 ## 스키마
 ```json
@@ -49,7 +50,7 @@ y0   1○   ·   ·   ·  4○
 |---|---|---|---|
 | version | int | O | 스키마 버전. **1 유지** (출시 전이라 v0.4 레벨 파일은 전부 새로 작성함 — 아래 버전 관리 참고) |
 | id | int | O | 레벨 번호 (파일명과 일치) |
-| width, height | int | O | 보드 크기. 각각 `minBoardSize`~`maxBoardSize` (3~10), 서로 달라도 됨 |
+| width, height | int | O | 보드 크기. width `minBoardSize`(3)~`maxBoardWidth`(10), height 3~`maxBoardHeight`(14). 서로 달라도 됨 |
 | lives | int | X | 생략 시 GameConfig.maxLives |
 | arrows[].id | string | O | 레벨 내 고유. 머리 위치 기준 위→아래, 왼→오른 순으로 a1, a2 … (정답 순서가 드러나지 않게) |
 | arrows[].type | enum | O | Basic / Frozen / Locked / Key (**Long 삭제**) |
@@ -64,9 +65,9 @@ y0   1○   ·   ·   ·  4○
 | meta.freeAtStart / depth / pathLength / bends | int | X | 기획 난이도 지표 (LEVEL_DESIGN §2). 게임 코드는 읽지 않음 |
 
 ## 검증 규칙 (LevelValidator, 저장 시 강제)
-0. 스키마: 보드 크기 범위, id 고유, 셀 `[x,y]` 형식, Frozen hits ≥ 2
+0. 스키마: 보드 크기 범위(가로·세로 따로), id 고유, 셀 `[x,y]` 형식, Frozen hits ≥ 2
 1. 모든 cells 가 보드 안에 있고 서로 겹치지 않는다 (다른 Arrow 끼리)
-2. **경로**: (a) 이웃 셀이 상하좌우로 붙어 있음 (b) 자기 겹침 없음 (c) 길이 2 이상이면 dir = 마지막 세그먼트 방향 (d) 길이 1 ~ `maxArrowLength`
+2. **경로**: (a) 이웃 셀이 상하좌우로 붙어 있음 (b) 자기 겹침 없음 (c) 길이 2 이상이면 dir = 마지막 세그먼트 방향 (d) 길이 1 ~ `maxArrowLength` **(e) 자기 레인 위에 자기 몸통 없음**
 3. Locked 에 대응하는 keyGroup 의 Key 가 최소 1개 존재
 4. **해결 가능**: 탐욕 시뮬레이션 — 레인이 비고 잠기지 않은 Arrow 를 반복해서 Exit, 보드가 비면 통과. 레인 판정은 v0.4 와 같음 (몸통은 자기 경로로만 움직이므로 레인만 보면 충분)
 5. 통과 시 `solution` 과 `meta.minTaps` 기록 (다른 meta 키는 보존)

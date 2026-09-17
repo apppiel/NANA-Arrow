@@ -35,12 +35,10 @@
 - [ ] 출시 목표 시점
 
 ## 다음 할 일
-> 작업 지시는 docs/WORK.md 의 "기획자" 항목, 보고는 docs/REPORT_PLANNER.md (2026-09-17 부터)
-- [x] W-016 경로형 레벨 1~20 · LEVEL_FORMAT v0.5 · LEVEL_DESIGN v1.0
-- [x] W-012 UI_FLOW v0.2 + 프리팹 가이드 + TutorialConfig
-- [x] W-014 ANALYTICS.md
-- [ ] W-013 레벨 21~30 — maxArrowLength·보드 구간 결정 + W-015 머지 대기
-- [ ] W-015 머지 후 레벨 1~20 Level Validator 재검증
+> 작업 지시는 docs/WORK.md 의 "기획자" 항목, 디렉터 전달·보고는 docs/REPORT_PLANNER.md 에만 (2026-09-17 팀장 지시)
+> 긴 생성 작업은 한 번 호출 2분 이내로 나누고, 중간 결과는 프로젝트 Temp/ 가 아니라 OS 임시 폴더(nana_gen)에 저장 (Unity 재시작 시 Temp 삭제됨)
+- [x] W-016 · W-012 · W-014 · W-013 · W-018 · W-019
+- [ ] 레벨 51~60 — LEVEL_DESIGN §4 제안 승인 후
 - [ ] STORE.md (스토어 문구·스크린샷·개인정보처리방침)
 
 ## v0.5 검토 잔여 → **해결됨 (v0.5.1)**. 디렉터 실수였음: v0.3 치환이 §9 한 줄에 붙어 있어 미적용. §9 HUD·§5 별점 모두 수정 완료. GitHub 이슈 정리 진행 OK.
