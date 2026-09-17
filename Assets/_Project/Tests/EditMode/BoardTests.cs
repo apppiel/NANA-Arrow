@@ -33,10 +33,10 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
-        public void Place_LongArrow_EveryCellResolvesToIt()
+        public void Place_PathArrow_EveryCellResolvesToIt()
         {
             var board = new Board(5, 5);
-            var arrow = new Arrow("a", ArrowType.Long, Direction.Right,
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Right,
                 new Vector2Int(1, 4), new Vector2Int(2, 4), new Vector2Int(3, 4));
 
             board.Place(arrow);
@@ -91,7 +91,7 @@ namespace NanaArrow.Tests.EditMode
         public void Remove_ClearsCellsAndArrowList()
         {
             var board = new Board(5, 5);
-            var arrow = new Arrow("a", ArrowType.Long, Direction.Up, new Vector2Int(0, 0), new Vector2Int(0, 1));
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Up, new Vector2Int(0, 0), new Vector2Int(0, 1));
             board.Place(arrow);
 
             var removed = board.Remove(arrow);

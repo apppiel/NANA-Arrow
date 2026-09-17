@@ -96,6 +96,37 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
+        public void TapAt_AnyCellOfPath_TapsThatArrow()
+        {
+            var level = Level(3, new ArrowData { Id = "p", Type = ArrowType.Basic, Direction = Direction.Right,
+                Cells = new[] { new[] { 0, 0 }, new[] { 0, 1 }, new[] { 1, 1 } } });
+            var session = NewSession(level);
+
+            var result = session.TapAt(new Vector2Int(0, 0));
+
+            Assert.AreEqual(TapOutcome.Exit, result.Outcome);
+            Assert.IsTrue(session.IsCleared);
+        }
+
+        [Test]
+        public void Preview_ReturnsLane_WithoutChangingState()
+        {
+            var session = NewSession(BlockedAndFree(3));
+            var a = session.Board.GetArrow("a");
+            var tapped = 0;
+            session.Tapped += (_, __) => tapped++;
+
+            var preview = session.Preview(a);
+
+            Assert.IsTrue(preview.IsBlocked);
+            Assert.AreEqual("b", preview.BlockedBy.Id);
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 2) }, preview.Lane);
+            Assert.AreEqual(0, tapped);
+            Assert.AreEqual(3, session.Lives.Lives);
+            Assert.AreSame(a, session.Board.GetArrow("a"));
+        }
+
+        [Test]
         public void Cleared_RaisedOnce_WhenLastArrowExits()
         {
             var session = NewSession(Level(3, Basic("a", Direction.Up, 0, 0), Basic("b", Direction.Up, 1, 0)));
