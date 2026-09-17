@@ -4,27 +4,26 @@ using UnityEngine;
 
 namespace NanaArrow.Gameplay.View
 {
-    /// <summary>논리 Board → 셀·ArrowView 생성과 연출 재생. 판정은 하지 않는다 (TapResult 만 받는다).</summary>
+    /// <summary>
+    /// 논리 Board → ArrowView 생성과 연출 재생. 격자·셀 배경은 그리지 않는다 (GAME_RULES v0.6.1 §0).
+    /// 판정은 하지 않는다 (TapResult / FireResult 만 받는다).
+    /// </summary>
     public sealed class BoardView : MonoBehaviour
     {
         [SerializeField] private GameConfig config;
         [SerializeField] private ArrowViewStyle style;
         [SerializeField, Tooltip("비우면 Camera.main")] private Camera targetCamera;
 
-        [Header("배치")]
+        [Header("배치 (레퍼런스: 보드 폭 = 화면 폭의 약 절반, 세로 중앙)")]
         [SerializeField, Range(0.1f, 1f), Tooltip("카메라 가로 폭 중 보드가 쓸 비율")]
-        private float areaWidthFraction = 0.9f;
+        private float areaWidthFraction = 0.5f;
         [SerializeField, Range(0.1f, 1f), Tooltip("카메라 세로 높이 중 보드가 쓸 비율 (HUD 공간 제외)")]
         private float areaHeightFraction = 0.6f;
 
-        [Header("셀")]
-        [SerializeField] private Color cellColor = new Color(0.9f, 0.9f, 0.93f);
-        [SerializeField, Tooltip("비우면 임시 사각형")] private Sprite cellSprite;
-        [SerializeField] private int cellSortingOrder = 0;
-
         private readonly Dictionary<Arrow, ArrowView> _views = new Dictionary<Arrow, ArrowView>();
-        private Transform _cellsRoot;
         private Transform _arrowsRoot;
+        private LaneView _lane;
+        private ArrowView _previewView;
         private int _firing;
 
         public BoardLayout Layout { get; private set; }
@@ -43,24 +42,12 @@ namespace NanaArrow.Gameplay.View
             Clear();
             Layout = new BoardLayout(board.Width, board.Height, config.CellSize, config.CellGap, AvailableSize(), transform.position);
 
-            _cellsRoot = CreateRoot("Cells");
-            _arrowsRoot = CreateRoot("Arrows");
+            _arrowsRoot = new GameObject("Arrows").transform;
+            _arrowsRoot.SetParent(transform, false);
 
-            var sprite = cellSprite != null ? cellSprite : PlaceholderSprites.Square;
-            for (var y = 0; y < board.Height; y++)
-            {
-                for (var x = 0; x < board.Width; x++)
-                {
-                    var cell = new Vector2Int(x, y);
-                    var renderer = new GameObject($"Cell {x},{y}").AddComponent<SpriteRenderer>();
-                    renderer.transform.SetParent(_cellsRoot, false);
-                    renderer.transform.position = Layout.CellToWorld(cell);
-                    renderer.sprite = sprite;
-                    renderer.color = cellColor;
-                    renderer.sortingOrder = cellSortingOrder;
-                    StartCoroutine(PopIn(renderer.transform, Vector3.one * Layout.CellSize, SpawnDelay(cell)));
-                }
-            }
+            _lane = new GameObject("Lane").AddComponent<LaneView>();
+            _lane.transform.SetParent(transform, false);
+            _lane.Initialize(style, Layout);
 
             var keyGroups = new Dictionary<string, int>();
             foreach (var arrow in board.Arrows)
@@ -69,7 +56,7 @@ namespace NanaArrow.Gameplay.View
                 view.transform.SetParent(_arrowsRoot, false);
                 view.Initialize(arrow, Layout, style, KeyGroupIndex(arrow, keyGroups));
                 _views[arrow] = view;
-                StartCoroutine(PopIn(view.transform, Vector3.one, SpawnDelay(arrow.Head)));
+                StartCoroutine(PopIn(view.transform, (arrow.Head.x + arrow.Head.y) * config.CellSpawnStagger));
             }
         }
 
@@ -90,10 +77,11 @@ namespace NanaArrow.Gameplay.View
                 case TapOutcome.Exit:
                     _views.Remove(arrow);
                     _firing++;
-                    view.PlayFire(result.FreeCells, config.FireDuration, () => _firing--);
+                    view.PlayFire(result.FreeCells, config.FireSpeedCellsPerSec, () => _firing--);
                     break;
                 case TapOutcome.Blocked:
-                    view.PlayBounce(result.FreeCells, config.BlockBounceDistance, config.BlockBounceDuration);
+                    _lane.Flash(arrow, result.Lane, Layout, style.LaneFlashColor, config.LaneFlashDuration);
+                    view.PlayBounce(config.BlockBounceDistance, config.BlockBounceDuration);
                     break;
                 case TapOutcome.IceBroken:
                     view.PlayIceBreak(result.RemainingHits, config.IceBreakDuration);
@@ -102,6 +90,28 @@ namespace NanaArrow.Gameplay.View
                     view.PlayShake(config.LockShakeDistance, config.LockShakeDuration);
                     break;
             }
+        }
+
+        /// <summary>길게 누르기: 레인 + 해당 Arrow 강조 (GAME_RULES v0.6 §0 레인 미리보기).</summary>
+        public void ShowLanePreview(Arrow arrow, FireResult preview)
+        {
+            HideLanePreview();
+            if (!_views.TryGetValue(arrow, out var view))
+                return;
+            _previewView = view;
+            view.SetPreview(true);
+            _lane.Show(arrow, preview.Lane, Layout, style.LanePreviewColor);
+        }
+
+        public void HideLanePreview()
+        {
+            if (_previewView != null)
+            {
+                _previewView.SetPreview(false);
+                _previewView = null;
+            }
+            if (_lane != null)
+                _lane.Hide();
         }
 
         /// <summary>남아 있는 Arrow 의 Marked / Locked 표시를 논리 상태에 맞춘다 (Exit 뒤에 호출).</summary>
@@ -117,29 +127,23 @@ namespace NanaArrow.Gameplay.View
         private void Clear()
         {
             StopAllCoroutines();
-            if (_cellsRoot != null) Destroy(_cellsRoot.gameObject);
             if (_arrowsRoot != null) Destroy(_arrowsRoot.gameObject);
+            if (_lane != null) Destroy(_lane.gameObject);
             _views.Clear();
+            _previewView = null;
+            _lane = null;
             _firing = 0;
             Layout = null;
         }
 
-        private Transform CreateRoot(string rootName)
-        {
-            var root = new GameObject(rootName).transform;
-            root.SetParent(transform, false);
-            return root;
-        }
-
         private Vector2 AvailableSize()
         {
+            // 외부(캡처 툴 등)가 camera.aspect 를 덮어쓴 채 남겨 두면 셀이 찌그러진다 — 게임 뷰 기준으로 되돌린 뒤 읽는다.
+            targetCamera.ResetAspect();
             var height = targetCamera.orthographicSize * 2f;
             var width = height * targetCamera.aspect;
             return new Vector2(width * areaWidthFraction, height * areaHeightFraction);
         }
-
-        /// <summary>좌하단부터 대각선으로 퍼지는 등장 순서.</summary>
-        private float SpawnDelay(Vector2Int cell) => (cell.x + cell.y) * config.CellSpawnStagger;
 
         private static int KeyGroupIndex(Arrow arrow, Dictionary<string, int> keyGroups)
         {
@@ -150,7 +154,7 @@ namespace NanaArrow.Gameplay.View
             return index;
         }
 
-        private IEnumerator PopIn(Transform target, Vector3 finalScale, float delay)
+        private IEnumerator PopIn(Transform target, float delay)
         {
             target.localScale = Vector3.zero;
             if (delay > 0f)
@@ -160,11 +164,11 @@ namespace NanaArrow.Gameplay.View
             for (var t = 0f; t < duration; t += Time.deltaTime)
             {
                 if (target == null) yield break;
-                target.localScale = finalScale * Mathf.SmoothStep(0f, 1f, t / duration);
+                target.localScale = Vector3.one * Mathf.SmoothStep(0f, 1f, t / duration);
                 yield return null;
             }
             if (target != null)
-                target.localScale = finalScale;
+                target.localScale = Vector3.one;
         }
     }
 }

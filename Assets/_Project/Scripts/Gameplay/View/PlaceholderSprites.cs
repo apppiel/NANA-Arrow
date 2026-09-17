@@ -9,12 +9,20 @@ namespace NanaArrow.Gameplay.View
         private const int Size = 64;
 
         private static Sprite _square;
+        private static Sprite _circle;
         private static Sprite _triangle;
         private static Sprite _padlock;
 
         public static Sprite Square => _square != null ? _square : _square = Create("Square", (x, y) => true);
 
-        /// <summary>위(+Y)를 가리키는 삼각형.</summary>
+        public static Sprite Circle => _circle != null ? _circle : _circle = Create("Circle", (x, y) =>
+        {
+            var dx = x + 0.5f - Size * 0.5f;
+            var dy = y + 0.5f - Size * 0.5f;
+            return dx * dx + dy * dy <= Size * Size * 0.25f;
+        });
+
+        /// <summary>위(+Y)를 가리키는 삼각형. 밑변이 아래.</summary>
         public static Sprite Triangle => _triangle != null ? _triangle : _triangle = Create("Triangle",
             (x, y) => Mathf.Abs(x + 0.5f - Size * 0.5f) <= (Size - y) * 0.5f);
 

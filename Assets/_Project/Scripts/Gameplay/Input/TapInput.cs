@@ -5,13 +5,24 @@ using UnityEngine.InputSystem;
 
 namespace NanaArrow.Gameplay.Input
 {
-    /// <summary>Input System 탭 → 월드 좌표 → 셀. 탭만 쓴다 (GAME_RULES §9). 판정은 구독자(GameSession) 몫.</summary>
+    /// <summary>
+    /// Input System 포인터 → 셀. 짧게 누르면 탭(놓을 때 확정), GameConfig.longPressSeconds 이상 누르면 레인 미리보기 (GAME_RULES v0.6 §0).
+    /// 미리보기가 시작된 누름은 탭으로 세지 않는다 (목숨 차감 없음). 판정은 구독자(GameSession) 몫.
+    /// </summary>
     public sealed class TapInput : MonoBehaviour
     {
+        [SerializeField] private GameConfig config;
         [SerializeField] private BoardView boardView;
         [SerializeField, Tooltip("비우면 Camera.main")] private Camera targetCamera;
 
+        private bool _pressing;
+        private bool _longPressed;
+        private float _pressedAt;
+        private Vector2Int _pressedCell;
+
         public event Action<Vector2Int> CellTapped;
+        public event Action<Vector2Int> LanePreviewRequested;
+        public event Action LanePreviewReleased;
 
         private void Awake()
         {
@@ -22,12 +33,34 @@ namespace NanaArrow.Gameplay.Input
         private void Update()
         {
             var pointer = Pointer.current;
-            if (pointer == null || !pointer.press.wasPressedThisFrame)
+            if (pointer == null)
                 return;
 
-            var world = targetCamera.ScreenToWorldPoint(pointer.position.ReadValue());
-            if (boardView.TryGetCell(world, out var cell))
-                CellTapped?.Invoke(cell);
+            if (pointer.press.wasPressedThisFrame)
+            {
+                var world = targetCamera.ScreenToWorldPoint(pointer.position.ReadValue());
+                _pressing = boardView.TryGetCell(world, out _pressedCell);
+                _longPressed = false;
+                _pressedAt = Time.unscaledTime;
+            }
+
+            if (!_pressing)
+                return;
+
+            if (!_longPressed && Time.unscaledTime - _pressedAt >= config.LongPressSeconds)
+            {
+                _longPressed = true;
+                LanePreviewRequested?.Invoke(_pressedCell);
+            }
+
+            if (pointer.press.wasReleasedThisFrame)
+            {
+                _pressing = false;
+                if (_longPressed)
+                    LanePreviewReleased?.Invoke();
+                else
+                    CellTapped?.Invoke(_pressedCell);
+            }
         }
     }
 }

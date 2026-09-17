@@ -32,11 +32,15 @@ namespace NanaArrow.Core
         private void Awake()
         {
             tapInput.CellTapped += OnCellTapped;
+            tapInput.LanePreviewRequested += OnLanePreviewRequested;
+            tapInput.LanePreviewReleased += OnLanePreviewReleased;
         }
 
         private void OnDestroy()
         {
             tapInput.CellTapped -= OnCellTapped;
+            tapInput.LanePreviewRequested -= OnLanePreviewRequested;
+            tapInput.LanePreviewReleased -= OnLanePreviewReleased;
             Unsubscribe();
         }
 
@@ -79,6 +83,16 @@ namespace NanaArrow.Core
                 return;
             Session.TapAt(cell);
         }
+
+        private void OnLanePreviewRequested(Vector2Int cell)
+        {
+            var arrow = Session?.Board.GetArrowAt(cell);
+            if (arrow == null)
+                return;
+            boardView.ShowLanePreview(arrow, Session.Preview(arrow));
+        }
+
+        private void OnLanePreviewReleased() => boardView.HideLanePreview();
 
         private void OnTapped(Arrow arrow, TapResult result)
         {
