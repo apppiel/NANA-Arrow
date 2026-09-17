@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": 7,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[1,0],[1,1]]
+    },
+    {
+      "id": "a2",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[1,3],[2,3]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[4,3]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[4,1]]
+    },
+    {
+      "id": "a5",
+      "type": "Long",
+      "dir": "Left",
+      "cells": [[2,4],[3,4]]
+    },
+    {
+      "id": "a6",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,4]]
+    }
+  ],
+  "solution": ["a4","a6","a3","a5","a2","a1"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 3,
+    "minTaps": 6,
+    "note": "Long 3개, 긴 화살표가 길을 막는 구조"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "id": 20,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[3,5],[4,5],[5,5]]
+    },
+    {
+      "id": "a2",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[1,4],[2,4]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[4,4]]
+    },
+    {
+      "id": "a4",
+      "type": "Frozen",
+      "dir": "Up",
+      "cells": [[5,4]],
+      "hits": 2
+    },
+    {
+      "id": "a5",
+      "type": "Frozen",
+      "dir": "Up",
+      "cells": [[4,3]],
+      "hits": 2
+    },
+    {
+      "id": "a6",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[3,2],[3,3]]
+    },
+    {
+      "id": "a7",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[2,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Frozen",
+      "dir": "Up",
+      "cells": [[3,1]],
+      "hits": 2
+    },
+    {
+      "id": "a9",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[4,1],[4,2]]
+    },
+    {
+      "id": "a10",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[5,1]]
+    },
+    {
+      "id": "a11",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[0,0]]
+    },
+    {
+      "id": "a12",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[1,0]]
+    },
+    {
+      "id": "a13",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[3,0]]
+    }
+  ],
+  "solution": ["a1","a4","a6","a8","a10","a11","a3","a5","a9","a2","a7","a12","a13"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 5,
+    "minTaps": 16,
+    "note": "Frozen 구간 마무리: 13개, 선택지 2, 깊이 6, 점유율 최고"
+  }
+}

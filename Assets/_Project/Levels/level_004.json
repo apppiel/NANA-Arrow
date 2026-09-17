@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": 4,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[0,0]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,0]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[2,2]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,4]]
+    },
+    {
+      "id": "a5",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[3,3]]
+    },
+    {
+      "id": "a6",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[4,1]]
+    }
+  ],
+  "solution": ["a3","a5","a6","a2","a1","a4"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 2,
+    "minTaps": 6,
+    "note": "선택지 3, 사슬 깊이 4"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": 2,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,2]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[2,3]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,3]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[4,2]]
+    }
+  ],
+  "solution": ["a3","a2","a1","a4"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 1,
+    "minTaps": 4,
+    "note": "순서 개념: 한 줄 사슬, 처음 쏠 수 있는 건 1개"
+  }
+}

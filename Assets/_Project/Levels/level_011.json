@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "id": 11,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,5]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[4,5]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,4]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,3]]
+    },
+    {
+      "id": "a5",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,3]]
+    },
+    {
+      "id": "a6",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,2]]
+    },
+    {
+      "id": "a7",
+      "type": "Long",
+      "dir": "Left",
+      "cells": [[0,1],[1,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[4,1],[4,2],[4,3]]
+    }
+  ],
+  "solution": ["a2","a3","a5","a7","a8","a6","a4","a1"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 3,
+    "minTaps": 8,
+    "note": "휴식: 6×6 첫 레벨. 보드만 커지고 구조는 쉬움"
+  }
+}

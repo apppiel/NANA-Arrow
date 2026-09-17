@@ -27,6 +27,7 @@ namespace NanaArrow.Data
 
         /// <summary>정답 Exit 순서 (검증기가 채움).</summary>
         [JsonProperty("solution")]
+        [JsonConverter(typeof(InlineArrayConverter))]
         public string[] Solution { get; set; }
 
         /// <summary>자유 형식. 검증기는 "minTaps" 만 기록한다.</summary>

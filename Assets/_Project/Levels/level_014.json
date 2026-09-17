@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "id": 14,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[0,5],[1,5],[2,5]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[3,5]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[4,5]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[3,3]]
+    },
+    {
+      "id": "a5",
+      "type": "Long",
+      "dir": "Down",
+      "cells": [[5,3],[5,4],[5,5]]
+    },
+    {
+      "id": "a6",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[3,2],[4,2],[5,2]]
+    },
+    {
+      "id": "a7",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[1,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[3,1]]
+    },
+    {
+      "id": "a9",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[5,1]]
+    },
+    {
+      "id": "a10",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[0,0]]
+    },
+    {
+      "id": "a11",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,0]]
+    }
+  ],
+  "solution": ["a2","a4","a6","a9","a5","a8","a3","a7","a1","a11","a10"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 4,
+    "minTaps": 11,
+    "note": "11개, 깊이 6"
+  }
+}

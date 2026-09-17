@@ -138,6 +138,55 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
+        public void ToJson_RoundTrips_FormatExample()
+        {
+            var original = LevelLoader.Parse(ExampleJson);
+
+            var reparsed = LevelLoader.Parse(LevelLoader.ToJson(original));
+
+            Assert.AreEqual(original.Id, reparsed.Id);
+            Assert.AreEqual(original.Lives, reparsed.Lives);
+            Assert.AreEqual(original.Arrows.Length, reparsed.Arrows.Length);
+            for (var i = 0; i < original.Arrows.Length; i++)
+            {
+                Assert.AreEqual(original.Arrows[i].Id, reparsed.Arrows[i].Id);
+                Assert.AreEqual(original.Arrows[i].Type, reparsed.Arrows[i].Type);
+                Assert.AreEqual(original.Arrows[i].Direction, reparsed.Arrows[i].Direction);
+                Assert.AreEqual(original.Arrows[i].Hits, reparsed.Arrows[i].Hits);
+                Assert.AreEqual(original.Arrows[i].KeyGroup, reparsed.Arrows[i].KeyGroup);
+                CollectionAssert.AreEqual(LevelLoader.ToCells(original.Arrows[i]).ToList(), LevelLoader.ToCells(reparsed.Arrows[i]).ToList());
+            }
+            CollectionAssert.AreEqual(original.Solution, reparsed.Solution);
+            Assert.AreEqual((int)original.Meta["minTaps"], (int)reparsed.Meta["minTaps"]);
+        }
+
+        [Test]
+        public void ToJson_WritesEnumsAsNames_ArraysInline_AndOmitsNulls()
+        {
+            var json = LevelLoader.ToJson(LevelLoader.Parse(ExampleJson));
+
+            StringAssert.Contains("\"type\": \"Long\"", json);
+            StringAssert.Contains("\"dir\": \"Right\"", json);
+            StringAssert.Contains("\"cells\": [[1,4],[2,4],[3,4]]", json);
+            StringAssert.Contains("\"solution\": [\"a1\",\"a5\",\"a4\",\"a2\",\"a3\"]", json);
+            StringAssert.DoesNotContain("\"hits\": null", json);
+            StringAssert.DoesNotContain("\"keyGroup\": null", json);
+        }
+
+        [Test]
+        public void ToJson_OptionalFieldsOmitted_AreNotWritten()
+        {
+            var level = LevelLoader.Parse(@"{ ""version"": 1, ""id"": 2, ""width"": 3, ""height"": 3,
+                ""arrows"": [ { ""id"": ""a"", ""type"": ""Basic"", ""dir"": ""Up"", ""cells"": [[0,0]] } ] }");
+
+            var json = LevelLoader.ToJson(level);
+
+            StringAssert.DoesNotContain("lives", json);
+            StringAssert.DoesNotContain("solution", json);
+            StringAssert.DoesNotContain("meta", json);
+        }
+
+        [Test]
         public void ToCells_MalformedPair_Throws()
         {
             var data = Basic("b", 0, 0);

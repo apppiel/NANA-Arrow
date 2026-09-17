@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d623e09a284470ca4f97c6214bf8d3, type: 3}
+  m_Name: ArrowViewStyle
+  m_EditorClassIdentifier: NanaArrow.Gameplay::NanaArrow.Gameplay.View.ArrowViewStyle
+  basicColor: {r: 0.29, g: 0.56, b: 0.89, a: 1}
+  frozenColor: {r: 0.55, g: 0.75, b: 0.95, a: 1}
+  keyFallbackColor: {r: 0.9, g: 0.64, b: 0.24, a: 1}
+  keyGroupColors:
+  - {r: 0.9, g: 0.64, b: 0.24, a: 1}
+  - {r: 0.61, g: 0.15, b: 0.69, a: 1}
+  - {r: 0.15, g: 0.65, b: 0.6, a: 1}
+  markedColor: {r: 0.9, g: 0.22, b: 0.21, a: 1}
+  headTint: {r: 0.65, g: 0.65, b: 0.65, a: 1}
+  iceColor: {r: 0.85, g: 0.95, b: 1, a: 0.7}
+  lockColor: {r: 0.15, g: 0.15, b: 0.15, a: 0.9}
+  bodySprite: {fileID: 0}
+  headSprite: {fileID: 0}
+  iceSprite: {fileID: 0}
+  lockSprite: {fileID: 0}
+  bodyInset: 0.1
+  headLength: 0.45
+  headWidth: 0.6
+  lockSize: 0.5
+  bodyOrder: 10
+  headOrder: 11
+  overlayOrder: 12

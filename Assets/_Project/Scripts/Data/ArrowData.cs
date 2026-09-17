@@ -19,6 +19,7 @@ namespace NanaArrow.Data
         public Direction Direction { get; set; }
 
         [JsonProperty("cells", Required = Required.Always)]
+        [JsonConverter(typeof(InlineArrayConverter))]
         public int[][] Cells { get; set; }
 
         /// <summary>Frozen 전용. 생략 시 ArrowTypeConfig.frozenDefaultHits.</summary>
