@@ -25,7 +25,9 @@
 - `TapResult` 에 `Lane`(머리 앞 직선 셀 목록) 추가 — 빨간 번쩍·미리보기용
 - **뷰 재작성**: `ArrowView` 를 경로 폴리라인(LineRenderer 또는 스프라이트 세그먼트, 직각 코너) + 머리 화살촉으로. Fire 연출 = 머리가 레인을 직진, 몸통은 경로를 따라 뱀처럼 이동, 꼬리가 나가면 제거 (`fireSpeedCellsPerSec`). Block = 레인 빨간 번쩍 + 머리 살짝 튕김. Marked = 선 전체 빨강. Frozen/Locked 표시는 머리 위
 - `TapInput`: 탭은 Arrow 의 **어느 셀이든** 히트. **길게 누르기** → `LanePreviewRequested(arrow)` / 떼면 해제 (`longPressSeconds`)
-- `BoardView`: 격자 옅게, 셀은 정사각 보장 (현재 Game 뷰 16:9 에서 셀이 4:1 로 찌그러지는 문제 — 원인 확인해 수정), 세로 화면에서 보드가 폭을 거의 채우도록 `areaWidthFraction` 추가
+- `BoardView`: **격자·셀 배경 제거** (GAME_RULES v0.6.1 §0 그래픽 항목). 셀 정사각 보장 (현재 Game 뷰 16:9 에서 셀이 4:1 로 찌그러지는 문제 — 원인 확인해 수정). 보드 폭 = 화면 폭 × `areaWidthFraction`(0.5), 세로 중앙
+- 선 스타일 값은 전부 `ArrowViewStyle` SerializeField: 색, `lineWidthCellRatio`, 화살촉 비율, round join/cap. **레퍼런스 스크린샷 `docs/reference/*.jpeg` 4장을 보고 최대한 비슷하게** (격자 없음·둥근 꺾임·작은 보드)
+- Game 뷰를 9:16 으로 놓고 스크린샷을 찍어 보고에 첨부 (레퍼런스와 나란히 비교)
 - 테스트: Arrow 경로/Head/Direction, Validator 신규 규칙, 기존 전부 통과
 - 보고에 "팀장 에디터 할 일" + 스크린샷 경로
 
@@ -51,7 +53,9 @@
 ## 기획자
 
 ### W-016 레벨 1~20 경로형으로 재설계 (최우선)
-- GAME_RULES v0.6 §0, LEVEL_FORMAT v0.5 읽기. 레퍼런스 Arrows – Puzzle Escape 초반 레벨 구조 조사 (스크린샷·플레이 영상): 보드 크기, 화살표 수, 꺾임 수, 첫 튜토리얼 흐름
+- GAME_RULES v0.6.1 §0, LEVEL_FORMAT v0.5 읽기. **`docs/reference/*.jpeg` 4장 = 레퍼런스 Lv1·2·3·4 부근 스크린샷** (팀장 제공). 여기서 보드 크기·화살표 수·꺾임 수를 셀 단위로 역산해 표로 만들 것
+- 확인된 흐름: Lv1 = 직선 3개(상) + 손가락 + 하단 말풍선. **Lv2 부터 꺾임 등장.** 레벨 4 부근에 이미 화살표 7개·테두리를 도는 긴 경로. 우리 곡선도 이 속도에 맞출 것 (기존 LEVEL_DESIGN 의 Lv6 Long 도입 은 폐기)
+- HUD 참고(UI_FLOW 수정용): 게임 화면엔 뒤로가기·다시하기·하트 3개만. 레벨 번호·설정 없음 → W-012 에서 UI_FLOW 반영
 - LEVEL_DESIGN v1.0: 난이도 지표에 "총 경로 길이", "꺾임 수" 추가. Lv1~2 직선만, Lv3 첫 꺾임, Lv6 이후 긴 경로
 - 레벨 1~20 JSON 재작성 → `Assets/_Project/Levels/` 덮어쓰기. 검증은 프로그래머 W-015 의 새 Validator 가 머지된 뒤 (그 전엔 손 검증 + 시뮬레이터)
 - 생성기: 역방향(빈 보드에서 Arrow 를 하나씩 "되돌려 넣기") 로 경로형 지원
