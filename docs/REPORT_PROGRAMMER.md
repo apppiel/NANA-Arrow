@@ -2,6 +2,27 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-020 완료 (2026-09-17) — 브랜치 `feat/board-zoom` (base main)
+- 테스트 **205/205**, 컴파일 에러 0. 플레이 모드에서 핀치(×2.5, ×3)·팬 클램프·재시작 시 줌 리셋과 셀 크기 고정 확인 (`docs/screenshots/W-020_zoom3_pan.png`)
+
+**변경 요약 (PR)**
+- `Gameplay/Input/BoardCameraModel` (순수 C#, 테스트 11): `Zoom`(zoomMin~zoomMax) · `Offset`(보드 중심 기준). `SetZoom(zoom, focus)` 는 손가락 아래 점을 화면에서 고정, `Pan`, `Reset`, `RegisterEmptyTap(time)` 더블 탭 판정. **클램프**: 줌 1 이면 항상 중앙. 보드+여백이 화면보다 큰 축만 이동 가능하고, 화면이 보드+여백(`panMarginCells`) 밖으로 나가지 않게 (= 보드가 화면 밖으로 완전히 나갈 수 없음)
+- `Gameplay/Input/BoardCameraController` (Main Camera): 모델을 `orthographicSize = 기본 ÷ Zoom`, position 으로 적용. `Attach(layout)` 레벨마다, `ResetZoom()` 은 GameController 가 레벨 시작·클리어·실패 때 호출. 줌 1.0 = 카메라의 시작 orthographicSize
+- **`TapInput` 개편**: 누름 → (a) `dragThresholdCells` 이상 이동 → 드래그 확정(`Pan` 이벤트, 탭·미리보기 아님, 미리보기 중이었으면 해제) (b) `longPressSeconds` 경과 → 미리보기 (c) 그 전에 놓음 → `CellTapped`(Arrow 있는 셀) 또는 `EmptyTapped`(빈 셀·보드 밖). 두 손가락 감지 → 즉시 `Pinch`(배율, 중심점) 모드, 진행 중이던 탭·미리보기 취소, 손가락이 다 떨어질 때까지 새 탭 후보 없음. 에디터: 마우스 드래그 = Pan, 휠 = `Scroll`(눈금당 ±10%)
+- `BoardView.HasArrowAt(cell)`, 셀 크기 계산은 `BoardCameraController.BaseOrthographicSize`(줌 1) 기준 고정
+- `GameConfig`: `zoomMin` 1 / `zoomMax` 3 / `dragThresholdCells` 0.3 / `panMarginCells` 1 / `doubleTapSeconds` 0.3 (+ `GameConfig.asset`)
+- HUD 는 Screen Space Overlay 라 줌 영향 없음 (W-017 캔버스 설정 그대로)
+
+**가정 (디렉터 확인)**
+- 작은 보드(초반 레벨)는 줌 2 정도까지는 보드+여백이 화면보다 작아 이동이 안 됨 (클램프 규칙의 자연스러운 결과). 줌 3 부터 이동 가능. 초반부터 이동을 원하면 `panMarginCells` 를 키우면 됨
+- 더블 탭 "빈 곳" = Arrow 가 없는 셀 + 보드 밖 전부. Arrow 위 더블 탭은 탭 2회 (규칙대로)
+- 핀치 중 HUD 위 손가락은 구분하지 않음 (두 손가락이면 무조건 핀치)
+
+**팀장 에디터 할 일**
+1. Game 씬 **Main Camera** → Add Component → **BoardCameraController** → Config = GameConfig, Tap Input = Input 오브젝트, Board View = Board 오브젝트
+2. `GameController` → **Board Camera** = Main Camera (새 필드), `Board`(BoardView) → **Board Camera** = Main Camera (새 필드)
+3. Play → 마우스 휠로 줌, 드래그로 이동, 빈 곳 더블 클릭으로 리셋 확인. 폰에서는 핀치·드래그
+
 ### W-015 후속 + W-010 완료 (2026-09-17) — 브랜치 `feat/services-infra` (base main)
 - 테스트 **194/194 통과** (CLI 배치 + 에디터), 컴파일 에러·경고 0 (UI/Services 에 스크립트가 생겨 "빈 asmdef" 경고도 사라짐)
 - 에디터가 SDK 임포트 중 종료돼 있어서 테스트는 `Unity -batchmode -runTests` 로 돌렸고, 팀장이 다시 연 뒤 플레이 모드로 카탈로그 로드·셀 크기·즉시 클리어→저장 파일 생성을 확인함 (`docs/screenshots/W-010_cell_rule_level5.png`)
