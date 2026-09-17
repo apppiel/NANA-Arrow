@@ -24,10 +24,12 @@
 - 참고 프로젝트 (읽기 전용): 
   - Block Fill Puzzle: `/Users/choiseungjin/letme/unity_/NANA_puzzle`
   - Water Sort Puzzle: `/Users/choiseungjin/letme/unity_/WaterSortPuzzle`
+  - **NANA-SpotTheDifference (미완성, 가장 최근·같은 Unity 버전)**: `/Users/choiseungjin/letme/unity_/NANA-SpotTheDifference` — 위 두 프로젝트를 참고해 수정한 버전이므로 광고·응모 코드는 이쪽을 1순위로 볼 것
 - 조사 항목 → docs/REPORT_PROGRAMMER.md 에 정리
   1. **광고**: AdMob + Unity Ads 를 어떻게 썼는지 (AdMob 단독 + Unity Ads 미디에이션인지, 둘 다 직접 호출인지), SDK 버전, 전면/보상형 호출 코드 위치, 앱 ID·유닛 ID 가 어디에 있는지
   2. **응모 코드**: 100단계 클리어 시 코드 생성·표시 스크립트 경로, 코드 생성 규칙(형식·시드), 홈페이지 URL, Firebase 관련 코드 유무
-  3. 두 프로젝트 사이에 차이가 있으면 어느 쪽이 최신인지
+  3. 세 프로젝트 사이에 차이가 있으면 어느 쪽이 최신인지 (SpotTheDifference 가 최신일 가능성 높음)
+  5. **SpotTheDifference 에서 그대로 가져올 만한 공용 코드**: 씬 전환(Boot/Main/Game), 저장 시스템, 설정(사운드 토글), Safe Area, 오디오 매니저, 팝업 베이스 등 — 파일 경로와 "그대로 / 수정 필요 / 새로 짜는 게 나음" 판정
   4. NANA-Arrow 에 이식할 때 어셈블리·네임스페이스 어떻게 나눌지 제안
 - 이식 자체는 디렉터가 조사 결과 보고 W-010 으로 지시
 
