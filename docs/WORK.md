@@ -30,8 +30,15 @@ PR 은 이제 프로그래머가 직접 머지 (`.claude/settings.json` 허용�
 - 설정(사운드·진동) PlayerPrefs. 진동은 하트 감소 시만
 - `AnalyticsReporter` 뼈대: docs/ANALYTICS.md v0.1 의 이벤트 18종을 상수로, 전송은 한 곳에서만 (SafeAnalytics 경유)
 
-### W-017 UI 스크립트 (선행: W-010. 브랜치 `feat/ui-scripts`)
+### W-017 UI 스크립트 (선행: W-020. 브랜치 `feat/ui-scripts`)
 UI_FLOW v0.2 §12-8 의 8건: `LivesView`(하트 3개), `TutorialPresenter`(TutorialConfig SO + 말풍선·손가락), `MainMenu`, `LevelSelectView`, `SettingsPopup`(사운드·진동), `GameController` 재시작/메인 이동, `PopupBase` 닫기 옵션, `Strings` SO(문구 키). 프리팹·씬 조립은 팀장 (UI_FLOW §12 가이드). 보고에 "씬에 붙일 것" 목록.
+
+### W-020 보드 줌·팬 (선행: W-010. 브랜치 `feat/board-zoom`) — **대표 요구사항, W-017 보다 먼저**
+- GAME_RULES v0.7.1 §10 "보드 확대·축소·이동" 그대로. `Gameplay/Input/BoardCameraController` (Main Camera orthographicSize + position)
+- `TapInput` 개편: 터치 시작 → (a) `dragThresholdCells` 이상 이동 → 드래그(팬) 확정, 탭 아님 (b) `longPressSeconds` 경과 → 미리보기 (c) 그 전에 놓음 → 탭. 두 손가락 감지 시 즉시 핀치 모드, 진행 중이던 탭·미리보기 취소
+- 에디터: 마우스 휠 줌, 마우스 드래그 팬 (테스트용)
+- 클램프·리셋·더블탭 로직은 순수 C# (`BoardCameraModel`) 로 분리해 테스트
+- 팀장 에디터 할 일: Main Camera 에 컴포넌트 붙이고 Config 연결
 
 ### W-011 광고·응모 코드 (선행: W-017. 브랜치 `feat/ads-reward`)
 - `Core/AdsManager` 순수 C#: NO.3 `InterstitialGate` 를 AdsConfig 값으로 확장. 입력 `LevelCleared(level, alreadyCleared)` / `RetryPressed(failCount)` / `ContinueRequested(continuesUsed)` → 광고 종류. 테스트 필수

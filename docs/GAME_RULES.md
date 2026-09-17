@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.7 — 2026-09-17 전면 재작성. v0.4~v0.6.1 결정을 한 문서로 통합)
+# NANA-Arrow — GAME_RULES.md (v0.7.1 — §10 에 보드 확대·축소·이동 추가)
 > 작성: 디렉터. **이 파일이 유일한 규칙 기준.** 이전 버전 문구와 충돌하면 이 파일이 우선.
 > 레퍼런스: **Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)**. 스크린샷 docs/reference/.
 > 모든 수치는 ScriptableObject(GameConfig / ArrowTypeConfig / AdsConfig / ArrowViewStyle / RewardConfig) 인스펙터 값. 여기 적힌 값은 기본값.
@@ -102,11 +102,20 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 - 팝업: 클리어 / 실패 / 메인으로 확인 / 설정 / 응모 코드 / 종료 확인
 - 언어: v1 한국어만. 문구는 키로 분리 (`Strings` SO)
 - 레벨 중간 저장 없음. 레벨 로드는 `LevelCatalog` SO
+- **보드 확대·축소·이동 (대표 요구사항, 필수)** — `BoardCameraController`, 값은 GameConfig
+  - 두 손가락 핀치 = 줌 (`zoomMin` 1.0 = 기본 크기, `zoomMax` 3.0). 에디터·PC 는 마우스 휠
+  - 한 손가락 드래그 = 이동. 단 **드래그 판정은 `dragThresholdCells`(0.3칸) 이상 움직였을 때만** — 그 전까지는 탭/길게 누르기 후보. 드래그로 확정되면 그 터치는 탭·미리보기로 세지 않음 (하트 차감 없음)
+  - 이동 범위: 보드가 화면 밖으로 완전히 나가지 않게 클램프 (`panMarginCells` 1). 줌 1.0 에서는 이동 불가 (항상 중앙)
+  - **더블 탭 빈 곳 = 줌 리셋** (`doubleTapSeconds` 0.3). Arrow 위 더블 탭은 탭 2회로 처리
+  - 레벨 시작·클리어·실패 시 줌 리셋
+  - 줌 상태에서 Fire 연출·Lane 번쩍은 그대로. HUD 는 줌 영향 없음 (Screen Space Overlay)
+  - 카메라 orthographicSize 를 바꾸는 방식 (보드 스케일 아님). `BoardLayout` 의 셀 크기 계산은 줌 1.0 기준으로 고정
 - 치트(에디터·개발 빌드): 레벨 점프, 즉시 클리어, 하트 채우기
 
 ## 11. 씬 흐름
 Boot(설정·저장 로드) → Main(시작·레벨 선택·설정) → Game → 클리어 팝업 → 다음 레벨 / 실패 팝업 → 이어하기·다시하기 / 뒤로가기 → Main
 
 ## 변경 이력
+- v0.7.1 (09-17) §10 보드 줌·팬 추가 (대표 요구사항)
 - v0.7 (09-17) 전면 재작성. maxArrowLength 40, 보드 가로·세로 분리, 셀 크기 규칙, 규칙 2-e, Lv4 튜토리얼, 게임 중 설정 없음 확정
 - v0.6.x 레퍼런스 확정, 경로형 전환 / v0.5.x Key·Frozen·Locked 세부, 코인 삭제, 보드 11/21/40 / v0.4 광고 확정 / v0.3 하트·Marked / v0.2 부스터 제외
