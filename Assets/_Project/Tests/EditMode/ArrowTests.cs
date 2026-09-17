@@ -56,6 +56,24 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
+        public void Constructor_ParamsCells_DefaultsHitsAndKeyGroup()
+        {
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Up, new Vector2Int(0, 0));
+
+            Assert.AreEqual(Arrow.DefaultHits, arrow.Hits);
+            Assert.IsNull(arrow.KeyGroup);
+        }
+
+        [Test]
+        public void Constructor_WithHitsAndKeyGroup_KeepsThem()
+        {
+            var arrow = new Arrow("a", ArrowType.Locked, Direction.Up, new[] { new Vector2Int(0, 0) }, 2, "red");
+
+            Assert.AreEqual(2, arrow.Hits);
+            Assert.AreEqual("red", arrow.KeyGroup);
+        }
+
+        [Test]
         public void Constructor_NoCells_Throws()
         {
             Assert.Throws<ArgumentException>(() => new Arrow("a", ArrowType.Basic, Direction.Up));
