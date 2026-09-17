@@ -3,7 +3,8 @@
     "rootNamespace": "NanaArrow.Core",
     "references": [
         "NanaArrow.Gameplay",
-        "NanaArrow.Data"
+        "NanaArrow.Data",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

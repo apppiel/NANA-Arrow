@@ -101,11 +101,43 @@ namespace NanaArrow.Tests.EditMode
             Assert.AreEqual(0, result.MinTaps);
         }
 
-        [TestCase(2)]
-        [TestCase(11)]
-        public void Validate_BoardSizeOutOfRange_FailsSchema(int size)
+        [TestCase(2, 5)]
+        [TestCase(5, 2)]
+        [TestCase(11, 5)]
+        [TestCase(5, 15)]
+        public void Validate_BoardSizeOutOfRange_FailsSchema(int width, int height)
         {
-            AssertOnlyRule(Validate(Level(size, Arrow("a", ArrowType.Basic, Direction.Up, (0, 0)))), LevelRule.Schema);
+            var level = new LevelData { Version = 1, Id = 1, Width = width, Height = height,
+                Arrows = new[] { Arrow("a", ArrowType.Basic, Direction.Up, (0, 0)) } };
+
+            AssertOnlyRule(Validate(level), LevelRule.Schema);
+        }
+
+        [Test]
+        public void Validate_BoardAtMaxWidthAndHeight_IsValid()
+        {
+            var level = new LevelData { Version = 1, Id = 1, Width = 10, Height = 14,
+                Arrows = new[] { Arrow("a", ArrowType.Basic, Direction.Up, (9, 13)) } };
+
+            Assert.IsTrue(Validate(level).IsValid, string.Join("\n", Validate(level).Errors));
+        }
+
+        [Test]
+        public void Validate_OwnBodyOnLane_FailsRule2e()
+        {
+            // 꼬리(2,0)가 머리(1,0)의 오른쪽 레인 위에 있는 U 자 경로
+            var u = Arrow("u", ArrowType.Basic, Direction.Right, (2, 0), (2, 1), (1, 1), (0, 1), (0, 0), (1, 0));
+
+            AssertOnlyRule(Validate(Level(5, u)), LevelRule.PathShape);
+        }
+
+        [Test]
+        public void Validate_BodyBesideLane_IsFine()
+        {
+            // 몸통이 레인 옆 칸에만 있으면 OK
+            var hook = Arrow("h", ArrowType.Basic, Direction.Up, (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (1, 3));
+
+            Assert.IsTrue(Validate(Level(5, hook)).IsValid, string.Join("\n", Validate(Level(5, hook)).Errors));
         }
 
         [Test]
@@ -179,9 +211,16 @@ namespace NanaArrow.Tests.EditMode
         [Test]
         public void Validate_PathTooLong_FailsRule2()
         {
-            // 13칸 뱀 모양 (기본 maxArrowLength 12 초과)
-            var snake = new (int x, int y)[] { (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (4, 1), (3, 1), (2, 1), (1, 1), (0, 1), (0, 2), (1, 2), (2, 2) };
-            AssertOnlyRule(Validate(Level(5, Arrow("p", ArrowType.Basic, Direction.Right, snake))), LevelRule.PathShape);
+            // 45칸 뱀 모양 (기본 maxArrowLength 40 초과): 9×5 를 지그재그로 채움, 머리 (0,0) 은 왼쪽을 향함
+            var cells = new System.Collections.Generic.List<(int x, int y)>();
+            for (var y = 0; y < 5; y++)
+                for (var i = 0; i < 9; i++)
+                    cells.Add((y % 2 == 0 ? i : 8 - i, y));
+            cells.Reverse();
+            var snake = cells.ToArray();
+            Assert.AreEqual(45, snake.Length);
+            var level = new LevelData { Version = 1, Id = 1, Width = 9, Height = 5, Arrows = new[] { Arrow("p", ArrowType.Basic, Direction.Left, snake) } };
+            AssertOnlyRule(Validate(level), LevelRule.PathShape);
         }
 
         [Test]

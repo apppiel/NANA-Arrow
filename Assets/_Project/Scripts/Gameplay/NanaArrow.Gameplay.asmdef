@@ -2,7 +2,8 @@
     "name": "NanaArrow.Gameplay",
     "rootNamespace": "NanaArrow.Gameplay",
     "references": [
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

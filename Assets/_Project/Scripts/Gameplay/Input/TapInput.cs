@@ -1,6 +1,7 @@
 using System;
 using NanaArrow.Gameplay.View;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace NanaArrow.Gameplay.Input
@@ -38,6 +39,12 @@ namespace NanaArrow.Gameplay.Input
 
             if (pointer.press.wasPressedThisFrame)
             {
+                // HUD·팝업 위의 터치는 보드 입력이 아니다
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                {
+                    _pressing = false;
+                    return;
+                }
                 var world = targetCamera.ScreenToWorldPoint(pointer.position.ReadValue());
                 _pressing = boardView.TryGetCell(world, out _pressedCell);
                 _longPressed = false;

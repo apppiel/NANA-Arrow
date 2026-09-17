@@ -1,0 +1,18 @@
+{
+    "name": "NanaArrow.Services",
+    "rootNamespace": "NanaArrow.Services",
+    "references": [
+        "NanaArrow.Core",
+        "NanaArrow.Gameplay",
+        "NanaArrow.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
