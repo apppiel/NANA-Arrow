@@ -5,7 +5,7 @@ namespace NanaArrow.Editor
     {
         Schema = 0,
         CellsInBoundsAndDisjoint = 1,
-        LongShape = 2,
+        PathShape = 2,
         LockedHasKey = 3,
         Solvable = 4,
     }

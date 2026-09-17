@@ -39,11 +39,19 @@ namespace NanaArrow.Data
             return board;
         }
 
+        /// <summary>cells 는 꼬리 → 머리 순서. dir 이 경로의 마지막 두 칸과 다르면 FormatException.</summary>
         public static Arrow CreateArrow(ArrowData data, int frozenDefaultHits)
         {
             var hits = data.Type == ArrowType.Frozen ? data.Hits ?? frozenDefaultHits : Arrow.DefaultHits;
             var keyGroup = data.Type == ArrowType.Locked || data.Type == ArrowType.Key ? data.KeyGroup : null;
-            return new Arrow(data.Id, data.Type, data.Direction, ToCells(data), hits, keyGroup);
+            try
+            {
+                return new Arrow(data.Id, data.Type, data.Direction, ToCells(data), hits, keyGroup);
+            }
+            catch (ArgumentException e)
+            {
+                throw new FormatException(e.Message, e);
+            }
         }
 
         /// <summary>[[x,y], ...] → Vector2Int[]. 좌표 쌍이 아니면 FormatException.</summary>

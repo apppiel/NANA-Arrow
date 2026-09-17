@@ -115,9 +115,9 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
-        public void Resolve_LongArrow_ChecksFromHead_NotFromTail()
+        public void Resolve_PathArrow_ChecksFromHead_NotFromTail()
         {
-            var arrow = new Arrow("a", ArrowType.Long, Direction.Right,
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Right,
                 new Vector2Int(1, 4), new Vector2Int(2, 4), new Vector2Int(3, 4));
             _board.Place(arrow);
 
@@ -128,9 +128,9 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
-        public void Resolve_LongArrow_BlockedRightInFrontOfHead()
+        public void Resolve_PathArrow_BlockedRightInFrontOfHead()
         {
-            var arrow = new Arrow("a", ArrowType.Long, Direction.Right,
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Right,
                 new Vector2Int(1, 4), new Vector2Int(2, 4), new Vector2Int(3, 4));
             var blocker = Basic("b", 4, 4, Direction.Down);
             _board.Place(arrow);
@@ -140,6 +140,52 @@ namespace NanaArrow.Tests.EditMode
 
             Assert.AreSame(blocker, result.BlockedBy);
             Assert.AreEqual(0, result.FreeCells);
+        }
+
+        [Test]
+        public void Resolve_BentPath_UsesHeadDirection_NotTailAxis()
+        {
+            // 위로 갔다가 오른쪽으로 꺾인 화살표: 레인은 머리(2,2)에서 오른쪽
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Right,
+                new Vector2Int(1, 0), new Vector2Int(1, 1), new Vector2Int(1, 2), new Vector2Int(2, 2));
+            var blocker = Basic("b", 4, 2, Direction.Down);
+            _board.Place(arrow);
+            _board.Place(blocker);
+
+            var result = FireResolver.Resolve(_board, arrow);
+
+            Assert.AreSame(blocker, result.BlockedBy);
+            CollectionAssert.AreEqual(new[] { new Vector2Int(3, 2) }, result.Lane);
+        }
+
+        [Test]
+        public void Resolve_OwnBodyInLane_DoesNotBlock()
+        {
+            // 꼬리(2,0)가 머리(1,0) 앞 레인 위에 있는 U 자 경로 — 몸통은 따라오므로 막지 않는다 (GAME_RULES v0.6 §0)
+            var arrow = new Arrow("a", ArrowType.Basic, Direction.Right,
+                new Vector2Int(2, 0), new Vector2Int(2, 1), new Vector2Int(1, 1), new Vector2Int(0, 1), new Vector2Int(0, 0), new Vector2Int(1, 0));
+            _board.Place(arrow);
+
+            var result = FireResolver.Resolve(_board, arrow);
+
+            Assert.IsTrue(result.IsExit);
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 0), new Vector2Int(3, 0), new Vector2Int(4, 0) }, result.Lane);
+        }
+
+        [Test]
+        public void Resolve_Lane_ListsFreeCellsFromHeadOutward()
+        {
+            var arrow = Basic("a", 2, 0, Direction.Up);
+            var blocker = Basic("b", 2, 3, Direction.Left);
+            _board.Place(arrow);
+            _board.Place(blocker);
+
+            var blocked = FireResolver.Resolve(_board, arrow);
+            _board.Remove(blocker);
+            var exit = FireResolver.Resolve(_board, arrow);
+
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 1), new Vector2Int(2, 2) }, blocked.Lane);
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 1), new Vector2Int(2, 2), new Vector2Int(2, 3), new Vector2Int(2, 4) }, exit.Lane);
         }
 
         [Test]

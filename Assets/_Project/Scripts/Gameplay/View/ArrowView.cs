@@ -1,29 +1,41 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NanaArrow.Gameplay.View
 {
-    /// <summary>Arrow 하나의 표시와 연출. BoardView 가 코드로 생성한다 (프리팹 없음). 판정은 하지 않는다.</summary>
+    /// <summary>
+    /// 경로형 Arrow 하나의 표시와 연출 (GAME_RULES v0.6 §0): 경로 폴리라인(LineRenderer, 둥근 꺾임) + 머리 화살촉 + 머리 위 타입 아이콘.
+    /// Fire 는 머리가 레인을 직진하고 몸통이 경로를 따라 뱀처럼 따라간다. BoardView 가 코드로 생성한다 (프리팹 없음). 판정은 하지 않는다.
+    /// </summary>
     public sealed class ArrowView : MonoBehaviour
     {
         /// <summary>잠긴 Locked 흔들림 왕복 횟수.</summary>
         private const int ShakeCycles = 3;
         /// <summary>얼음 깨질 때 순간 확대 비율.</summary>
-        private const float IcePunchScale = 1.15f;
+        private const float IcePunchScale = 1.2f;
+
+        private readonly List<Vector3> _points = new List<Vector3>();
 
         private Arrow _arrow;
         private BoardLayout _layout;
         private ArrowViewStyle _style;
-        private SpriteRenderer _body;
+        private LineRenderer _line;
         private SpriteRenderer _head;
-        private SpriteRenderer _ice;
-        private SpriteRenderer _lock;
-        private Color _bodyColor;
+        private SpriteRenderer _icon;
+        private Color _baseColor;
+        private Vector3 _headDir;
+        private float _headLength;
         private Vector3 _restPosition;
-        private Vector3 _iceScale;
-        private float _bodyLength;
+        private Vector3 _iconScale;
+        /// <summary>경로 셀 중심 + 머리 앞으로 직진하는 연장 (월드 좌표). 뱀 이동은 이 폴리라인 위의 창(window)이다.</summary>
+        private Vector3[] _extended;
+        private bool _marked;
+        private bool _preview;
         private Coroutine _motion;
+        /// <summary>Bounce 중 현재 창 오프셋 (셀 단위). 정지 상태는 0.</summary>
+        private float _currentOffset;
 
         public Arrow Arrow => _arrow;
 
@@ -32,103 +44,173 @@ namespace NanaArrow.Gameplay.View
             _arrow = arrow;
             _layout = layout;
             _style = style;
+            _headDir = (Vector2)arrow.Direction.ToOffset();
+            _headLength = layout.CellSize * style.ArrowHeadLengthCellRatio;
+            _baseColor = style.LineColor;
 
+            // 루트는 경로 중심 (등장 스케일의 기준점). 선·머리는 루트 기준 로컬 좌표.
             var center = Vector2.zero;
             foreach (var cell in arrow.Cells)
                 center += layout.CellToWorld(cell);
-            center /= arrow.Cells.Count;
-
-            var angle = AngleOf(arrow.Direction);
-            transform.position = center;
-            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            transform.position = center / arrow.Length;
+            transform.rotation = Quaternion.identity;
             _restPosition = transform.position;
 
-            var cells = arrow.Cells.Count;
-            var inset = layout.CellSize * style.BodyInset;
-            var fullLength = cells * layout.CellSize + (cells - 1) * layout.CellGap;
-            _bodyLength = fullLength - inset * 2f;
-            var thickness = layout.CellSize - inset * 2f;
+            // 보드 어느 위치에서 쏴도 꼬리까지 밖으로 나갈 만큼 연장
+            var extra = Mathf.Max(layout.Width, layout.Height) + arrow.Length + 1;
+            _extended = new Vector3[arrow.Length + extra];
+            for (var i = 0; i < arrow.Length; i++)
+                _extended[i] = layout.CellToWorld(arrow.Cells[i]);
+            for (var k = 1; k <= extra; k++)
+                _extended[arrow.Length - 1 + k] = _extended[arrow.Length - 1] + _headDir * (layout.Pitch * k);
 
-            _bodyColor = ColorFor(arrow, style, keyGroupIndex);
-            _body = CreateChild("Body", style.BodySprite, _bodyColor, style.BodyOrder);
-            _body.transform.localScale = new Vector3(thickness, _bodyLength, 1f);
+            _line = gameObject.AddComponent<LineRenderer>();
+            _line.useWorldSpace = false;
+            _line.alignment = LineAlignment.TransformZ;
+            _line.material = style.LineMaterial;
+            _line.textureMode = LineTextureMode.Stretch;
+            _line.startWidth = _line.endWidth = layout.CellSize * style.LineWidthCellRatio;
+            _line.numCornerVertices = style.CornerVertices;
+            _line.numCapVertices = style.CapVertices;
+            _line.sortingOrder = style.LineOrder;
 
-            var headLength = layout.CellSize * style.HeadLength;
-            _head = CreateChild("Head", style.HeadSprite, _bodyColor * style.HeadTint, style.HeadOrder);
-            _head.transform.localScale = new Vector3(layout.CellSize * style.HeadWidth, headLength, 1f);
-            _head.transform.localPosition = new Vector3(0f, (_bodyLength - headLength) * 0.5f, 0f);
+            _head = CreateChild("Head", style.HeadSprite, _baseColor, style.HeadOrder);
+            _head.transform.localScale = new Vector3(layout.CellSize * style.ArrowHeadWidthCellRatio, _headLength, 1f);
+            _head.transform.localRotation = Quaternion.Euler(0f, 0f, AngleOf(arrow.Direction));
 
-            _iceScale = new Vector3(layout.CellSize, fullLength, 1f);
-            _ice = CreateChild("Ice", style.IceSprite, style.IceColor, style.OverlayOrder);
-            _ice.transform.localScale = _iceScale;
-            _ice.enabled = arrow.Type == ArrowType.Frozen;
+            _iconScale = Vector3.one * (layout.CellSize * style.IconSizeCellRatio);
+            _icon = CreateIcon(arrow, style, keyGroupIndex);
 
-            _lock = CreateChild("Lock", style.LockSprite, style.LockColor, style.OverlayOrder);
-            _lock.transform.localScale = Vector3.one * (layout.CellSize * style.LockSize);
-            _lock.transform.localRotation = Quaternion.Euler(0f, 0f, -angle);
-            _lock.enabled = false;
+            ApplyColor();
+            SetSnake(0f);
         }
 
         public void SetMarked(bool marked)
         {
-            var color = marked ? _style.MarkedColor : _bodyColor;
-            _body.color = color;
-            _head.color = color * _style.HeadTint;
+            _marked = marked;
+            ApplyColor();
         }
 
-        public void SetLocked(bool locked) => _lock.enabled = locked;
-
-        /// <summary>Exit: 꼬리까지 보드 밖으로 날아간 뒤 파괴.</summary>
-        public void PlayFire(int freeCells, float duration, Action onComplete)
+        /// <summary>길게 누르기 미리보기 중 선 색 강조.</summary>
+        public void SetPreview(bool preview)
         {
-            var distance = freeCells * _layout.Pitch + _bodyLength + _layout.CellSize;
-            StartMotion(FireRoutine(transform.up * distance, duration, onComplete));
+            _preview = preview;
+            ApplyColor();
         }
 
-        /// <summary>Block: 막은 Arrow 직전까지 밀렸다가 (+bounceDistance) 원위치 (GAME_RULES §2-3).</summary>
-        public void PlayBounce(int freeCells, float bounceDistanceCells, float legDuration)
+        public void SetLocked(bool locked)
         {
-            var distance = freeCells * _layout.Pitch + bounceDistanceCells * _layout.CellSize;
-            StartMotion(BounceRoutine(transform.up * distance, legDuration));
+            if (_arrow.Type == ArrowType.Locked && _icon != null)
+                _icon.enabled = locked;
+        }
+
+        /// <summary>Exit: 머리는 레인을 직진, 몸통은 경로를 따라. 꼬리가 보드 밖으로 나가면 파괴.</summary>
+        public void PlayFire(int laneCells, float cellsPerSecond, Action onComplete)
+        {
+            StartMotion(FireRoutine(laneCells + _arrow.Length + 1, cellsPerSecond, onComplete));
+        }
+
+        /// <summary>Block: 머리가 앞으로 살짝 밀렸다가 제자리 (GAME_RULES §2-3). 레인 번쩍은 LaneView 가 한다.</summary>
+        public void PlayBounce(float distanceCells, float legDuration)
+        {
+            StartMotion(BounceRoutine(distanceCells, legDuration));
         }
 
         /// <summary>잠긴 Locked 탭: 진행 방향에 수직으로 흔들림.</summary>
         public void PlayShake(float distanceCells, float duration)
         {
-            StartMotion(ShakeRoutine(transform.right * (distanceCells * _layout.CellSize), duration));
+            var side = new Vector3(-_headDir.y, _headDir.x, 0f);
+            StartMotion(ShakeRoutine(side * (distanceCells * _layout.CellSize), duration));
         }
 
         /// <summary>Frozen 얼음 깨기: 남은 얼음만큼 알파를 줄이고 순간 확대.</summary>
         public void PlayIceBreak(int remainingHits, float duration)
         {
+            if (_icon == null) return;
             var totalIceTaps = Mathf.Max(1, _arrow.Hits - Arrow.DefaultHits);
             var iceLeft = Mathf.Clamp01((remainingHits - Arrow.DefaultHits) / (float)totalIceTaps);
             var color = _style.IceColor;
             color.a *= iceLeft;
-            _ice.color = color;
-            StartCoroutine(PunchRoutine(_ice.transform, _iceScale, duration));
+            _icon.color = color;
+            StartCoroutine(PunchRoutine(_icon.transform, _iconScale, duration));
         }
+
+        // ---- 뱀 폴리라인 ----
+
+        /// <summary>_extended 위에서 [offset, offset + Length-1] 창을 잘라 선·머리를 놓는다 (셀 단위).</summary>
+        private void SetSnake(float offset)
+        {
+            var start = offset;
+            var end = offset + (_arrow.Length - 1);
+            var headCenter = Sample(end);
+
+            _points.Clear();
+            _points.Add(_arrow.Length == 1 ? headCenter - _headDir * (_layout.CellSize * 0.5f) : Sample(start));
+            for (var k = Mathf.FloorToInt(start) + 1; k < end; k++)
+                _points.Add(_extended[k]);
+            _points.Add(headCenter - _headDir * (_headLength * 0.5f));
+
+            _line.positionCount = _points.Count;
+            for (var i = 0; i < _points.Count; i++)
+                _line.SetPosition(i, transform.InverseTransformPoint(_points[i]));
+
+            var headLocal = transform.InverseTransformPoint(headCenter);
+            _head.transform.localPosition = headLocal;
+            if (_icon != null)
+                _icon.transform.localPosition = headLocal;
+        }
+
+        private Vector3 Sample(float u)
+        {
+            var index = Mathf.FloorToInt(u);
+            if (index >= _extended.Length - 1)
+                return _extended[_extended.Length - 1];
+            if (index < 0)
+                return _extended[0];
+            return Vector3.Lerp(_extended[index], _extended[index + 1], u - index);
+        }
+
+        // ---- 연출 코루틴 ----
 
         private void StartMotion(IEnumerator routine)
         {
             if (_motion != null)
                 StopCoroutine(_motion);
             transform.position = _restPosition;
+            _currentOffset = 0f;
+            SetSnake(0f);
             _motion = StartCoroutine(routine);
         }
 
-        private IEnumerator FireRoutine(Vector3 delta, float duration, Action onComplete)
+        private IEnumerator FireRoutine(float travelCells, float cellsPerSecond, Action onComplete)
         {
-            yield return MoveBy(delta, duration);
+            for (var offset = 0f; offset < travelCells; offset += cellsPerSecond * Time.deltaTime)
+            {
+                SetSnake(offset);
+                yield return null;
+            }
             onComplete?.Invoke();
             Destroy(gameObject);
         }
 
-        private IEnumerator BounceRoutine(Vector3 delta, float legDuration)
+        private IEnumerator BounceRoutine(float distanceCells, float legDuration)
         {
-            yield return MoveBy(delta, legDuration);
-            yield return MoveBy(-delta, legDuration);
+            yield return SlideTo(distanceCells, legDuration);
+            yield return SlideTo(0f, legDuration);
             _motion = null;
+        }
+
+        private IEnumerator SlideTo(float targetOffset, float duration)
+        {
+            var from = _currentOffset;
+            for (var t = 0f; t < duration; t += Time.deltaTime)
+            {
+                _currentOffset = Mathf.Lerp(from, targetOffset, Mathf.SmoothStep(0f, 1f, t / duration));
+                SetSnake(_currentOffset);
+                yield return null;
+            }
+            _currentOffset = targetOffset;
+            SetSnake(targetOffset);
         }
 
         private IEnumerator ShakeRoutine(Vector3 amplitude, float duration)
@@ -144,27 +226,44 @@ namespace NanaArrow.Gameplay.View
             _motion = null;
         }
 
-        private IEnumerator MoveBy(Vector3 delta, float duration)
-        {
-            var from = transform.position;
-            var to = from + delta;
-            for (var t = 0f; t < duration; t += Time.deltaTime)
-            {
-                transform.position = Vector3.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / duration));
-                yield return null;
-            }
-            transform.position = to;
-        }
-
         private static IEnumerator PunchRoutine(Transform target, Vector3 baseScale, float duration)
         {
             for (var t = 0f; t < duration; t += Time.deltaTime)
             {
-                var punch = Mathf.Lerp(IcePunchScale, 1f, t / duration);
-                target.localScale = baseScale * punch;
+                target.localScale = baseScale * Mathf.Lerp(IcePunchScale, 1f, t / duration);
                 yield return null;
             }
             target.localScale = baseScale;
+        }
+
+        // ---- 생성 헬퍼 ----
+
+        private void ApplyColor()
+        {
+            var color = _preview ? _style.PreviewLineColor : _marked ? _style.MarkedColor : _baseColor;
+            _line.startColor = _line.endColor = color;
+            _head.color = color;
+        }
+
+        private SpriteRenderer CreateIcon(Arrow arrow, ArrowViewStyle style, int keyGroupIndex)
+        {
+            SpriteRenderer icon;
+            switch (arrow.Type)
+            {
+                case ArrowType.Frozen:
+                    icon = CreateChild("Ice", style.IceSprite, style.IceColor, style.IconOrder);
+                    break;
+                case ArrowType.Locked:
+                    icon = CreateChild("Lock", style.LockSprite, style.GetKeyGroupColor(keyGroupIndex), style.IconOrder);
+                    break;
+                case ArrowType.Key:
+                    icon = CreateChild("Key", style.KeySprite, style.GetKeyGroupColor(keyGroupIndex), style.IconOrder);
+                    break;
+                default:
+                    return null;
+            }
+            icon.transform.localScale = _iconScale;
+            return icon;
         }
 
         private SpriteRenderer CreateChild(string childName, Sprite sprite, Color color, int sortingOrder)
@@ -178,18 +277,7 @@ namespace NanaArrow.Gameplay.View
             return renderer;
         }
 
-        private static Color ColorFor(Arrow arrow, ArrowViewStyle style, int keyGroupIndex)
-        {
-            switch (arrow.Type)
-            {
-                case ArrowType.Frozen: return style.FrozenColor;
-                case ArrowType.Key:
-                case ArrowType.Locked: return style.GetKeyGroupColor(keyGroupIndex);
-                default: return style.BasicColor;
-            }
-        }
-
-        /// <summary>로컬 +Y 가 Direction 을 향하도록 하는 Z 회전.</summary>
+        /// <summary>스프라이트의 +Y 가 Direction 을 향하도록 하는 Z 회전.</summary>
         private static float AngleOf(Direction direction)
         {
             switch (direction)

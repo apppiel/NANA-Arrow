@@ -240,6 +240,41 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
+        public void Tap_Exit_CarriesLaneToEdge()
+        {
+            var arrow = Place("a", ArrowType.Basic, Direction.Up, 2, 2);
+
+            var result = _handler.Tap(arrow);
+
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 3), new Vector2Int(2, 4) }, result.Lane);
+        }
+
+        [Test]
+        public void Tap_Blocked_CarriesLaneUpToBlocker()
+        {
+            var arrow = Place("a", ArrowType.Basic, Direction.Up, 2, 0);
+            Place("b", ArrowType.Basic, Direction.Left, 2, 3);
+
+            var result = _handler.Tap(arrow);
+
+            CollectionAssert.AreEqual(new[] { new Vector2Int(2, 1), new Vector2Int(2, 2) }, result.Lane);
+        }
+
+        [Test]
+        public void Tap_PathArrow_ExitRemovesEveryCell()
+        {
+            var path = new Arrow("p", ArrowType.Basic, Direction.Right, new Vector2Int(0, 0), new Vector2Int(0, 1), new Vector2Int(1, 1));
+            _board.Place(path);
+
+            var result = _handler.Tap(path);
+
+            Assert.AreEqual(TapOutcome.Exit, result.Outcome);
+            Assert.IsNull(_board.GetArrowAt(new Vector2Int(0, 0)));
+            Assert.IsNull(_board.GetArrowAt(new Vector2Int(0, 1)));
+            Assert.IsNull(_board.GetArrowAt(new Vector2Int(1, 1)));
+        }
+
+        [Test]
         public void Tap_Key_BehavesLikeBasic()
         {
             var key = Place("k", ArrowType.Key, Direction.Up, 2, 1, keyGroup: "red");

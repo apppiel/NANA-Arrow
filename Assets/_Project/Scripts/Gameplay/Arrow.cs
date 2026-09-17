@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace NanaArrow.Gameplay
 {
-    /// <summary>보드 위 화살표 블록. 불변. 셀이 직선·연속인지는 LevelValidator 가 검사한다.</summary>
+    /// <summary>
+    /// 보드 위 화살표 = 순서 있는 셀 경로 (GAME_RULES v0.6 §0). cells[0] 이 꼬리, 마지막이 머리. 불변.
+    /// 경로 전체의 인접·자기 겹침 검사는 LevelValidator 규칙 2 몫이고, 여기서는 Direction 을 정하는 마지막 두 칸만 본다.
+    /// </summary>
     public sealed class Arrow
     {
         /// <summary>Frozen 이 아닌 Arrow 는 탭 1회로 Fire (GAME_RULES §3).</summary>
@@ -14,8 +17,15 @@ namespace NanaArrow.Gameplay
 
         public string Id { get; }
         public ArrowType Type { get; }
+
+        /// <summary>머리의 진행 방향. 길이 2 이상이면 마지막 두 칸에서 계산, 길이 1 이면 생성자 인자.</summary>
         public Direction Direction { get; }
+
+        /// <summary>꼬리 → 머리 순서의 경로.</summary>
         public IReadOnlyList<Vector2Int> Cells => _cells;
+        public int Length => _cells.Length;
+        public Vector2Int Tail => _cells[0];
+        public Vector2Int Head => _cells[_cells.Length - 1];
 
         /// <summary>Exit 까지 필요한 총 탭 수 (마지막 Fire 포함). Frozen 만 2 이상 (LEVEL_FORMAT hits).</summary>
         public int Hits { get; }
@@ -23,18 +33,25 @@ namespace NanaArrow.Gameplay
         /// <summary>Locked/Key 의 그룹. 그 외 null (LEVEL_FORMAT keyGroup).</summary>
         public string KeyGroup { get; }
 
-        /// <summary>Direction 방향의 맨 앞 칸 (GAME_RULES §1 Head).</summary>
-        public Vector2Int Head { get; }
-
         public Arrow(string id, ArrowType type, Direction direction, params Vector2Int[] cells)
             : this(id, type, direction, cells, DefaultHits, null)
         {
         }
 
+        /// <param name="direction">길이 1 이면 머리 방향. 길이 2 이상이면 경로의 마지막 두 칸과 일치해야 한다 (불일치 시 ArgumentException).</param>
         public Arrow(string id, ArrowType type, Direction direction, Vector2Int[] cells, int hits, string keyGroup)
         {
             if (cells == null || cells.Length == 0)
                 throw new ArgumentException("Arrow needs at least one cell.", nameof(cells));
+
+            if (cells.Length >= 2)
+            {
+                var lastStep = cells[cells.Length - 1] - cells[cells.Length - 2];
+                if (!DirectionExtensions.TryFromOffset(lastStep, out var pathDirection))
+                    throw new ArgumentException($"Arrow '{id}': last two cells {cells[cells.Length - 2]} -> {cells[cells.Length - 1]} are not adjacent.", nameof(cells));
+                if (pathDirection != direction)
+                    throw new ArgumentException($"Arrow '{id}': dir {direction} does not match the path's last step ({pathDirection}).", nameof(direction));
+            }
 
             Id = id;
             Type = type;
@@ -42,23 +59,6 @@ namespace NanaArrow.Gameplay
             Hits = hits;
             KeyGroup = keyGroup;
             _cells = (Vector2Int[])cells.Clone();
-            Head = FindHead(_cells, direction.ToOffset());
         }
-
-        private static Vector2Int FindHead(Vector2Int[] cells, Vector2Int step)
-        {
-            var head = cells[0];
-            var best = Dot(head, step);
-            for (var i = 1; i < cells.Length; i++)
-            {
-                var d = Dot(cells[i], step);
-                if (d <= best) continue;
-                best = d;
-                head = cells[i];
-            }
-            return head;
-        }
-
-        private static int Dot(Vector2Int a, Vector2Int b) => a.x * b.x + a.y * b.y;
     }
 }

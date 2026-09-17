@@ -55,10 +55,10 @@ namespace NanaArrow.Tests.EditMode
         private static LevelData Level(int size, params ArrowData[] arrows) =>
             new LevelData { Version = 1, Id = 1, Width = size, Height = size, Arrows = arrows };
 
-        // docs/LEVEL_FORMAT.md v0.3 예시
+        // docs/LEVEL_FORMAT.md v0.3 예시 (a2 는 v0.6 경로형 Basic)
         private static LevelData FormatExample() => Level(5,
             Arrow("a1", ArrowType.Basic, Direction.Left, (0, 2)),
-            Arrow("a2", ArrowType.Long, Direction.Right, (1, 4), (2, 4), (3, 4)),
+            Arrow("a2", ArrowType.Basic, Direction.Right, (1, 4), (2, 4), (3, 4)),
             Frozen("a3", Direction.Up, 2, (2, 0)),
             Locked("a4", Direction.Down, "red", (4, 4)),
             Key("a5", Direction.Up, "red", (0, 0)));
@@ -89,7 +89,7 @@ namespace NanaArrow.Tests.EditMode
         {
             var level = Level(5,
                 Arrow("a1", ArrowType.Basic, Direction.Up, (2, 2)),
-                Arrow("a2", ArrowType.Long, Direction.Right, (0, 4), (1, 4), (2, 4)),
+                Arrow("a2", ArrowType.Basic, Direction.Right, (0, 4), (1, 4), (2, 4)),
                 Frozen("a3", Direction.Left, 2, (4, 0)),
                 Locked("a4", Direction.Down, "red", (4, 4)),
                 Key("a5", Direction.Up, "red", (0, 0)));
@@ -156,41 +156,67 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
-        public void Validate_LongNotStraight_FailsRule2()
+        public void Validate_PathNotAdjacent_FailsRule2()
         {
-            AssertOnlyRule(Validate(Level(5, Arrow("l", ArrowType.Long, Direction.Right, (0, 0), (1, 0), (1, 1)))), LevelRule.LongShape);
+            AssertOnlyRule(Validate(Level(5, Arrow("p", ArrowType.Basic, Direction.Right, (0, 0), (2, 0), (3, 0)))), LevelRule.PathShape);
+            AssertOnlyRule(Validate(Level(5, Arrow("p", ArrowType.Basic, Direction.Right, (0, 0), (1, 1), (2, 1)))), LevelRule.PathShape);
         }
 
         [Test]
-        public void Validate_LongNotContiguous_FailsRule2()
+        public void Validate_PathCrossesItself_FailsRule2()
         {
-            AssertOnlyRule(Validate(Level(5, Arrow("l", ArrowType.Long, Direction.Right, (0, 0), (2, 0)))), LevelRule.LongShape);
+            // 한 바퀴 돌아 자기 칸을 다시 밟음
+            var loop = Arrow("p", ArrowType.Basic, Direction.Up, (0, 0), (1, 0), (1, 1), (0, 1), (0, 0), (0, 1));
+            AssertOnlyRule(Validate(Level(5, loop)), LevelRule.PathShape);
         }
 
         [Test]
-        public void Validate_LongAxisMismatchesDir_FailsRule2()
+        public void Validate_PathDirMismatchesLastStep_FailsRule2()
         {
-            AssertOnlyRule(Validate(Level(5, Arrow("l", ArrowType.Long, Direction.Up, (0, 0), (1, 0)))), LevelRule.LongShape);
+            AssertOnlyRule(Validate(Level(5, Arrow("p", ArrowType.Basic, Direction.Up, (0, 0), (1, 0)))), LevelRule.PathShape);
         }
 
         [Test]
-        public void Validate_LongTooLong_FailsRule2()
+        public void Validate_PathTooLong_FailsRule2()
         {
-            AssertOnlyRule(Validate(Level(5, Arrow("l", ArrowType.Long, Direction.Right, (0, 0), (1, 0), (2, 0), (3, 0)))), LevelRule.LongShape);
+            // 13칸 뱀 모양 (기본 maxArrowLength 12 초과)
+            var snake = new (int x, int y)[] { (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (4, 1), (3, 1), (2, 1), (1, 1), (0, 1), (0, 2), (1, 2), (2, 2) };
+            AssertOnlyRule(Validate(Level(5, Arrow("p", ArrowType.Basic, Direction.Right, snake))), LevelRule.PathShape);
         }
 
         [Test]
-        public void Validate_BasicWithTwoCells_FailsRule2()
+        public void Validate_BentPath_IsValid_AndSolvable()
         {
-            AssertOnlyRule(Validate(Level(5, Arrow("b", ArrowType.Basic, Direction.Right, (0, 0), (1, 0)))), LevelRule.LongShape);
-        }
+            var level = Level(5,
+                Arrow("p", ArrowType.Basic, Direction.Right, (0, 0), (0, 1), (0, 2), (1, 2)),
+                Arrow("q", ArrowType.Basic, Direction.Up, (3, 0), (3, 1)));
 
-        [Test]
-        public void Validate_VerticalLong_IsValid()
-        {
-            var result = Validate(Level(5, Arrow("l", ArrowType.Long, Direction.Down, (2, 1), (2, 2), (2, 3))));
+            var result = Validate(level);
 
             Assert.IsTrue(result.IsValid, string.Join("\n", result.Errors));
+            Assert.AreEqual(2, result.MinTaps);
+        }
+
+        [Test]
+        public void Validate_SingleCellArrow_IsValid()
+        {
+            var result = Validate(Level(5, Arrow("s", ArrowType.Basic, Direction.Down, (2, 2))));
+
+            Assert.IsTrue(result.IsValid, string.Join("\n", result.Errors));
+        }
+
+        [Test]
+        public void Validate_PathBlockedByOtherArrowsBody_FailsSolvableUntilItMoves()
+        {
+            // q 의 몸통이 p 의 레인을 가로지름. q 는 나갈 수 있으니 전체는 풀림: solution = q, p
+            var level = Level(5,
+                Arrow("p", ArrowType.Basic, Direction.Right, (0, 2)),
+                Arrow("q", ArrowType.Basic, Direction.Up, (2, 1), (2, 2), (2, 3)));
+
+            var result = Validate(level);
+
+            Assert.IsTrue(result.IsValid, string.Join("\n", result.Errors));
+            CollectionAssert.AreEqual(new[] { "q", "p" }, result.Solution);
         }
 
         [Test]

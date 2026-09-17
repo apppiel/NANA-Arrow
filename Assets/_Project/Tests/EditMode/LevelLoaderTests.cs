@@ -34,7 +34,7 @@ namespace NanaArrow.Tests.EditMode
 
             var a2 = level.Arrows[1];
             Assert.AreEqual("a2", a2.Id);
-            Assert.AreEqual(ArrowType.Long, a2.Type);
+            Assert.AreEqual(ArrowType.Basic, a2.Type);
             Assert.AreEqual(Direction.Right, a2.Direction);
             CollectionAssert.AreEqual(new[] { 1, 4 }, a2.Cells[0]);
             CollectionAssert.AreEqual(new[] { 3, 4 }, a2.Cells[2]);
@@ -64,6 +64,35 @@ namespace NanaArrow.Tests.EditMode
                 ""arrows"": [ { ""id"": ""a"", ""type"": ""Basic"", ""cells"": [[0,0]] } ] }";
 
             Assert.Catch<JsonException>(() => LevelLoader.Parse(noDir));
+        }
+
+        [Test]
+        public void Parse_LongType_IsNoLongerAccepted()
+        {
+            const string longArrow = @"{ ""version"": 1, ""id"": 1, ""width"": 3, ""height"": 3,
+                ""arrows"": [ { ""id"": ""a"", ""type"": ""Long"", ""dir"": ""Right"", ""cells"": [[0,0],[1,0]] } ] }";
+
+            Assert.Catch<JsonException>(() => LevelLoader.Parse(longArrow));
+        }
+
+        [Test]
+        public void CreateArrow_DirMismatchesPath_ThrowsFormatException()
+        {
+            var data = new ArrowData { Id = "a", Type = ArrowType.Basic, Direction = Direction.Up, Cells = new[] { new[] { 0, 0 }, new[] { 1, 0 } } };
+
+            Assert.Throws<FormatException>(() => LevelLoader.CreateArrow(data, FrozenDefaultHits));
+        }
+
+        [Test]
+        public void CreateArrow_BentPath_HeadIsLastCell()
+        {
+            var data = new ArrowData { Id = "a", Type = ArrowType.Basic, Direction = Direction.Right, Cells = new[] { new[] { 0, 0 }, new[] { 0, 1 }, new[] { 1, 1 } } };
+
+            var arrow = LevelLoader.CreateArrow(data, FrozenDefaultHits);
+
+            Assert.AreEqual(new Vector2Int(1, 1), arrow.Head);
+            Assert.AreEqual(new Vector2Int(0, 0), arrow.Tail);
+            Assert.AreEqual(Direction.Right, arrow.Direction);
         }
 
         [Test]
@@ -165,7 +194,7 @@ namespace NanaArrow.Tests.EditMode
         {
             var json = LevelLoader.ToJson(LevelLoader.Parse(ExampleJson));
 
-            StringAssert.Contains("\"type\": \"Long\"", json);
+            StringAssert.Contains("\"type\": \"Frozen\"", json);
             StringAssert.Contains("\"dir\": \"Right\"", json);
             StringAssert.Contains("\"cells\": [[1,4],[2,4],[3,4]]", json);
             StringAssert.Contains("\"solution\": [\"a1\",\"a5\",\"a4\",\"a2\",\"a3\"]", json);

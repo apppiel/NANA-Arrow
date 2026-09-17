@@ -1,51 +1,15 @@
 {
   "version": 1,
   "id": 4,
-  "width": 5,
-  "height": 5,
+  "width": 6,
+  "height": 7,
   "arrows": [
-    {
-      "id": "a1",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[0,0]]
-    },
-    {
-      "id": "a2",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[2,0]]
-    },
-    {
-      "id": "a3",
-      "type": "Basic",
-      "dir": "Left",
-      "cells": [[2,2]]
-    },
-    {
-      "id": "a4",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[0,4]]
-    },
-    {
-      "id": "a5",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[3,3]]
-    },
-    {
-      "id": "a6",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[4,1]]
-    }
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[2,4],[2,5],[1,5],[0,5],[0,6]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[5,6],[5,5],[5,4],[4,4],[4,5],[4,6],[3,6],[2,6],[1,6]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[0,0],[0,1],[0,2],[0,3],[0,4],[1,4],[1,3],[1,2],[2,2],[2,3]] },
+    { "id": "a4", "type": "Basic", "dir": "Down", "cells": [[3,5],[3,4],[3,3],[4,3],[5,3],[5,2],[5,1]] },
+    { "id": "a5", "type": "Basic", "dir": "Right", "cells": [[3,2],[4,2],[4,1],[3,1],[2,1],[1,1],[1,0],[2,0],[3,0],[4,0],[5,0]] }
   ],
-  "solution": ["a3","a5","a6","a2","a1","a4"],
-  "meta": {
-    "author": "desktop",
-    "difficulty": 2,
-    "minTaps": 6,
-    "note": "선택지 3, 사슬 깊이 4"
-  }
+  "solution": ["a1", "a2", "a3", "a5", "a4"],
+  "meta": { "author": "desktop", "difficulty": 2, "minTaps": 5, "freeAtStart": 2, "depth": 3, "pathLength": 42, "bends": 15, "note": "보드 확대 6×7, 빈칸 없음" }
 }

@@ -17,5 +17,16 @@ namespace NanaArrow.Gameplay
                 default: throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
         }
+
+        /// <summary>인접 셀 사이의 한 칸 오프셋 → 방향. 상하좌우 한 칸이 아니면 false.</summary>
+        public static bool TryFromOffset(Vector2Int offset, out Direction direction)
+        {
+            if (offset == Vector2Int.up) { direction = Direction.Up; return true; }
+            if (offset == Vector2Int.down) { direction = Direction.Down; return true; }
+            if (offset == Vector2Int.left) { direction = Direction.Left; return true; }
+            if (offset == Vector2Int.right) { direction = Direction.Right; return true; }
+            direction = default;
+            return false;
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using NanaArrow.Core;
 using UnityEditor;
 using UnityEngine;
@@ -57,7 +58,15 @@ namespace NanaArrow.Editor
                 Debug.LogWarning($"[LevelCheat] {path} 가 없습니다.");
                 return;
             }
-            controller.LoadLevel(asset);
+            try
+            {
+                controller.LoadLevel(asset);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[LevelCheat] {path} 로드 실패: {e.Message}");
+                return;
+            }
             _levelId = id;
             Repaint();
         }
