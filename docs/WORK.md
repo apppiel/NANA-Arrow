@@ -5,6 +5,11 @@
 
 ---
 
+## ⚠ 2026-09-17 코어 전환 공지 (전원 필독)
+레퍼런스가 **Arrows – Puzzle Escape (Lessmore)** 로 확정됨. 화살표는 직선 막대가 아니라 **그리드를 따라 꺾이는 경로**다. GAME_RULES **v0.6 §0** 과 LEVEL_FORMAT **v0.5** 를 먼저 읽을 것. Block 판정·목숨·Marked·Frozen/Locked·GameSession 은 그대로. 바뀌는 건 Arrow 데이터(순서 있는 경로), 검증 규칙 2, 뷰/연출, 레벨 데이터.
+- 프로그래머: **W-015 가 W-010 보다 우선.** W-010/W-011 은 영향 없으니 그 다음.
+- 기획자: **W-016 이 최우선.** W-012(UI_FLOW) 는 영향 적으니 그 다음, W-013(레벨 21~30) 은 W-016 뒤로.
+
 ## 팀장 (에디터·계정 작업 — AI 가 못 하는 것)
 - [ ] **PR 머지**: GitHub 웹에서 PR #1 → #28 → #29 순서로 Merge. 그 다음 터미널 `git checkout main && git pull`
 - [ ] Game 씬 조립: REPORT_PROGRAMMER.md W-005 "팀장 에디터 할 일" 1~7 (ArrowViewStyle 에셋 → Board/Input/GameController 오브젝트 → Play 테스트 → Level Jump 치트)
@@ -12,7 +17,20 @@
 
 ## 프로그래머
 
-### W-010 인프라 이식 (선행: 팀장 PR 머지 완료. 브랜치 `feat/services-infra`)
+### W-015 코어 전환: 경로형 Arrow (최우선. 브랜치 `feat/path-arrows`, base main, 스택 PR 금지)
+- `Arrow`: cells 를 순서 있는 경로로. `Head = cells[^1]`, `Direction` 은 길이≥2 면 마지막 두 셀에서 계산(JSON dir 과 불일치 시 로더 예외), 길이 1 이면 JSON dir. `Tail`, `Length` 추가
+- `ArrowType.Long` 삭제, 관련 config(`longMin/Max`) → `maxArrowLength`(GameConfig, 기본 12)
+- `LevelValidator` 규칙 2 교체: 인접 셀 상하좌우 연결 / 자기 겹침 없음 / dir 과 마지막 세그먼트 일치 / 길이 범위. 규칙 4(탐욕 시뮬)는 레인만 보므로 그대로
+- `FireResolver`·`TapHandler`·`LivesTracker`·`GameSession`: 변경 없음 확인 (테스트로 증명)
+- `TapResult` 에 `Lane`(머리 앞 직선 셀 목록) 추가 — 빨간 번쩍·미리보기용
+- **뷰 재작성**: `ArrowView` 를 경로 폴리라인(LineRenderer 또는 스프라이트 세그먼트, 직각 코너) + 머리 화살촉으로. Fire 연출 = 머리가 레인을 직진, 몸통은 경로를 따라 뱀처럼 이동, 꼬리가 나가면 제거 (`fireSpeedCellsPerSec`). Block = 레인 빨간 번쩍 + 머리 살짝 튕김. Marked = 선 전체 빨강. Frozen/Locked 표시는 머리 위
+- `TapInput`: 탭은 Arrow 의 **어느 셀이든** 히트. **길게 누르기** → `LanePreviewRequested(arrow)` / 떼면 해제 (`longPressSeconds`)
+- `BoardView`: 격자 옅게, 셀은 정사각 보장 (현재 Game 뷰 16:9 에서 셀이 4:1 로 찌그러지는 문제 — 원인 확인해 수정), 세로 화면에서 보드가 폭을 거의 채우도록 `areaWidthFraction` 추가
+- 테스트: Arrow 경로/Head/Direction, Validator 신규 규칙, 기존 전부 통과
+- 보고에 "팀장 에디터 할 일" + 스크린샷 경로
+
+
+### W-010 인프라 이식 (선행: W-015. 브랜치 `feat/services-infra`, base main)
 디렉터 승인: W-009 §4 어셈블리 제안 그대로. `NanaArrow.Services` asmdef 신설, Core 는 Services 미참조.
 - SDK 폴더 복사 (NO.3 SpotTheDifference 에서): `Assets/GoogleMobileAds`, `Assets/Firebase`, `Assets/ExternalDependencyManager`, `Plugins/Android/*.androidlib`, gradle 템플릿 3종. **CLAUDE.md "절대 복사 금지" 항목은 테스트 ID / 빈 값으로**
 - 그대로 이식: `SaveService`+`SaveCodec`+`SaveData`(필드는 최고 레벨·응모 코드 발급 여부·설정 3종: 사운드·진동, 테스트 포함), `ScreenCaptureProtection`, `SafeAnalytics`, NO.2 `SafeAreaAdapter`
@@ -32,12 +50,19 @@
 
 ## 기획자
 
+### W-016 레벨 1~20 경로형으로 재설계 (최우선)
+- GAME_RULES v0.6 §0, LEVEL_FORMAT v0.5 읽기. 레퍼런스 Arrows – Puzzle Escape 초반 레벨 구조 조사 (스크린샷·플레이 영상): 보드 크기, 화살표 수, 꺾임 수, 첫 튜토리얼 흐름
+- LEVEL_DESIGN v1.0: 난이도 지표에 "총 경로 길이", "꺾임 수" 추가. Lv1~2 직선만, Lv3 첫 꺾임, Lv6 이후 긴 경로
+- 레벨 1~20 JSON 재작성 → `Assets/_Project/Levels/` 덮어쓰기. 검증은 프로그래머 W-015 의 새 Validator 가 머지된 뒤 (그 전엔 손 검증 + 시뮬레이터)
+- 생성기: 역방향(빈 보드에서 Arrow 를 하나씩 "되돌려 넣기") 로 경로형 지원
+
+
 ### W-012 UI_FLOW v0.2 + 프리팹 가이드
 - GAME_RULES §11 의 디렉터 답변 5건을 UI_FLOW 에 반영 (v0.2)
 - §12 캔버스·팝업 프리팹 구조를 **팀장이 에디터에서 따라 만들 수 있는 단계별 가이드** 로 확장 (오브젝트 이름, 앵커, 컴포넌트, 어떤 스크립트를 붙이는지). 프로그래머 W-010 의 PopupBase 를 전제
 - `TutorialConfig` SO 필드 정의 (레벨·대상 arrow id·문구·손가락 위치)
 
-### W-013 레벨 21~30 (7×7, Key/Locked 26 도입) — W-012 다음
+### W-013 레벨 21~30 (7×7, Key/Locked 26 도입) — W-016·W-012 다음
 - LEVEL_DESIGN v0.4, JSON 을 직접 `Assets/_Project/Levels/` 에 저장하고 프로젝트 LevelValidator 로 검증 (앞으로 레벨 파일 저장은 기획자 담당, 프로그래머는 손대지 않음)
 
 ### W-014 애널리틱스 이벤트 목록 (이슈 #26) — W-013 다음
@@ -46,6 +71,8 @@
 ---
 
 ## 결정 사항 (참고)
+- **레퍼런스 게임: Arrows – Puzzle Escape (Lessmore GmbH)** — 팀장·대표 확정 09-17. 코어 = 경로형 화살표
+- PR 은 스택 금지, 항상 main 기준 브랜치 하나씩 (오늘 스택 PR 역순 머지 사고)
 - 광고 SDK: **AdMob 단독 호출 + Unity Ads 는 AdMob 미디에이션** (세 기존 게임과 동일). ID 는 전부 신규 발급
 - 응모 코드: NO.3 SpotTheDifference 의 RewardCode/RewardCodeService 이식. 규칙 XXXX-XXXX (0/O/1/I 제외 32자)
 - Firebase: NANA-Arrow 전용 새 프로젝트 필요 (기존 게임과 분리)
