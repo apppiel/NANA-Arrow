@@ -1,4 +1,8 @@
-# NANA-Arrow — GAME_RULES.md (v0.5.2 — §4 보드 크기 구간 확정 11/21/40)
+<<<<<<< Updated upstream
+# NANA-Arrow — GAME_RULES.md (v0.4 — 2026-09-17 광고 정책 확정)
+=======
+# NANA-Arrow — GAME_RULES.md (v0.5.3 — §8 연출값 4개 추가, §11 UI 결정 추가)
+>>>>>>> Stashed changes
 > 작성: 클로드 데스크탑 / **v1 범위 확정** (2026-09-17). 변경 시 버전 올리고 CLAUDE.md 담당에게 알릴 것.
 > 모든 수치는 `GameConfig` ScriptableObject에서 인스펙터로 조정한다. 여기 적힌 값은 초기 기본값.
 
@@ -34,30 +38,28 @@
 |---|---|---|
 | Basic | 1칸, Dir 하나 | 1 |
 | Long | 2~3칸 직선, Dir은 긴 축 방향 중 하나 | 6 |
-| Frozen | 탭 1회로 얼음 해제(경로 무관, 목숨 차감 없음), 2회째 탭이 실제 Fire 로 Block 판정 | 16 |
-| Key | Basic과 동일, `keyGroup` 을 가짐. Exit 되면 같은 그룹 Locked 해제 | 26 |
-| Locked | 같은 `keyGroup` 의 Key 가 모두 Exit 되어야 해제. 잠긴 상태에서 탭하면 **목숨 차감 없음** + 자물쇠 흔들림 | 26 |
+| Frozen | 탭 1회로 얼음 해제, 2회째 Fire | 16 |
+| Locked | 같은 색 Key Arrow가 Exit 되어야 해제 | 26 |
 | Bomb | Fire 시 인접 8칸 Arrow 강제 Exit | **보류** (v1 미포함) |
-
-`ArrowType` enum: Basic, Long, Frozen, Locked, Key (Bomb 은 enum 에도 넣지 않음)
 
 각 타입은 `ArrowType` enum + 타입별 설정은 `ArrowTypeConfig` ScriptableObject.
 
 ## 4. 레벨 구조
-- 보드 크기: 5×5 (Lv1~10) → 6×6 (Lv11~20) → 7×7 (Lv21~39) → 8×8 (Lv40+). 기믹 도입 레벨(16 Frozen, 26 Key/Locked)과 크기 변경 레벨을 겹치지 않게 한다. 최소 `minBoardSize`=3, 최대 `maxBoardSize`=10
+- 보드 크기: 5×5 (Lv1~10) → 6×6 → 7×7 → 8×8 (Lv40+). 최대 `maxBoardSize` = 10
 - 셀 크기와 간격은 `cellSize`, `cellGap` 으로 화면에 맞춰 자동 스케일
 - 레벨 데이터: `Assets/_Project/Levels/level_###.json` (스키마는 LEVEL_FORMAT.md)
 - 정답 보장: 모든 레벨은 검증기가 "해결 가능" 판정을 통과해야 저장 가능
 
 ## 5. 별점 (재플레이)
-- **별점 시스템은 v1 미포함** (보류). 도입 시 기준은 minTaps 가 아니라 "잃은 목숨 수" (0=⭐⭐⭐, 1=⭐⭐, 2+=⭐) 로 할 것
+- ⭐⭐⭐: 최소 탭 수 이하 / ⭐⭐: +`star2Tolerance`(=3) 이내 / ⭐: 클리어
+- **별점 시스템은 v1 미포함** (보류). 위 기준은 도입 시 초안
 
 ## 6. 힌트 / 부스터
 **v1 전체 제외.** (Hint, Undo, Shuffle 모두 미포함) 이후 리텐션 지표 보고 Hint 부터 검토.
 - 보상형 광고는 "목숨 0 → 이어하기" 한 곳에만 사용
 
 ## 7. 진행 / 보상
-- **코인 없음 (v1 삭제)** — 부스터·IAP 가 없어 용처가 없음. 힌트 도입 시 함께 도입. `coinPerClear` 는 GameConfig 에서 제거
+- 레벨 클리어 → `coinPerClear` 코인, 별 3개 시 보너스
 - **100단계 클리어 → 응모 코드 표시 (확정)**. 기존 홈페이지 Firebase 응모 구조 재사용, 코드 생성 규칙은 Water Sort/Block Fill 과 동일하게
 - 광고 정책 (확정, 전부 `AdsConfig` ScriptableObject)
 
@@ -78,12 +80,28 @@
 | blockBounceDistance | 0.2 cell |
 | clearPopupDelay | 0.6s |
 | cellSpawnStagger | 0.03s |
+| cellSpawnDuration | 0.15s |
+| iceBreakDuration | 0.15s |
+| lockShakeDuration | 0.2s |
+| lockShakeDistance | 0.08 cell |
+
+- Block 튕김: 막은 Arrow 직전(FreeCells)까지 + blockBounceDistance 전진 후 복귀, 편도 blockBounceDuration
 
 ## 9. 화면 / 입력
-- 세로 고정, 보드는 화면 중앙, 상단 HUD(레벨 번호·설정 버튼), 상단 또는 보드 위에 목숨 하트 3개. 코인·부스터 UI 없음
+- 세로 고정, 보드는 화면 중앙, 상단 HUD(레벨·코인·설정), 하단 부스터 바
 - 입력: Input System, 탭만 사용 (드래그 없음). **연속 탭 허용** (`allowInputDuringFire` = true)
   - 판정은 탭 즉시 논리 보드에서 확정하고, 연출은 뒤따라감 (논리와 연출 분리 필수)
   - 이미 Fire 중인 Arrow는 다시 탭 불가. 날아가는 중인 Arrow가 차지했던 칸은 논리상 이미 비어 있음
 
 ## 10. 씬 흐름
 Boot(설정·저장 로드) → Main(시작·설정·레벨 선택) → Game(레벨 N) → 클리어 팝업 → 다음 레벨 / Main
+
+## 11. UI / 진행 결정 (UI_FLOW v0.1 확인 요청에 대한 답, 2026-09-17)
+- 진동 토글: **추가**. 기본 켜짐, 하트 감소 시에만 진동 (`vibrateOnLifeLost`, 설정 저장)
+- 설정 팝업의 "다시하기": 실패 횟수에 **포함하지 않음**, 광고 없음
+- 레벨 중간 저장: **없음**. 앱 종료 시 그 레벨 처음부터
+- 언어: v1 **한국어만**. 단, 문구는 UI_FLOW 의 키 표대로 코드와 분리해 둘 것 (나중에 영어 추가 대비)
+- 이미 깬 레벨 재클리어: 전면 광고 카운트에 **포함**
+- 레벨 로드: `LevelCatalog` ScriptableObject (TextAsset 목록, 인스펙터에서 순서 편집) — Resources 폴더 사용 안 함
+- 치트 (에디터/개발 빌드 전용): 레벨 점프 + 즉시 클리어 + 목숨 채우기
+- Lv20 depth 6: 허용. 플레이 테스트 후 조정

@@ -16,6 +16,7 @@ Undo, 힌트, Shuffle 등 부스터 전부 / 코인 / 별점 / 인앱결제 / Bo
 - Scripts/Gameplay : 그리드, 화살표, 경로 계산, 탭 처리, 목숨
 - Scripts/UI : 메뉴, HUD, 팝업
 - Scripts/Data : 레벨 데이터 클래스, 로더
+- Scripts/Services : 외부 SDK 연동(AdMob·Firebase·애널리틱스·캡처 방지). Core 는 Services 를 참조하지 않는다 — 인터페이스는 Core, 구현은 Services
 - Scripts/Editor : 레벨 검증기, 생성기, 치트 메뉴
 - Levels/ : 레벨 JSON (docs/LEVEL_FORMAT.md 준수)
 - Tests/EditMode : 로직 유닛 테스트
@@ -29,6 +30,9 @@ Undo, 힌트, Shuffle 등 부스터 전부 / 코인 / 별점 / 인앱결제 / Bo
 5. Editor: 레벨 검증기(해결 가능 여부, 최소 탭 수), 역방향 자동 생성기, 레벨 점프 치트
 6. 광고/애널리틱스 SDK 연동 코드
 7. 모든 로직에 EditMode 테스트 작성 후 `unity` MCP 또는 CLI로 실행
+
+## 절대 복사 금지 (이전 프로젝트에서 이식할 때)
+google-services.json, GoogleService-Info.plist, GoogleMobileAdsSettings.asset 의 앱 ID, FirebaseApp.androidlib/res/values/google-services.xml, 실제 광고 단위 ID. 전부 NANA-Arrow 용 신규 발급 (팀장). 이식 코드는 테스트 ID·빈 값으로 둔다.
 
 ## 하지 않는 일
 - 씬(.unity)·프리팹(.prefab) 직접 수정 → 컴포넌트 연결은 사용자가 에디터에서 함. 필요하면 "어떤 오브젝트에 무엇을 붙여야 하는지" 텍스트로 안내
