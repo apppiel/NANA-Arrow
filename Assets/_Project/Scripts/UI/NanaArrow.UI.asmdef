@@ -1,0 +1,19 @@
+{
+    "name": "NanaArrow.UI",
+    "rootNamespace": "NanaArrow.UI",
+    "references": [
+        "NanaArrow.Core",
+        "NanaArrow.Gameplay",
+        "NanaArrow.Data",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

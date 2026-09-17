@@ -1,0 +1,21 @@
+{
+    "name": "NanaArrow.Editor",
+    "rootNamespace": "NanaArrow.Editor",
+    "references": [
+        "NanaArrow.Core",
+        "NanaArrow.Gameplay",
+        "NanaArrow.Data",
+        "NanaArrow.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
