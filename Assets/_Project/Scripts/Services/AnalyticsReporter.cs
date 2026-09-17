@@ -38,6 +38,12 @@ namespace NanaArrow.Services
             GameEvents.LevelFailed += OnLevelFailed;
             GameEvents.RetryPressed += OnRetryPressed;
             GameEvents.LevelQuit += OnLevelQuit;
+            GameEvents.TutorialStepShown += (level, key, trigger) => Send(AnalyticsEvents.TutorialStep,
+                new Parameter(AnalyticsEvents.ParamLevel, level), new Parameter(AnalyticsEvents.ParamTextKey, key), new Parameter(AnalyticsEvents.ParamTrigger, trigger));
+            GameEvents.TutorialDone += (level, key, elapsed) => Send(AnalyticsEvents.TutorialDone,
+                new Parameter(AnalyticsEvents.ParamLevel, level), new Parameter(AnalyticsEvents.ParamTextKey, key), new Parameter(AnalyticsEvents.ParamElapsedSec, (long)elapsed));
+            GameEvents.LanePreviewFirst += level => Send(AnalyticsEvents.LanePreviewFirst, new Parameter(AnalyticsEvents.ParamLevel, level));
+            GameEvents.LevelSelectOpened += highest => Send(AnalyticsEvents.LevelSelectOpen, new Parameter(AnalyticsEvents.ParamHighestLevel, highest));
             SettingsStore.SoundChanged += on => Send(AnalyticsEvents.SettingsChange, new Parameter(AnalyticsEvents.ParamSetting, "sound"), new Parameter(AnalyticsEvents.ParamValue, on ? 1 : 0));
             SettingsStore.VibrationChanged += on => Send(AnalyticsEvents.SettingsChange, new Parameter(AnalyticsEvents.ParamSetting, "vibration"), new Parameter(AnalyticsEvents.ParamValue, on ? 1 : 0));
         }
