@@ -2,6 +2,48 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-015 후속 + W-010 완료 (2026-09-17) — 브랜치 `feat/services-infra` (base main)
+- 테스트 **194/194 통과** (CLI 배치 + 에디터), 컴파일 에러·경고 0 (UI/Services 에 스크립트가 생겨 "빈 asmdef" 경고도 사라짐)
+- 에디터가 SDK 임포트 중 종료돼 있어서 테스트는 `Unity -batchmode -runTests` 로 돌렸고, 팀장이 다시 연 뒤 플레이 모드로 카탈로그 로드·셀 크기·즉시 클리어→저장 파일 생성을 확인함 (`docs/screenshots/W-010_cell_rule_level5.png`)
+
+**W-015 후속**
+- `GameConfig`: `maxBoardWidth` 10 / `maxBoardHeight` 14 (검증기 규칙 0 분리 검사), `maxArrowLength` 40, **셀 크기 규칙** `cellWidthFraction` 0.052 / `maxAreaFraction` 0.9 / `cellGapRatio` 0. `cellSize`·`cellGap`·`areaWidthFraction` 삭제. `GameConfig.asset` 갱신
+- `BoardLayout.CellSizeFor(화면폭, 가로칸수, …)` = min(폭×0.052, 폭×0.9÷칸수). 세로 중앙 = Board 오브젝트 위치
+- 검증기 **규칙 2-e**: 머리 앞 Lane(가장자리까지) 위에 자기 몸통 셀이 있으면 오류. 기획자의 레벨 1~20 은 그대로 통과
+- ⚠ 셀 크기 관찰: 0.052 면 6칸 보드가 화면 폭의 31% (레퍼런스 Lv4 는 약 45%). 레퍼런스에 맞추려면 `cellWidthFraction` 0.07 근처 — 인스펙터 값이니 팀장이 보면서 조정
+
+**W-010 인프라**
+- **SDK 이식 (NO.3 → `Assets/`)**: `GoogleMobileAds`(11.2.0, Unity Ads 미디에이션 4.19.0 포함), `Firebase`(13.13.0 App·Analytics·Auth·Firestore·Crashlytics + m2repository), `ExternalDependencyManager`(1.2.187), `Plugins/Android`(androidlib 3종, aar, gradle 템플릿 3종), `ProjectSettings/GvhProjectSettings.xml`·`AndroidResolverDependencies.xml`. **복사 안 함**: `google-services.json`, `GoogleService-Info.plist`, `FirebaseApp.androidlib/res/values/google-services.xml`(NO.3 프로젝트 값 — 실제 json 이 들어오면 EDM 이 재생성), `Plugins/iOS`, `StreamingAssets/google-services-desktop.json`. AdMob 앱 ID 는 Google 테스트 ID 그대로. `Assets/GeneratedLocalRepo/` 는 EDM 생성물이라 .gitignore (NO.3 와 동일)
+- **어셈블리**: `NanaArrow.Services` 신설 (Core/Gameplay/Data 참조, SDK dll 은 auto-reference). Core 는 Services 를 모름. UI → Core. 결정대로 6+테스트
+- **Core (순수 C# + MonoBehaviour)**
+  - `SaveData`(v, 최고 클리어 레벨, 응모 코드 발급 여부) / `SaveCodec`(HMAC-SHA256, 새 키) / `SaveService`(원자적 쓰기) — NO.3 그대로, 필드만 교체. `PlayerProgress`(메모리 사본 + 즉시 저장, `NextLevel`, `IsCleared`, 레벨별 `attempts` 는 PlayerPrefs) / `App.Progress` 로케이터 (파일 `persistentDataPath/save.json`)
+  - `SettingsStore`(사운드·진동 PlayerPrefs, 변경 이벤트) / `Haptics.LifeLost()`(Android Vibrator 30ms, iOS 는 Handheld.Vibrate 대체)
+  - `SceneId`(Boot/Main/Game) + `SceneLoader.Load / LoadGame(level)` (레벨 전달은 static, PlayerPrefs 아님) / `BootLoader`(저장 로드 → 설정 적용 → `minDuration` 1초 뒤 Main)
+  - `AudioManager`(BGM 1채널 + SFX, `SoundId` 13종 ↔ 클립 인스펙터 리스트, 사운드 토글 연동, `PauseBgm`) / `BackButton.Pressed` static 이벤트 (Escape, 자가 생성)
+  - **`GameEvents` 허브** (LevelStarted/Cleared/Failed/RetryPressed/LevelQuit) + `LevelStats`(taps·blocks·lane_previews·duration·attempt) — 게임플레이는 발행만
+  - `GameController`: `LevelCatalog` + 레벨 번호로 로드 (`SceneLoader.PendingLevel` 우선, 없으면 인스펙터 `startLevel`), `Restart(reason)`, `LoadNextLevel()`, `GoToMain()`, `IsLastLevel`, 치트 `CheatClear()`/`CheatRefillLives()`, 클리어 시 `App.Progress.MarkCleared`, 앱 pause 시 level_quit
+- `Data/LevelCatalog` SO (TextAsset 리스트, 1부터), `GameSession.ForceClear()`, `TapInput` 은 `EventSystem.IsPointerOverGameObject()` 로 UI 위 탭 무시
+- **UI**: `PopupBase`(CanvasGroup, 한 번에 하나 `Current`, `closableByBack`, Dim 용 `CloseIfAllowed`, 열림 SFX), `SafeAreaAdapter`
+- **Services**: `SafeAnalytics`(LogEvent/SetUserProperty 예외 삼킴), `AnalyticsEvents`(18 이벤트·파라미터·속성 상수, `LevelName`/`Board`/`SnakeCase`), `AnalyticsReporter`(자가 생성, GameEvents 구독 → 전송은 여기 한 곳, `sendInEditor` 기본 끔, 설정 변경도 전송), `ScreenCaptureProtection`(Android FLAG_SECURE)
+- 치트 창: 레벨 점프(카탈로그 없으면 파일 직접) · 다시하기 · **즉시 클리어 · 하트 채우기 · 저장 초기화**
+- 테스트 추가: SaveCodec 5 · SaveService 5 · PlayerProgress 5 · LevelCatalog 4 · AnalyticsEvents 4 + 규칙 2-e·보드 상한·셀 규칙
+
+**가정 (디렉터 확인)**
+- WORK 의 "SaveData 필드: …사운드·진동" 과 "설정은 PlayerPrefs" 가 겹쳐서 **설정은 PlayerPrefs, SaveData 는 최고 레벨·응모 여부만** 으로 함 (UI_FLOW §6-4 와 일치)
+- iOS 는 v1 대상이 아니라 `Plugins/iOS`(ATT·캡처 감지·햅틱 브릿지) 미복사. iOS 빌드 시 W-011 에서 함께
+- `google-services.json` 이 없으므로 실기에서 Firebase 초기화는 실패하고 폴백 경로를 탄다 (정상). 팀장 Firebase 프로젝트 생성 후 파일만 넣으면 됨
+- Android 빌드 전 **Assets → External Dependency Manager → Android Resolver → Force Resolve** 필요 (GeneratedLocalRepo 생성)
+- 이번 플레이 테스트로 팀장 기기에 `save.json`(최고 레벨 4) 이 생겼음 → 치트 창 "저장 초기화" 로 지우면 됨
+
+**팀장 에디터 할 일**
+1. `Settings` 우클릭 → Create → NanaArrow → **Level Catalog** → `LevelCatalog.asset`, Levels 리스트에 `level_001~020.json` 순서대로 드래그 (20개)
+2. Game 씬 `GameController`: **Catalog = LevelCatalog**, Start Level = 1 (Level Json 필드는 사라짐). `Input` 의 TapInput → Config 가 비어 있으면 GameConfig 연결 (플레이 테스트 때 비어 있었음 — 씬 저장 확인)
+3. Boot 씬: 빈 오브젝트 `Boot` → **BootLoader** (Next Scene = Main, Min Duration 1). 빈 오브젝트 `Audio` → **AudioManager** → Clips 리스트에 SoundId 13종 (클립은 있는 것만)
+4. Build Settings 씬 순서 Boot / Main / Game 확인 (SceneLoader 는 이름으로 로드)
+5. UI_FLOW §12-2 캔버스 준비 시 `SafeArea` 오브젝트에 **SafeAreaAdapter**, 팝업 루트에 **PopupBase**(+CanvasGroup) — 나머지 UI 스크립트는 W-017
+6. Play(Boot) → 1초 뒤 Main(비어 있음) 로 넘어가는지, Game 씬 직접 Play → 레벨 1 로드 확인. `GameConfig.cellWidthFraction` 을 레퍼런스와 비교해 조정 (위 관찰)
+7. Android 빌드 전: Force Resolve, `google-services.json` 은 Firebase 프로젝트 만든 뒤 `Assets/` 에
+
 ### W-015 완료 (2026-09-17) — 브랜치 `feat/path-arrows` → **PR #30 → main 머지 완료** (`2a9d2c4`, 브랜치 삭제)
 - 테스트 **155/155 통과**, 컴파일 에러 0. `FireResolver`·`TapHandler`·`LivesTracker`·`GameSession` 로직은 바꾸지 않았고 기존 테스트가 그대로 통과함 (Lane 추가만)
 - **상태 (디렉터용)**: W-015 는 main 에 들어갔으니 "완료" 로 옮겨도 됨. **W-010 착수 가능** — 다음 "WORK.md 읽고 처리" 지시 때 `feat/services-infra` 로 시작. W-011 은 W-010 뒤
