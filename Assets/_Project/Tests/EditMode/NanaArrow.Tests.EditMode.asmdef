@@ -8,7 +8,8 @@
         "NanaArrow.Data",
         "NanaArrow.Editor",
         "NanaArrow.Core",
-        "NanaArrow.Services"
+        "NanaArrow.Services",
+        "NanaArrow.UI"
     ],
     "includePlatforms": [
         "Editor"
