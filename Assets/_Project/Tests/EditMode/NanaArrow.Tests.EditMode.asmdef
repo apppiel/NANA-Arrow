@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "NanaArrow.Gameplay",
         "NanaArrow.Data",
-        "NanaArrow.Editor"
+        "NanaArrow.Editor",
+        "NanaArrow.Core"
     ],
     "includePlatforms": [
         "Editor"
