@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "id": 37,
+  "width": 8,
+  "height": 12,
+  "arrows": [
+    { "id": "a1", "type": "Key", "dir": "Up", "cells": [[0,7],[0,8],[0,9],[0,10],[0,11]], "keyGroup": "red" },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[3,10],[2,10],[2,11],[1,11]] },
+    { "id": "a3", "type": "Basic", "dir": "Left", "cells": [[5,11],[5,10],[4,10],[4,11],[3,11]] },
+    { "id": "a4", "type": "Basic", "dir": "Left", "cells": [[6,8],[6,9],[6,10],[7,10],[7,11],[6,11]] },
+    { "id": "a5", "type": "Locked", "dir": "Left", "cells": [[3,8],[3,9],[2,9]], "keyGroup": "red" },
+    { "id": "a6", "type": "Frozen", "dir": "Down", "cells": [[4,3],[3,3],[3,2],[3,1],[2,1],[2,2],[2,3],[2,4],[3,4],[4,4],[4,5],[4,6],[3,6],[3,7],[4,7],[4,8],[4,9],[5,9],[5,8]], "hits": 2 },
+    { "id": "a7", "type": "Basic", "dir": "Down", "cells": [[2,7],[2,8],[1,8],[1,7]] },
+    { "id": "a8", "type": "Basic", "dir": "Up", "cells": [[5,7],[5,6],[6,6],[6,7]] },
+    { "id": "a9", "type": "Basic", "dir": "Down", "cells": [[2,6],[1,6],[0,6],[0,5]] },
+    { "id": "a10", "type": "Basic", "dir": "Left", "cells": [[3,5],[2,5],[1,5]] },
+    { "id": "a11", "type": "Basic", "dir": "Up", "cells": [[5,5],[5,4],[5,3],[6,3],[6,4]] },
+    { "id": "a12", "type": "Key", "dir": "Down", "cells": [[1,3],[1,4],[0,4],[0,3]], "keyGroup": "red" },
+    { "id": "a13", "type": "Basic", "dir": "Right", "cells": [[2,0],[3,0],[4,0],[5,0],[5,1],[4,1],[4,2],[5,2]] },
+    { "id": "a14", "type": "Basic", "dir": "Down", "cells": [[7,9],[7,8],[7,7],[7,6],[7,5],[7,4],[7,3],[7,2]] },
+    { "id": "a15", "type": "Basic", "dir": "Right", "cells": [[7,0],[6,0],[6,1],[7,1]] },
+    { "id": "a16", "type": "Frozen", "dir": "Down", "cells": [[1,0],[1,1],[1,2],[0,2],[0,1],[0,0]], "hits": 2 }
+  ],
+  "solution": ["a1", "a2", "a3", "a4", "a8", "a11", "a15", "a16", "a12", "a14", "a5", "a9", "a10", "a13", "a6", "a7"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 18, "freeAtStart": 3, "depth": 7, "pathLength": 92, "bends": 37, "note": "최장 경로 19칸" }
+}

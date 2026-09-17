@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": 45,
+  "width": 9,
+  "height": 12,
+  "arrows": [
+    { "id": "a1", "type": "Locked", "dir": "Up", "cells": [[7,10],[7,11],[6,11],[5,11],[4,11],[3,11],[2,11],[2,10],[3,10],[4,10],[4,9],[5,9],[5,10],[6,10],[6,9],[7,9],[8,9],[8,10]], "keyGroup": "red" },
+    { "id": "a2", "type": "Basic", "dir": "Right", "cells": [[2,7],[2,8],[1,8],[1,9],[2,9]] },
+    { "id": "a3", "type": "Basic", "dir": "Right", "cells": [[3,6],[3,7],[3,8],[4,8],[4,7],[5,7],[5,8],[6,8]] },
+    { "id": "a4", "type": "Basic", "dir": "Up", "cells": [[7,8],[7,7],[8,7],[8,8]] },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[3,5],[2,5],[2,6]] },
+    { "id": "a6", "type": "Basic", "dir": "Right", "cells": [[0,11],[1,11],[1,10],[0,10],[0,9],[0,8],[0,7],[1,7],[1,6],[0,6],[0,5],[1,5]] },
+    { "id": "a7", "type": "Frozen", "dir": "Down", "cells": [[8,6],[7,6],[7,5]], "hits": 2 },
+    { "id": "a8", "type": "Locked", "dir": "Up", "cells": [[3,4],[3,3],[4,3],[4,4]], "keyGroup": "blue" },
+    { "id": "a9", "type": "Basic", "dir": "Down", "cells": [[6,3],[6,4],[6,5],[6,6],[5,6],[4,6],[4,5],[5,5],[5,4]] },
+    { "id": "a10", "type": "Frozen", "dir": "Left", "cells": [[8,5],[8,4],[7,4]], "hits": 2 },
+    { "id": "a11", "type": "Key", "dir": "Down", "cells": [[0,4],[0,3],[0,2]], "keyGroup": "blue" },
+    { "id": "a12", "type": "Basic", "dir": "Down", "cells": [[2,3],[2,4],[1,4],[1,3],[1,2]] },
+    { "id": "a13", "type": "Frozen", "dir": "Left", "cells": [[4,2],[3,2],[2,2]], "hits": 2 },
+    { "id": "a14", "type": "Basic", "dir": "Left", "cells": [[7,2],[6,2],[5,2]] },
+    { "id": "a15", "type": "Basic", "dir": "Right", "cells": [[6,0],[5,0],[4,0],[4,1],[5,1]] },
+    { "id": "a16", "type": "Key", "dir": "Down", "cells": [[7,3],[8,3],[8,2],[8,1]], "keyGroup": "blue" },
+    { "id": "a17", "type": "Key", "dir": "Left", "cells": [[0,1],[1,1],[2,1],[2,0],[1,0],[0,0]], "keyGroup": "red" },
+    { "id": "a18", "type": "Key", "dir": "Right", "cells": [[6,1],[7,1],[7,0],[8,0]], "keyGroup": "red" }
+  ],
+  "solution": ["a17", "a18", "a1", "a2", "a4", "a5", "a11", "a12", "a13", "a14", "a16", "a3", "a15", "a9", "a8", "a10", "a7", "a6"],
+  "meta": { "author": "desktop", "difficulty": 5, "minTaps": 21, "freeAtStart": 2, "depth": 9, "pathLength": 102, "bends": 46, "note": "41~45 고비: 깊이 9, 선택지 2" }
+}

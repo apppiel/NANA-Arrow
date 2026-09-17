@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": 22,
+  "width": 8,
+  "height": 10,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[0,6],[0,7],[0,8],[0,9]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[3,9],[2,9],[1,9]] },
+    { "id": "a3", "type": "Basic", "dir": "Right", "cells": [[5,8],[6,8],[6,9],[7,9]] },
+    { "id": "a4", "type": "Basic", "dir": "Up", "cells": [[0,5],[1,5],[1,6],[1,7],[1,8]] },
+    { "id": "a5", "type": "Basic", "dir": "Left", "cells": [[2,7],[2,6],[3,6],[3,7],[3,8],[2,8]] },
+    { "id": "a6", "type": "Basic", "dir": "Up", "cells": [[5,7],[6,7],[7,7],[7,8]] },
+    { "id": "a7", "type": "Basic", "dir": "Right", "cells": [[5,9],[4,9],[4,8],[4,7],[4,6],[5,6]] },
+    { "id": "a8", "type": "Basic", "dir": "Up", "cells": [[6,6],[6,5],[7,5],[7,6]] },
+    { "id": "a9", "type": "Basic", "dir": "Up", "cells": [[0,2],[0,1],[0,0],[1,0],[2,0],[2,1],[1,1],[1,2],[1,3],[0,3],[0,4],[1,4],[2,4],[2,5]] },
+    { "id": "a10", "type": "Basic", "dir": "Right", "cells": [[5,2],[4,2],[4,3],[4,4],[3,4],[3,5],[4,5],[5,5],[5,4],[5,3],[6,3]] },
+    { "id": "a11", "type": "Basic", "dir": "Down", "cells": [[6,4],[7,4],[7,3]] },
+    { "id": "a12", "type": "Basic", "dir": "Up", "cells": [[6,1],[6,0],[5,0],[5,1]] },
+    { "id": "a13", "type": "Basic", "dir": "Down", "cells": [[6,2],[7,2],[7,1],[7,0]] }
+  ],
+  "solution": ["a1", "a2", "a3", "a4", "a5", "a6", "a8", "a9", "a13", "a7", "a11", "a10", "a12"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 13, "freeAtStart": 3, "depth": 5, "pathLength": 72, "bends": 29, "note": "13개, 빈칸 없음" }
+}

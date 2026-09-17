@@ -51,7 +51,7 @@ MonoBehaviour:
   - level: 26
     trigger: 1
     textKey: tut.key
-    targetArrowId: 
+    targetArrowId: a12
     fingerAnchor: 0
     fingerOffsetCells: {x: 0, y: 0}
     hideOn: 3
