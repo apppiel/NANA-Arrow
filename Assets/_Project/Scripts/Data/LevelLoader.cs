@@ -11,6 +11,12 @@ namespace NanaArrow.Data
         /// <summary>LEVEL_FORMAT 스키마 버전. 올릴 때 마이그레이션을 여기 추가한다.</summary>
         public const int SupportedVersion = 1;
 
+        private static readonly JsonSerializerSettings WriteSettings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+        };
+
         public static LevelData Parse(string json)
         {
             var level = JsonConvert.DeserializeObject<LevelData>(json);
@@ -20,6 +26,9 @@ namespace NanaArrow.Data
                 throw new NotSupportedException($"Level schema version {level.Version} is not supported (expected {SupportedVersion}).");
             return level;
         }
+
+        /// <summary>LevelData → 파일에 쓸 JSON. 생략된 선택 필드는 쓰지 않는다.</summary>
+        public static string ToJson(LevelData level) => JsonConvert.SerializeObject(level, WriteSettings);
 
         /// <param name="frozenDefaultHits">ArrowTypeConfig.frozenDefaultHits. Frozen 의 hits 생략 시 사용.</param>
         public static Board CreateBoard(LevelData level, int frozenDefaultHits)

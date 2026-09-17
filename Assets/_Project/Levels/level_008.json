@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "id": 8,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[1,4]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,4]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[1,3]]
+    },
+    {
+      "id": "a4",
+      "type": "Long",
+      "dir": "Left",
+      "cells": [[2,3],[3,3],[4,3]]
+    },
+    {
+      "id": "a5",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[2,2]]
+    },
+    {
+      "id": "a6",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[4,1]]
+    },
+    {
+      "id": "a7",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[0,0],[0,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[1,0]]
+    }
+  ],
+  "solution": ["a2","a5","a7","a1","a3","a4","a6","a8"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 3,
+    "minTaps": 8,
+    "note": "8개, 3칸 Long 첫 등장"
+  }
+}

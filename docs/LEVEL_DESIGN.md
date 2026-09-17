@@ -1,4 +1,4 @@
-# NANA-Arrow — LEVEL_DESIGN.md (v0.2 — 2026-09-17 검증기 재검증, 보드 크기 구간 승인)
+# NANA-Arrow — LEVEL_DESIGN.md (v0.3 — 2026-09-17 레벨 11~20 추가, W-008)
 > 작성: 기획자/PM (클로드 데스크탑). 기준: GAME_RULES v0.5.2, LEVEL_FORMAT v0.4
 > 모든 레벨은 **프로젝트의 `LevelValidator.Validate` 로 검증 통과** (오류 0). `solution`·`minTaps` 는 검증기 결과와 동일하게 적었으므로 `Record` 해도 바뀌지 않음. 파일 저장은 레벨 에디터 툴(프로그래머)에서 `Assets/_Project/Levels/`
 
@@ -345,7 +345,365 @@ y0  9↑  ·   ·   ·   ·
 }
 ```
 
-## 7. 다음 작업
+## 7. 레벨 11~20 (6×6, Frozen 도입) — W-008
+> 모두 `LevelValidator.Validate` 오류 0, `Record` 해도 solution·minTaps 불변 확인 (2026-09-17). 그림의 `*` = Frozen(hits 2)
+> 생성 방식: 역순 배치(나중에 나갈 화살표부터 놓되, 새 화살표를 기존 화살표의 경로 위에 두어 의존 사슬을 만듦) → 구간 목표에 맞는 후보 선택 → Frozen 조건(16: 처음부터 쏠 수 있음 / 17~20: 막힌 Frozen 1개 이상, Frozen 이 다른 화살표를 막음) 필터
+
+| Lv | 보드 | 요소 | n | free0 | depth | fill | minTaps | 설계 의도 |
+|---|---|---|---|---|---|---|---|---|
+| 11 | 6×6 | Long 2 | 8 | 3 | 4 | 11/36 | 8 | 휴식: 6×6 첫 레벨. 보드만 커지고 구조는 쉬움 |
+| 12 | 6×6 | Long 2 | 9 | 2 | 5 | 11/36 | 9 | 깊이 5, 선택지 2 |
+| 13 | 6×6 | Long 3 | 10 | 2 | 5 | 13/36 | 10 | Long 3개 |
+| 14 | 6×6 | Long 3 | 11 | 3 | 6 | 17/36 | 11 | 11개, 깊이 6 |
+| 15 | 6×6 | Long 4 | 12 | 2 | 7 | 16/36 | 12 | 6×6 고비: 12개, 선택지 2, 깊이 7 |
+| 16 | 6×6 | Long 2 · Frozen 1 | 9 | 3 | 4 | 11/36 | 10 | Frozen 도입(휴식): Frozen 1개가 처음부터 쏠 수 있고 다른 화살표의 길을 막음 |
+| 17 | 6×6 | Long 2 · Frozen 2 | 10 | 3 | 5 | 13/36 | 12 | Frozen 2개. 그중 막힌 Frozen 은 얼음은 깨져도 발사하면 Block — 순서 학습 |
+| 18 | 6×6 | Long 3 · Frozen 2 | 11 | 3 | 6 | 14/36 | 13 | Frozen 2개, 깊이 6 |
+| 19 | 6×6 | Long 3 · Frozen 3 | 12 | 2 | 6 | 16/36 | 15 | Frozen 3개, 선택지 2 |
+| 20 | 6×6 | Long 4 · Frozen 3 | 13 | 2 | 6 | 18/36 | 16 | Frozen 구간 마무리: 13개, 선택지 2, 깊이 6, 점유율 최고 |
+
+- minTaps = n + Frozen 수 (hits 2 → 얼음 깨기 1회씩 추가)
+- **Lv20 은 depth 6** (구간 목표 7 미달). Frozen 조건과 free0 2~3 을 함께 만족하는 depth 7 후보가 드물었음. 대신 화살표 수·점유율이 구간 최고라 Lv19 보다 무거움. 플레이 테스트에서 약하면 교체
+- **Lv16 튜토리얼 손가락**: `a9` (UI_FLOW §7 의 Frozen)
+- 톱니: 10(깊이 7) → **11 휴식(4)** → 15 고비(7) → **16 휴식(4, Frozen 도입)** → 20 마무리(6)
+
+### Level 11
+```
+y5   1↓   ·    ·    ·    2→   ·  
+y4   ·    ·    3↑   ·    ·    ·  
+y3   4↓   ·    5↑   ·    8↑   ·  
+y2   6↓   ·    ·    ·    8↑   ·  
+y1   7←   7←   ·    ·    8↑   ·  
+y0   ·    ·    ·    ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 11,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Down", "cells": [[0,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Right", "cells": [[4,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[2,4]] },
+    { "id": "a4", "type": "Basic", "dir": "Down", "cells": [[0,3]] },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[2,3]] },
+    { "id": "a6", "type": "Basic", "dir": "Down", "cells": [[0,2]] },
+    { "id": "a7", "type": "Long", "dir": "Left", "cells": [[0,1],[1,1]] },
+    { "id": "a8", "type": "Long", "dir": "Up", "cells": [[4,1],[4,2],[4,3]] }
+  ],
+  "solution": ["a2", "a3", "a5", "a7", "a8", "a6", "a4", "a1"],
+  "meta": { "author": "desktop", "difficulty": 3, "minTaps": 8, "note": "휴식: 6×6 첫 레벨. 보드만 커지고 구조는 쉬움" }
+}
+```
+
+### Level 12
+```
+y5   ·    ·    ·    1→   1→   2↑ 
+y4   ·    ·    ·    3↑   4←   ·  
+y3   5→   5→   ·    6↓   7→   8↑ 
+y2   ·    ·    ·    ·    9↑   ·  
+y1   ·    ·    ·    ·    ·    ·  
+y0   ·    ·    ·    ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 12,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[3,5],[4,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[5,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[3,4]] },
+    { "id": "a4", "type": "Basic", "dir": "Left", "cells": [[4,4]] },
+    { "id": "a5", "type": "Long", "dir": "Right", "cells": [[0,3],[1,3]] },
+    { "id": "a6", "type": "Basic", "dir": "Down", "cells": [[3,3]] },
+    { "id": "a7", "type": "Basic", "dir": "Right", "cells": [[4,3]] },
+    { "id": "a8", "type": "Basic", "dir": "Up", "cells": [[5,3]] },
+    { "id": "a9", "type": "Basic", "dir": "Up", "cells": [[4,2]] }
+  ],
+  "solution": ["a2", "a6", "a8", "a1", "a3", "a4", "a7", "a9", "a5"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 9, "note": "깊이 5, 선택지 2" }
+}
+```
+
+### Level 13
+```
+y5   ·    ·    ·    ·    ·    ·  
+y4   1↑   2←   3↓   ·    ·    4← 
+y3   7↑   ·    5→   5→   6→   ·  
+y2   7↑   ·    8←   ·    ·    ·  
+y1   9↑   ·    ·    ·    ·    ·  
+y0   9↑   ·    ·   10←   ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 13,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[0,4]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[1,4]] },
+    { "id": "a3", "type": "Basic", "dir": "Down", "cells": [[2,4]] },
+    { "id": "a4", "type": "Basic", "dir": "Left", "cells": [[5,4]] },
+    { "id": "a5", "type": "Long", "dir": "Right", "cells": [[2,3],[3,3]] },
+    { "id": "a6", "type": "Basic", "dir": "Right", "cells": [[4,3]] },
+    { "id": "a7", "type": "Long", "dir": "Up", "cells": [[0,2],[0,3]] },
+    { "id": "a8", "type": "Basic", "dir": "Left", "cells": [[2,2]] },
+    { "id": "a9", "type": "Long", "dir": "Up", "cells": [[0,0],[0,1]] },
+    { "id": "a10", "type": "Basic", "dir": "Left", "cells": [[3,0]] }
+  ],
+  "solution": ["a1", "a2", "a6", "a7", "a8", "a9", "a10", "a5", "a3", "a4"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 10, "note": "Long 3개" }
+}
+```
+
+### Level 14
+```
+y5   1→   1→   1→   2↑   3→   5↓ 
+y4   ·    ·    ·    ·    ·    5↓ 
+y3   ·    ·    ·    4↑   ·    5↓ 
+y2   ·    ·    ·    6→   6→   6→ 
+y1   ·    7→   ·    8→   ·    9→ 
+y0  10→   ·   11↑   ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 14,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[0,5],[1,5],[2,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[3,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Right", "cells": [[4,5]] },
+    { "id": "a4", "type": "Basic", "dir": "Up", "cells": [[3,3]] },
+    { "id": "a5", "type": "Long", "dir": "Down", "cells": [[5,3],[5,4],[5,5]] },
+    { "id": "a6", "type": "Long", "dir": "Right", "cells": [[3,2],[4,2],[5,2]] },
+    { "id": "a7", "type": "Basic", "dir": "Right", "cells": [[1,1]] },
+    { "id": "a8", "type": "Basic", "dir": "Right", "cells": [[3,1]] },
+    { "id": "a9", "type": "Basic", "dir": "Right", "cells": [[5,1]] },
+    { "id": "a10", "type": "Basic", "dir": "Right", "cells": [[0,0]] },
+    { "id": "a11", "type": "Basic", "dir": "Up", "cells": [[2,0]] }
+  ],
+  "solution": ["a2", "a4", "a6", "a9", "a5", "a8", "a3", "a7", "a1", "a11", "a10"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 11, "note": "11개, 깊이 6" }
+}
+```
+
+### Level 15
+```
+y5   ·    ·    ·    1→   1→   4↓ 
+y4   ·    2↓   ·    ·    3←   4↓ 
+y3   ·    ·    5←   6↓   8↑   ·  
+y2   ·    7↓   ·    ·    8↑   ·  
+y1   9→   9→  10↑  11→   ·   12→ 
+y0   ·    ·    ·    ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 15,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[3,5],[4,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Down", "cells": [[1,4]] },
+    { "id": "a3", "type": "Basic", "dir": "Left", "cells": [[4,4]] },
+    { "id": "a4", "type": "Long", "dir": "Down", "cells": [[5,4],[5,5]] },
+    { "id": "a5", "type": "Basic", "dir": "Left", "cells": [[2,3]] },
+    { "id": "a6", "type": "Basic", "dir": "Down", "cells": [[3,3]] },
+    { "id": "a7", "type": "Basic", "dir": "Down", "cells": [[1,2]] },
+    { "id": "a8", "type": "Long", "dir": "Up", "cells": [[4,2],[4,3]] },
+    { "id": "a9", "type": "Long", "dir": "Right", "cells": [[0,1],[1,1]] },
+    { "id": "a10", "type": "Basic", "dir": "Up", "cells": [[2,1]] },
+    { "id": "a11", "type": "Basic", "dir": "Right", "cells": [[3,1]] },
+    { "id": "a12", "type": "Basic", "dir": "Right", "cells": [[5,1]] }
+  ],
+  "solution": ["a5", "a10", "a12", "a4", "a11", "a1", "a6", "a9", "a7", "a2", "a3", "a8"],
+  "meta": { "author": "desktop", "difficulty": 5, "minTaps": 12, "note": "6×6 고비: 12개, 선택지 2, 깊이 7" }
+}
+```
+
+### Level 16
+```
+y5   1→   ·    ·    ·    ·    ·  
+y4   ·    ·    ·    ·    ·    ·  
+y3   ·    ·    2→   ·    4↓   3↓ 
+y2   ·    ·    ·    ·    4↓   5↓ 
+y1   6↓   7←   ·    8→   8→ * 9→ 
+y0   ·    ·    ·    ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 16,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Right", "cells": [[0,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Right", "cells": [[2,3]] },
+    { "id": "a3", "type": "Basic", "dir": "Down", "cells": [[5,3]] },
+    { "id": "a4", "type": "Long", "dir": "Down", "cells": [[4,2],[4,3]] },
+    { "id": "a5", "type": "Basic", "dir": "Down", "cells": [[5,2]] },
+    { "id": "a6", "type": "Basic", "dir": "Down", "cells": [[0,1]] },
+    { "id": "a7", "type": "Basic", "dir": "Left", "cells": [[1,1]] },
+    { "id": "a8", "type": "Long", "dir": "Right", "cells": [[3,1],[4,1]] },
+    { "id": "a9", "type": "Frozen", "dir": "Right", "cells": [[5,1]], "hits": 2 }
+  ],
+  "solution": ["a1", "a6", "a7", "a9", "a5", "a8", "a3", "a4", "a2"],
+  "meta": { "author": "desktop", "difficulty": 3, "minTaps": 10, "note": "Frozen 도입(휴식): Frozen 1개가 처음부터 쏠 수 있고 다른 화살표의 길을 막음" }
+}
+```
+
+### Level 17
+```
+y5   ·    ·    ·    ·    ·    ·  
+y4   ·    ·    ·    1↓   ·    ·  
+y3   ·    6↓   2↓   3↓   ·    ·  
+y2   ·    6↓   4↓   ·    ·    ·  
+y1 * 5←   6↓   ·    7↓   8←   8← 
+y0   9↑ *10←   ·    ·    ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 17,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Down", "cells": [[3,4]] },
+    { "id": "a2", "type": "Basic", "dir": "Down", "cells": [[2,3]] },
+    { "id": "a3", "type": "Basic", "dir": "Down", "cells": [[3,3]] },
+    { "id": "a4", "type": "Basic", "dir": "Down", "cells": [[2,2]] },
+    { "id": "a5", "type": "Frozen", "dir": "Left", "cells": [[0,1]], "hits": 2 },
+    { "id": "a6", "type": "Long", "dir": "Down", "cells": [[1,1],[1,2],[1,3]] },
+    { "id": "a7", "type": "Basic", "dir": "Down", "cells": [[3,1]] },
+    { "id": "a8", "type": "Long", "dir": "Left", "cells": [[4,1],[5,1]] },
+    { "id": "a9", "type": "Basic", "dir": "Up", "cells": [[0,0]] },
+    { "id": "a10", "type": "Frozen", "dir": "Left", "cells": [[1,0]], "hits": 2 }
+  ],
+  "solution": ["a4", "a5", "a7", "a9", "a10", "a2", "a3", "a6", "a8", "a1"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 12, "note": "Frozen 2개. 그중 막힌 Frozen 은 얼음은 깨져도 발사하면 Block — 순서 학습" }
+}
+```
+
+### Level 18
+```
+y5   1→   1→   4↓   ·    ·    2↑ 
+y4   ·    3↑   4↓   ·    5←   ·  
+y3 * 6→   ·    ·    ·    8↓   7↑ 
+y2   ·    ·    ·    ·    8↓   9← 
+y1   ·    ·    ·    ·    ·    ·  
+y0   ·    ·  *10→  11↑   ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 18,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[0,5],[1,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[5,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[1,4]] },
+    { "id": "a4", "type": "Long", "dir": "Down", "cells": [[2,4],[2,5]] },
+    { "id": "a5", "type": "Basic", "dir": "Left", "cells": [[4,4]] },
+    { "id": "a6", "type": "Frozen", "dir": "Right", "cells": [[0,3]], "hits": 2 },
+    { "id": "a7", "type": "Basic", "dir": "Up", "cells": [[5,3]] },
+    { "id": "a8", "type": "Long", "dir": "Down", "cells": [[4,2],[4,3]] },
+    { "id": "a9", "type": "Basic", "dir": "Left", "cells": [[5,2]] },
+    { "id": "a10", "type": "Frozen", "dir": "Right", "cells": [[2,0]], "hits": 2 },
+    { "id": "a11", "type": "Basic", "dir": "Up", "cells": [[3,0]] }
+  ],
+  "solution": ["a2", "a7", "a8", "a9", "a11", "a6", "a10", "a4", "a1", "a3", "a5"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 13, "note": "Frozen 2개, 깊이 6" }
+}
+```
+
+### Level 19
+```
+y5   1→   1→   1→   ·    2→   4↑ 
+y4   ·    3↑   ·    ·    ·    4↑ 
+y3   ·    5↑   ·  * 6←   ·    ·  
+y2   ·    ·    ·    ·    ·    ·  
+y1   7→   7→   ·    8↓ * 9→  10↓ 
+y0   ·    ·    ·   11→   ·  *12→ 
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 19,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[0,5],[1,5],[2,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Right", "cells": [[4,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[1,4]] },
+    { "id": "a4", "type": "Long", "dir": "Up", "cells": [[5,4],[5,5]] },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[1,3]] },
+    { "id": "a6", "type": "Frozen", "dir": "Left", "cells": [[3,3]], "hits": 2 },
+    { "id": "a7", "type": "Long", "dir": "Right", "cells": [[0,1],[1,1]] },
+    { "id": "a8", "type": "Basic", "dir": "Down", "cells": [[3,1]] },
+    { "id": "a9", "type": "Frozen", "dir": "Right", "cells": [[4,1]], "hits": 2 },
+    { "id": "a10", "type": "Basic", "dir": "Down", "cells": [[5,1]] },
+    { "id": "a11", "type": "Basic", "dir": "Right", "cells": [[3,0]] },
+    { "id": "a12", "type": "Frozen", "dir": "Right", "cells": [[5,0]], "hits": 2 }
+  ],
+  "solution": ["a4", "a12", "a2", "a10", "a11", "a1", "a3", "a5", "a6", "a8", "a9", "a7"],
+  "meta": { "author": "desktop", "difficulty": 5, "minTaps": 15, "note": "Frozen 3개, 선택지 2" }
+}
+```
+
+### Level 20
+```
+y5   ·    ·    ·    1→   1→   1→ 
+y4   ·    2→   2→   ·    3→ * 4↑ 
+y3   ·    ·    ·    6↑ * 5↑   ·  
+y2   ·    ·    ·    6↑   9↑   ·  
+y1   ·    ·    7→ * 8↑   9↑  10↑ 
+y0  11↑  12↑   ·   13←   ·    ·  
+    x0   x1   x2   x3   x4   x5
+```
+```json
+{
+  "version": 1,
+  "id": 20,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    { "id": "a1", "type": "Long", "dir": "Right", "cells": [[3,5],[4,5],[5,5]] },
+    { "id": "a2", "type": "Long", "dir": "Right", "cells": [[1,4],[2,4]] },
+    { "id": "a3", "type": "Basic", "dir": "Right", "cells": [[4,4]] },
+    { "id": "a4", "type": "Frozen", "dir": "Up", "cells": [[5,4]], "hits": 2 },
+    { "id": "a5", "type": "Frozen", "dir": "Up", "cells": [[4,3]], "hits": 2 },
+    { "id": "a6", "type": "Long", "dir": "Up", "cells": [[3,2],[3,3]] },
+    { "id": "a7", "type": "Basic", "dir": "Right", "cells": [[2,1]] },
+    { "id": "a8", "type": "Frozen", "dir": "Up", "cells": [[3,1]], "hits": 2 },
+    { "id": "a9", "type": "Long", "dir": "Up", "cells": [[4,1],[4,2]] },
+    { "id": "a10", "type": "Basic", "dir": "Up", "cells": [[5,1]] },
+    { "id": "a11", "type": "Basic", "dir": "Up", "cells": [[0,0]] },
+    { "id": "a12", "type": "Basic", "dir": "Up", "cells": [[1,0]] },
+    { "id": "a13", "type": "Basic", "dir": "Left", "cells": [[3,0]] }
+  ],
+  "solution": ["a1", "a4", "a6", "a8", "a10", "a11", "a3", "a5", "a9", "a2", "a7", "a12", "a13"],
+  "meta": { "author": "desktop", "difficulty": 5, "minTaps": 16, "note": "Frozen 구간 마무리: 13개, 선택지 2, 깊이 6, 점유율 최고" }
+}
+```
+
+## 8. 다음 작업
 - [x] 1~10 검증기 재검증 (2026-09-17, 오류 0)
 - [ ] Levels/ 저장 (프로그래머 레벨 에디터 툴, 이슈 #7)
-- [ ] 레벨 11~20 (6×6, Frozen 16 도입) — W-008
+- [x] 레벨 11~20 (6×6, Frozen 16 도입) — W-008 (§7)
+- [ ] 레벨 21~30 (7×7, Key/Locked 26 도입)

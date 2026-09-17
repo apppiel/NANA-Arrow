@@ -44,7 +44,7 @@
 - [x] docs/LEVEL_DESIGN.md v0.1 (난이도 곡선 + 레벨 1~10 JSON, 프로젝트 코드로 풀이 검증)
 - [ ] 디렉터 확인: 보드 크기 전환 레벨 11 / 21 / 40 (LEVEL_DESIGN §3)
 - [ ] 팀장 확인: CLAUDE.md 의 Undo·힌트 비용 잔재 (ISSUES.md 하단)
-- [ ] LEVEL_DESIGN 11~20
+- [x] LEVEL_DESIGN 11~20 (W-008, v0.3 §7)
 - [ ] UI_FLOW.md
 
 ## v0.5 검토 잔여 → **해결됨 (v0.5.1)**. 디렉터 실수였음: v0.3 치환이 §9 한 줄에 붙어 있어 미적용. §9 HUD·§5 별점 모두 수정 완료. GitHub 이슈 정리 진행 OK.

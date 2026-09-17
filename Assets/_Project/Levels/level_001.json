@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": 1,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[1,2]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[3,2]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[2,4]]
+    }
+  ],
+  "solution": ["a2","a3","a1"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 1,
+    "minTaps": 3,
+    "note": "튜토리얼: 탭하면 날아간다. a1 은 막혀 있어 Block·목숨 차감을 처음 경험"
+  }
+}
