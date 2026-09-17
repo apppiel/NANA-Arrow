@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace NanaArrow.Editor
 {
-    /// <summary>LEVEL_FORMAT §검증 규칙 1~6. 레벨 저장 전에 반드시 통과해야 한다.</summary>
+    /// <summary>LEVEL_FORMAT §검증 규칙 1~6 (규칙 2 는 GAME_RULES v0.6 경로형). 레벨 저장 전에 반드시 통과해야 한다.</summary>
     public static class LevelValidator
     {
         /// <summary>meta 에 기록하는 최소 탭 수 키 (LEVEL_FORMAT meta.minTaps).</summary>
@@ -26,7 +26,7 @@ namespace NanaArrow.Editor
                 return LevelValidationResult.Invalid(errors);
 
             CheckCellsInBoundsAndDisjoint(level, errors);
-            CheckLongShape(level, arrowTypeConfig, errors);
+            CheckPathShape(level, gameConfig, errors);
             CheckLockedHasKey(level, errors);
             if (errors.Count > 0)
                 return LevelValidationResult.Invalid(errors);
@@ -86,7 +86,7 @@ namespace NanaArrow.Editor
         private static bool IsInRange(int size, GameConfig config) =>
             size >= config.MinBoardSize && size <= config.MaxBoardSize;
 
-        // 규칙 1
+        // 규칙 1: 보드 안 + 서로 다른 Arrow 끼리 겹침 없음 (자기 겹침은 규칙 2)
         private static void CheckCellsInBoundsAndDisjoint(LevelData level, List<LevelValidationError> errors)
         {
             var occupied = new Dictionary<Vector2Int, string>();
@@ -102,58 +102,45 @@ namespace NanaArrow.Editor
                     }
 
                     if (occupied.TryGetValue(cell, out var otherId))
-                        errors.Add(new LevelValidationError(LevelRule.CellsInBoundsAndDisjoint,
-                            $"Arrow '{arrow.Id}' overlaps '{otherId}' at {cell}."));
+                    {
+                        if (otherId != arrow.Id)
+                            errors.Add(new LevelValidationError(LevelRule.CellsInBoundsAndDisjoint,
+                                $"Arrow '{arrow.Id}' overlaps '{otherId}' at {cell}."));
+                    }
                     else
                         occupied[cell] = arrow.Id;
                 }
             }
         }
 
-        // 규칙 2
-        private static void CheckLongShape(LevelData level, ArrowTypeConfig config, List<LevelValidationError> errors)
+        // 규칙 2 (v0.6): 경로 = 상하좌우 인접 연결, 자기 겹침 없음, dir 이 마지막 세그먼트와 일치, 길이 1~maxArrowLength
+        private static void CheckPathShape(LevelData level, GameConfig config, List<LevelValidationError> errors)
         {
             foreach (var arrow in level.Arrows)
             {
                 var cells = LevelLoader.ToCells(arrow);
 
-                if (arrow.Type != ArrowType.Long)
+                if (cells.Length > config.MaxArrowLength)
+                    errors.Add(new LevelValidationError(LevelRule.PathShape,
+                        $"Arrow '{arrow.Id}' has {cells.Length} cells, max is {config.MaxArrowLength}."));
+
+                var visited = new HashSet<Vector2Int> { cells[0] };
+                for (var i = 1; i < cells.Length; i++)
                 {
-                    if (cells.Length != 1)
-                        errors.Add(new LevelValidationError(LevelRule.LongShape,
-                            $"{arrow.Type} '{arrow.Id}' must occupy exactly one cell, has {cells.Length}."));
-                    continue;
+                    if (!DirectionExtensions.TryFromOffset(cells[i] - cells[i - 1], out _))
+                        errors.Add(new LevelValidationError(LevelRule.PathShape,
+                            $"Arrow '{arrow.Id}' cells #{i - 1} {cells[i - 1]} and #{i} {cells[i]} are not adjacent."));
+
+                    if (!visited.Add(cells[i]))
+                        errors.Add(new LevelValidationError(LevelRule.PathShape,
+                            $"Arrow '{arrow.Id}' crosses itself at {cells[i]}."));
                 }
 
-                if (cells.Length < config.LongMinLength || cells.Length > config.LongMaxLength)
-                {
-                    errors.Add(new LevelValidationError(LevelRule.LongShape,
-                        $"Long '{arrow.Id}' must have {config.LongMinLength}~{config.LongMaxLength} cells, has {cells.Length}."));
-                    continue;
-                }
-
-                var horizontal = cells.All(c => c.y == cells[0].y);
-                var vertical = cells.All(c => c.x == cells[0].x);
-                if (!horizontal && !vertical)
-                {
-                    errors.Add(new LevelValidationError(LevelRule.LongShape,
-                        $"Long '{arrow.Id}' cells must be in a single row or column."));
-                    continue;
-                }
-
-                var coords = cells.Select(c => horizontal ? c.x : c.y).OrderBy(v => v).ToArray();
-                for (var i = 1; i < coords.Length; i++)
-                {
-                    if (coords[i] == coords[i - 1] + 1) continue;
-                    errors.Add(new LevelValidationError(LevelRule.LongShape,
-                        $"Long '{arrow.Id}' cells must be contiguous."));
-                    break;
-                }
-
-                var dirHorizontal = arrow.Direction == Direction.Left || arrow.Direction == Direction.Right;
-                if (horizontal != dirHorizontal)
-                    errors.Add(new LevelValidationError(LevelRule.LongShape,
-                        $"Long '{arrow.Id}' dir {arrow.Direction} must follow its cell axis."));
+                if (cells.Length >= 2 &&
+                    DirectionExtensions.TryFromOffset(cells[cells.Length - 1] - cells[cells.Length - 2], out var pathDirection) &&
+                    pathDirection != arrow.Direction)
+                    errors.Add(new LevelValidationError(LevelRule.PathShape,
+                        $"Arrow '{arrow.Id}' dir {arrow.Direction} must match its last step ({pathDirection})."));
             }
         }
 
