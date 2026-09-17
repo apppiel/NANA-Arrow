@@ -44,6 +44,20 @@ namespace NanaArrow.Services
                 new Parameter(AnalyticsEvents.ParamLevel, level), new Parameter(AnalyticsEvents.ParamTextKey, key), new Parameter(AnalyticsEvents.ParamElapsedSec, (long)elapsed));
             GameEvents.LanePreviewFirst += level => Send(AnalyticsEvents.LanePreviewFirst, new Parameter(AnalyticsEvents.ParamLevel, level));
             GameEvents.LevelSelectOpened += highest => Send(AnalyticsEvents.LevelSelectOpen, new Parameter(AnalyticsEvents.ParamHighestLevel, highest));
+            GameEvents.ContinueOffered += (s, adReady) => Send(AnalyticsEvents.ContinueOffer, Common(s, new Parameter(AnalyticsEvents.ParamAdReady, adReady ? 1 : 0)));
+            GameEvents.ContinueRequested += s => Send(AnalyticsEvents.ContinueRequest, Common(s, new Parameter(AnalyticsEvents.ParamContinuesUsed, s.ContinuesUsed)));
+            GameEvents.ContinueGranted += (s, livesAfter) => Send(AnalyticsEvents.ContinueGranted, Common(s, new Parameter(AnalyticsEvents.ParamLivesAfter, livesAfter)));
+            GameEvents.InterstitialDecided += (trigger, result, level) => Send(AnalyticsEvents.AdInterstitial,
+                new Parameter(AnalyticsEvents.ParamTrigger, trigger), new Parameter(AnalyticsEvents.ParamResult, result), new Parameter(AnalyticsEvents.ParamLevel, level));
+            GameEvents.RewardedFinished += (result, level) => Send(AnalyticsEvents.AdRewardedResult,
+                new Parameter(AnalyticsEvents.ParamResult, AnalyticsEvents.SnakeCase(result)), new Parameter(AnalyticsEvents.ParamLevel, level));
+            GameEvents.RewardCodeIssued += synced =>
+            {
+                Send(AnalyticsEvents.RewardCodeIssued, new Parameter(AnalyticsEvents.ParamSynced, synced ? 1 : 0));
+                SetProperty(AnalyticsEvents.PropRewardIssued, "1");
+            };
+            GameEvents.RewardCodeCopied += () => Send(AnalyticsEvents.RewardCodeCopy);
+            GameEvents.RewardLinkOpened += () => Send(AnalyticsEvents.RewardLinkOpen);
             SettingsStore.SoundChanged += on => Send(AnalyticsEvents.SettingsChange, new Parameter(AnalyticsEvents.ParamSetting, "sound"), new Parameter(AnalyticsEvents.ParamValue, on ? 1 : 0));
             SettingsStore.VibrationChanged += on => Send(AnalyticsEvents.SettingsChange, new Parameter(AnalyticsEvents.ParamSetting, "vibration"), new Parameter(AnalyticsEvents.ParamValue, on ? 1 : 0));
         }

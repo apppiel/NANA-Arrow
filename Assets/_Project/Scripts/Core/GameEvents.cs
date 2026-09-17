@@ -28,7 +28,30 @@ namespace NanaArrow.Core
         /// <summary>레벨 선택 패널 열림 (최고 클리어 레벨).</summary>
         public static event Action<int> LevelSelectOpened;
 
+        /// <summary>실패 팝업에 이어하기 버튼이 보일 때 (stats, 광고 준비 여부).</summary>
+        public static event Action<LevelStats, bool> ContinueOffered;
+        /// <summary>이어하기 버튼 탭.</summary>
+        public static event Action<LevelStats> ContinueRequested;
+        /// <summary>보상 지급 (stats, 회복 후 목숨).</summary>
+        public static event Action<LevelStats, int> ContinueGranted;
+        /// <summary>전면 광고 판정 결과 (trigger "clear"/"fail_retry", result "shown"/"not_ready"/"skipped_free_level", level).</summary>
+        public static event Action<string, string, int> InterstitialDecided;
+        /// <summary>보상형 광고 종료 (result, level).</summary>
+        public static event Action<RewardedResult, int> RewardedFinished;
+        /// <summary>응모 코드 발급 (서버 저장 성공 여부).</summary>
+        public static event Action<bool> RewardCodeIssued;
+        public static event Action RewardCodeCopied;
+        public static event Action RewardLinkOpened;
+
         public static void RaiseLevelStarted(LevelStats stats) => LevelStarted?.Invoke(stats);
+        public static void RaiseContinueOffered(LevelStats stats, bool adReady) => ContinueOffered?.Invoke(stats, adReady);
+        public static void RaiseContinueRequested(LevelStats stats) => ContinueRequested?.Invoke(stats);
+        public static void RaiseContinueGranted(LevelStats stats, int livesAfter) => ContinueGranted?.Invoke(stats, livesAfter);
+        public static void RaiseInterstitialDecided(string trigger, string result, int level) => InterstitialDecided?.Invoke(trigger, result, level);
+        public static void RaiseRewardedFinished(RewardedResult result, int level) => RewardedFinished?.Invoke(result, level);
+        public static void RaiseRewardCodeIssued(bool synced) => RewardCodeIssued?.Invoke(synced);
+        public static void RaiseRewardCodeCopied() => RewardCodeCopied?.Invoke();
+        public static void RaiseRewardLinkOpened() => RewardLinkOpened?.Invoke();
         public static void RaiseTutorialStepShown(int level, string textKey, string trigger) => TutorialStepShown?.Invoke(level, textKey, trigger);
         public static void RaiseTutorialDone(int level, string textKey, float elapsedSec) => TutorialDone?.Invoke(level, textKey, elapsedSec);
         public static void RaiseLanePreviewFirst(int level) => LanePreviewFirst?.Invoke(level);
