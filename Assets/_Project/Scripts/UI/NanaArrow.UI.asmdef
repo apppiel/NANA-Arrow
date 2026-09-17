@@ -5,7 +5,8 @@
         "NanaArrow.Core",
         "NanaArrow.Gameplay",
         "NanaArrow.Data",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
