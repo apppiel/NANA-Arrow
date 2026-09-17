@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-# NANA-Arrow — GAME_RULES.md (v0.4 — 2026-09-17 광고 정책 확정)
-=======
 # NANA-Arrow — GAME_RULES.md (v0.5.3 — §8 연출값 4개 추가, §11 UI 결정 추가)
->>>>>>> Stashed changes
 > 작성: 클로드 데스크탑 / **v1 범위 확정** (2026-09-17). 변경 시 버전 올리고 CLAUDE.md 담당에게 알릴 것.
 > 모든 수치는 `GameConfig` ScriptableObject에서 인스펙터로 조정한다. 여기 적힌 값은 초기 기본값.
 
