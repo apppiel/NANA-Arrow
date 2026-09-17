@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "id": 17,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[3,4]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[2,3]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[3,3]]
+    },
+    {
+      "id": "a4",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[2,2]]
+    },
+    {
+      "id": "a5",
+      "type": "Frozen",
+      "dir": "Left",
+      "cells": [[0,1]],
+      "hits": 2
+    },
+    {
+      "id": "a6",
+      "type": "Long",
+      "dir": "Down",
+      "cells": [[1,1],[1,2],[1,3]]
+    },
+    {
+      "id": "a7",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[3,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Long",
+      "dir": "Left",
+      "cells": [[4,1],[5,1]]
+    },
+    {
+      "id": "a9",
+      "type": "Basic",
+      "dir": "Up",
+      "cells": [[0,0]]
+    },
+    {
+      "id": "a10",
+      "type": "Frozen",
+      "dir": "Left",
+      "cells": [[1,0]],
+      "hits": 2
+    }
+  ],
+  "solution": ["a4","a5","a7","a9","a10","a2","a3","a6","a8","a1"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 4,
+    "minTaps": 12,
+    "note": "Frozen 2개. 그중 막힌 Frozen 은 얼음은 깨져도 발사하면 Block — 순서 학습"
+  }
+}

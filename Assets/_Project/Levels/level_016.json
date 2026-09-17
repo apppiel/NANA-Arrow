@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": 16,
+  "width": 6,
+  "height": 6,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[0,5]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[2,3]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[5,3]]
+    },
+    {
+      "id": "a4",
+      "type": "Long",
+      "dir": "Down",
+      "cells": [[4,2],[4,3]]
+    },
+    {
+      "id": "a5",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[5,2]]
+    },
+    {
+      "id": "a6",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[0,1]]
+    },
+    {
+      "id": "a7",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[1,1]]
+    },
+    {
+      "id": "a8",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[3,1],[4,1]]
+    },
+    {
+      "id": "a9",
+      "type": "Frozen",
+      "dir": "Right",
+      "cells": [[5,1]],
+      "hits": 2
+    }
+  ],
+  "solution": ["a1","a6","a7","a9","a5","a8","a3","a4","a2"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 3,
+    "minTaps": 10,
+    "note": "Frozen 도입(휴식): Frozen 1개가 처음부터 쏠 수 있고 다른 화살표의 길을 막음"
+  }
+}

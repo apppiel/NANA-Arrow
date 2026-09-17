@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": 6,
+  "width": 5,
+  "height": 5,
+  "arrows": [
+    {
+      "id": "a1",
+      "type": "Long",
+      "dir": "Right",
+      "cells": [[0,2],[1,2]]
+    },
+    {
+      "id": "a2",
+      "type": "Basic",
+      "dir": "Down",
+      "cells": [[3,2]]
+    },
+    {
+      "id": "a3",
+      "type": "Basic",
+      "dir": "Right",
+      "cells": [[0,4]]
+    },
+    {
+      "id": "a4",
+      "type": "Long",
+      "dir": "Up",
+      "cells": [[2,3],[2,4]]
+    },
+    {
+      "id": "a5",
+      "type": "Basic",
+      "dir": "Left",
+      "cells": [[3,0]]
+    }
+  ],
+  "solution": ["a4","a5","a2","a3","a1"],
+  "meta": {
+    "author": "desktop",
+    "difficulty": 3,
+    "minTaps": 5,
+    "note": "Long 도입 (휴식 레벨): 세로·가로 Long 각 1개, 쉬운 구조"
+  }
+}
