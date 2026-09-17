@@ -116,3 +116,6 @@ InitTestScene*.unity*
 # External Dependency Manager (regenerated from Assets/Firebase/m2repository on resolve)
 /[Aa]ssets/GeneratedLocalRepo/
 /[Aa]ssets/GeneratedLocalRepo.meta
+
+# macOS
+.DS_Store
