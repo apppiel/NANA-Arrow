@@ -1,0 +1,69 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace NanaArrow.Gameplay
+{
+    /// <summary>N×M 논리 보드. 셀 하나는 비어 있거나 Arrow 하나의 일부 (GAME_RULES §1).</summary>
+    public sealed class Board
+    {
+        private readonly Dictionary<Vector2Int, Arrow> _cellToArrow = new Dictionary<Vector2Int, Arrow>();
+        private readonly Dictionary<string, Arrow> _arrowsById = new Dictionary<string, Arrow>();
+
+        public int Width { get; }
+        public int Height { get; }
+        public IReadOnlyCollection<Arrow> Arrows => _arrowsById.Values;
+
+        /// <summary>모든 Arrow 가 Exit 됨 = 레벨 클리어 (GAME_RULES §2-4).</summary>
+        public bool IsCleared => _arrowsById.Count == 0;
+
+        public Board(int width, int height)
+        {
+            if (width <= 0 || height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width), $"Board size must be positive: {width}x{height}");
+            Width = width;
+            Height = height;
+        }
+
+        public bool IsInside(Vector2Int cell) =>
+            cell.x >= 0 && cell.x < Width && cell.y >= 0 && cell.y < Height;
+
+        /// <returns>해당 칸을 차지한 Arrow, 비어 있으면 null.</returns>
+        public Arrow GetArrowAt(Vector2Int cell) =>
+            _cellToArrow.TryGetValue(cell, out var arrow) ? arrow : null;
+
+        /// <returns>id 로 찾은 Arrow, 없으면 null.</returns>
+        public Arrow GetArrow(string id) =>
+            _arrowsById.TryGetValue(id, out var arrow) ? arrow : null;
+
+        public void Place(Arrow arrow)
+        {
+            if (_arrowsById.ContainsKey(arrow.Id))
+                throw new InvalidOperationException($"Duplicate arrow id '{arrow.Id}'.");
+
+            foreach (var cell in arrow.Cells)
+            {
+                if (!IsInside(cell))
+                    throw new ArgumentOutOfRangeException(nameof(arrow), $"Arrow '{arrow.Id}' cell {cell} is outside the {Width}x{Height} board.");
+                if (_cellToArrow.TryGetValue(cell, out var other))
+                    throw new InvalidOperationException($"Arrow '{arrow.Id}' overlaps '{other.Id}' at {cell}.");
+            }
+
+            foreach (var cell in arrow.Cells)
+                _cellToArrow[cell] = arrow;
+            _arrowsById[arrow.Id] = arrow;
+        }
+
+        /// <returns>보드에 있던 Arrow 를 제거했으면 true.</returns>
+        public bool Remove(Arrow arrow)
+        {
+            if (!_arrowsById.TryGetValue(arrow.Id, out var placed) || placed != arrow)
+                return false;
+
+            _arrowsById.Remove(arrow.Id);
+            foreach (var cell in placed.Cells)
+                _cellToArrow.Remove(cell);
+            return true;
+        }
+    }
+}
