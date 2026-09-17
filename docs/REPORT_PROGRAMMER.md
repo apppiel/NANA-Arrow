@@ -2,6 +2,49 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-017 완료 (2026-09-17) — 브랜치 `feat/ui-scripts` (base main)
+- 테스트 **233/233** (+28), 컴파일 에러 0. 플레이 모드에서 임시 캔버스로 튜토리얼(레벨 16: 말풍선 + 손가락이 a2 머리 위) → 얼음 깨기로 사라짐, 하트 감소(흔들림 → 빈 하트) · 회복 연출 확인. 씬·프리팹은 안 건드림
+- 겸사겸사: 기획자가 올린 **레벨 21~50** 을 Level Validator 로 검증 **30/30 통과**(minTaps 전부 일치) 후 커밋. UI_FLOW §7-2 의 L26 손가락 대상 "(W-013 에서 확정)" → 레벨 26 의 Key 화살표 **a12** 로 채움
+
+**변경 요약 (PR) — UI_FLOW v0.2 §12-8 8건 + 붙이는 데 필요한 접착 스크립트**
+- `UI/Strings` SO + `StringEntry` (§9 키 → 문구, `Get`/`Format("{0}")`, 없는 키는 키 그대로 표시) → **`Settings/Strings_ko.asset`** 생성됨(36키 전부). `UI/LocalizedText`(TMP 에 붙여 키만 지정하는 고정 문구용)
+- `UI/Tutorial/`: `TutorialConfig` SO(`steps`, `hideDelay` 3, `showOnReplay` false) · `TutorialStep` · `TutorialTrigger` · `FingerAnchor` (§7-1 그대로, 필드는 CLAUDE.md 규칙대로 `[SerializeField] private` + getter). **`TutorialFlow`** 순수 C#(테스트 9): 트리거는 판마다 처음 1회만 인정, 항목은 한 번에 하나, `hideOn` 트리거 또는 `hideDelay` 로 닫힘. `TutorialPresenter`: GameSession 사건 → 트리거 (탭=FirstTap, Exit/Blocked/IceBroken, 길게 누르기=FirstLongPress), 말풍선 문구 = Strings, 손가락은 화살표 셀(Head/Middle/Tail + 오프셋) → 화면 좌표로 매 프레임 추적(줌·팬 대응) + 위아래 흔들림. `showOnReplay` 끄면 클리어한 레벨은 표시 안 함. 애널리틱스 `tutorial_step`/`tutorial_done`(elapsed) 발행 → **`Settings/TutorialConfig.asset`** 생성됨(§7-2 6행)
+- `UI/Game/LivesView`: `SessionStarted` 마다 세션의 `LivesTracker.LivesChanged` 구독. 감소 → 해당 하트 흔들림(`shakeDuration` 0.3 / `shakeDistance` 10px) → 빈 하트 스프라이트 + `Haptics.LifeLost()`(`vibrateOnLifeLost` 켜짐 + 설정 진동 켜짐일 때) + SfxLifeLost. 회복 → 채워지며 팝(`refillDuration` 0.25 / `refillScale` 1.3) + SfxHeartRestore. 빈 하트 스프라이트가 없으면 알파만 낮춤
+- `UI/Game/ClearPopup`(PopupBase 파생): 열릴 때 부제 `레벨 N` / 마지막 레벨이면 `clear.all_done` + 주 버튼 `메인으로` + 보조 버튼 숨김. `OnPrimary()`(다음 레벨 또는 메인) / `OnSecondary()`(메인). 광고 판단은 W-011 이 끼어듦
+- `UI/Game/GameScreen`: Android 뒤로가기 → 팝업 없을 때 `Popup_ConfirmMain` 열기
+- `UI/Main/MainMenu`: `StartLevel` = `App.Progress.NextLevel` 을 1~카탈로그 수로 클램프(전부 깼으면 마지막), `레벨 N` 라벨, `RaffleButton` 은 응모 코드 발급 뒤만, `StartGame()`/`OpenLevelSelect()`/`OpenSettings()`/`OpenRaffle()`/`Quit()`, 뒤로가기 → 종료 확인 팝업(레벨 선택이 열려 있으면 그쪽이 닫힘). Main 진입 시 BgmMain
+- `UI/Main/LevelSelectView` + `LevelCell` + `LevelCellState`: 카탈로그 개수만큼 셀 생성(재사용), 열 때마다 상태 갱신 — 클리어(체크) / 다음 도전(강조) / 잠김(자물쇠, 탭하면 흔들림만). 열면 '다음 도전' 행으로 스크롤, `level_select_open` 발행. 탭 → `SceneLoader.LoadGame`
+- `UI/Main/SettingsPopup`(PopupBase 파생): 열릴 때 토글을 `SettingsStore` 값으로, 바꾸면 즉시 PlayerPrefs (변경 이벤트 → AudioManager·애널리틱스는 기존 경로)
+- `GameController`: **`RestartFromHud()`**(실패 횟수 미포함) / **`RestartFromFailPopup()`**(포함) / 기존 `GoToMain()` `LoadNextLevel()` — UnityEvent 에서 바로 연결. `SessionStarted` 이벤트, `LanePreviewShown` 이벤트, `lane_preview_first`(설치 후 1회, PlayerPrefs)
+- `PopupBase`: `closableByBack` 은 W-010 에 이미 있음. 추가로 `ConsumedBack`(팝업이 열려 있거나 이번 프레임 뒤로가기를 팝업이 받았으면 true) — 화면 쪽 핸들러가 같은 프레임에 이중 처리(팝업 닫힘 → 종료 확인 열림)하지 않게
+- `LivesTracker.LivesChanged(int)`, `GameEvents` 4종(TutorialStepShown/TutorialDone/LanePreviewFirst/LevelSelectOpened) + `AnalyticsReporter` 전송, `BoardView.TargetCamera`, UI asmdef 에 `Unity.TextMeshPro`
+- 테스트: TutorialFlow 9 · TutorialConfig 3 · Strings 4 · MainMenu/LevelSelect 규칙 9 · LivesChanged 3
+
+**가정 (디렉터 확인)**
+- `hideDelay` 해석: **`hideOn` 이 None 인 항목에만** 적용(3초 뒤 숨김). `hideOn` 이 있는 항목은 그 트리거가 올 때까지 유지 (L1 의 손가락이 3초 만에 사라지면 안 되니까). "0 이면 판이 끝날 때까지 유지"
+- 튜토리얼 표시 중 새 항목이 열리면 앞 항목은 닫힘(한 번에 하나). L2 에서 첫 탭이 Block 이면 free_first 가 닫히고 block 이 열림
+- FirstTap = Ignored 가 아닌 모든 탭(Locked 흔들림 포함). FirstLongPress = 레인 미리보기가 실제로 켜진 순간
+- 설정 팝업은 Main 전용이라 Game 씬엔 넣지 않음 (§4). 실패 팝업은 W-011 (이어하기) 에서 `FailPopup` 스크립트로 — 지금은 PopupBase + 버튼을 `GameController.RestartFromFailPopup` 에 직접 연결하면 동작
+- 응모 코드 팝업 스크립트(`RewardCodePanel`)는 W-011. `MainMenu.rafflePopup` 필드는 비워 둬도 됨
+- 하트 연출 수치·손가락 흔들림·셀 흔들림은 각 컴포넌트의 SerializeField (UI_FLOW 의 `UIConfig` SO 제안은 안 만듦 — 값이 컴포넌트마다 2~4개라 SO 로 묶으면 연결만 늘어남. 원하면 다음에 묶음)
+
+**팀장 에디터 할 일 — "씬에 붙일 것"** (UI_FLOW §12 순서 그대로, [스크립트] 이름만 확정)
+0. §12-1 한글 TMP 폰트 먼저 (없으면 말풍선이 □□□ 로 보임 — 이번 스크린샷이 그 상태)
+1. **Game 씬 HUD** (§12-3): `Hearts` 에 **LivesView** → Game Controller = GameController, Hearts = Heart_0~2 의 Image 3개, Full/Empty Sprite = 하트 스프라이트 2종 (없으면 비워도 됨: 빈 하트는 알파 0.3). `RetryButton.OnClick` → GameController.**RestartFromHud**, `BackButton.OnClick` → Popup_ConfirmMain 의 PopupBase.**Open**
+2. **Game 씬 튜토리얼** (§12-4): `Tutorial` 오브젝트에 **TutorialPresenter** → Config = `Settings/TutorialConfig`, Strings = `Settings/Strings_ko`, Game Controller, Board View = Board, Bubble = TutorialBubble, Bubble Text = TutorialBubble/Text, Finger = UICanvas/Finger (SafeArea 밖, Raycast Target 끔)
+3. **Game 씬 빈 오브젝트 `Screen`** → **GameScreen** → Confirm Main Popup = Popup_ConfirmMain (Android 뒤로가기용)
+4. **팝업** (§12-5): `Popup_Clear` 는 PopupBase 대신 **ClearPopup** 을 붙임(파생이라 PopupBase 기능 포함) → Strings, Game Controller, Subtitle, Primary Label(PrimaryButton 안 TMP), Secondary Button. PrimaryButton.OnClick → ClearPopup.**OnPrimary**, SecondaryButton → **OnSecondary**. `GameController` 인스펙터의 **Level Cleared** 이벤트 → Popup_Clear.**Open**, **Level Failed** → Popup_Fail.**Open**
+   - `Popup_Fail`: PopupBase, **Closable By Back 끔**, `다시하기` → GameController.**RestartFromFailPopup** (이어하기 버튼은 W-011 까지 비활성)
+   - `Popup_ConfirmMain`: PopupBase, `계속하기` → PopupBase.**Close**, `나가기` → GameController.**GoToMain**
+   - 문구는 TMP 에 직접 입력하거나 TMP 에 **LocalizedText** 붙여 Strings + 키 지정 (둘 다 됨. `레벨 N` 처럼 숫자가 들어가는 건 스크립트가 채움)
+5. **Main 씬** (§12-6): 빈 오브젝트 `Main` → **MainMenu** → Strings, Catalog = LevelCatalog, Start Level Label = StartButton/LevelLabel, Level Select = LevelSelectPanel, Settings Popup = Popup_Settings, Quit Popup = Popup_Quit, Raffle Button = RaffleButton (Raffle Popup 은 비움). 버튼: StartButton → MainMenu.**StartGame**, LevelSelectButton → **OpenLevelSelect**, SettingsButton → **OpenSettings**, RaffleButton → **OpenRaffle**
+   - `LevelSelectPanel` 에 **LevelSelectView** → Catalog, Cell Prefab = `Prefabs/UI/LevelCell`, Content = Scroll/Viewport/Content, Scroll Rect = Scroll, Columns 5. Header/BackButton → LevelSelectView.**Close**
+   - `LevelCell` 프리팹에 **LevelCell** → Number, Check, Lock Icon, Highlight 연결 (Button 은 자동)
+   - `Popup_Settings` 는 PopupBase 대신 **SettingsPopup** → Sound Toggle, Vibration Toggle. CloseButton → SettingsPopup.**Close**
+   - `Popup_Quit`: PopupBase, `취소` → **Close**, `종료` → MainMenu.**Quit**
+6. **LevelCatalog.asset** 에 `level_021~050.json` 추가 (30개, 순서대로) — 이제 50레벨
+7. Play(Main 씬부터) → 시작하기 라벨 `레벨 5`(지금 저장 기준), 레벨 선택에서 1~4 체크 · 5 강조 · 6~ 자물쇠(탭하면 흔들림), 설정 토글, Esc 로 종료 확인 팝업. Game 씬: 하트 감소·재시작·클리어 팝업 → 다음 레벨. 레벨 1 튜토리얼은 저장 초기화(치트 창) 후에 보임
+
 ### W-020 완료 (2026-09-17) — 브랜치 `feat/board-zoom` (base main)
 - 테스트 **205/205**, 컴파일 에러 0. 플레이 모드에서 핀치(×2.5, ×3)·팬 클램프·재시작 시 줌 리셋과 셀 크기 고정 확인 (`docs/screenshots/W-020_zoom3_pan.png`)
 

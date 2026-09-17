@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": 43,
+  "width": 9,
+  "height": 12,
+  "arrows": [
+    { "id": "a1", "type": "Key", "dir": "Left", "cells": [[2,11],[1,11],[0,11]], "keyGroup": "blue" },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[0,8],[0,9],[0,10]] },
+    { "id": "a3", "type": "Frozen", "dir": "Left", "cells": [[1,7],[1,8],[1,9],[2,9],[2,8],[3,8],[3,9],[3,10],[2,10]], "hits": 2 },
+    { "id": "a4", "type": "Frozen", "dir": "Up", "cells": [[0,5],[0,6],[0,7]], "hits": 2 },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[4,6],[3,6],[2,6],[2,7]] },
+    { "id": "a6", "type": "Locked", "dir": "Left", "cells": [[3,11],[4,11],[4,10],[4,9],[4,8],[5,8],[5,7],[4,7]], "keyGroup": "red" },
+    { "id": "a7", "type": "Basic", "dir": "Left", "cells": [[5,6],[6,6],[7,6],[7,7],[6,7]] },
+    { "id": "a8", "type": "Key", "dir": "Down", "cells": [[1,6],[1,5],[1,4]], "keyGroup": "blue" },
+    { "id": "a9", "type": "Frozen", "dir": "Left", "cells": [[2,5],[3,5],[4,5],[4,4],[3,4]], "hits": 2 },
+    { "id": "a10", "type": "Locked", "dir": "Left", "cells": [[5,5],[6,5],[6,4],[5,4]], "keyGroup": "blue" },
+    { "id": "a11", "type": "Basic", "dir": "Right", "cells": [[4,3],[3,3],[3,2],[4,2]] },
+    { "id": "a12", "type": "Basic", "dir": "Up", "cells": [[4,1],[3,1],[3,0],[4,0],[5,0],[5,1],[5,2]] },
+    { "id": "a13", "type": "Basic", "dir": "Up", "cells": [[7,0],[6,0],[6,1],[6,2]] },
+    { "id": "a14", "type": "Basic", "dir": "Down", "cells": [[7,10],[8,10],[8,11],[7,11],[6,11],[5,11],[5,10],[6,10],[6,9],[6,8],[7,8],[7,9],[8,9],[8,8],[8,7],[8,6],[8,5],[8,4],[7,4],[7,3],[8,3],[8,2]] },
+    { "id": "a15", "type": "Key", "dir": "Down", "cells": [[0,4],[0,3],[1,3],[1,2],[1,1]], "keyGroup": "red" },
+    { "id": "a16", "type": "Key", "dir": "Right", "cells": [[7,2],[7,1],[8,1]], "keyGroup": "red" },
+    { "id": "a17", "type": "Basic", "dir": "Down", "cells": [[0,2],[0,1],[0,0]] },
+    { "id": "a18", "type": "Basic", "dir": "Left", "cells": [[2,4],[2,3],[2,2],[2,1],[2,0],[1,0]] }
+  ],
+  "solution": ["a1", "a2", "a3", "a4", "a5", "a16", "a17", "a18", "a14", "a15", "a6", "a7", "a8", "a9", "a10", "a12", "a13", "a11"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 21, "freeAtStart": 3, "depth": 8, "pathLength": 101, "bends": 39, "note": "Frozen 3 + 두 그룹×Key 2" }
+}

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "id": 25,
+  "width": 8,
+  "height": 11,
+  "arrows": [
+    { "id": "a1", "type": "Basic", "dir": "Left", "cells": [[1,9],[1,10],[0,10]] },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[6,10],[6,9],[7,9],[7,10]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[2,8],[1,8],[0,8],[0,9]] },
+    { "id": "a4", "type": "Basic", "dir": "Down", "cells": [[3,7],[3,6],[4,6],[5,6],[5,7],[4,7],[4,8],[3,8],[3,9],[4,9],[5,9],[5,10],[4,10],[3,10],[2,10],[2,9]] },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[6,5],[6,6],[6,7],[6,8]] },
+    { "id": "a6", "type": "Basic", "dir": "Up", "cells": [[7,3],[7,4],[7,5]] },
+    { "id": "a7", "type": "Basic", "dir": "Up", "cells": [[0,1],[0,2],[0,3],[0,4]] },
+    { "id": "a8", "type": "Basic", "dir": "Left", "cells": [[2,6],[2,7],[1,7],[1,6],[1,5],[2,5],[2,4],[1,4]] },
+    { "id": "a9", "type": "Basic", "dir": "Up", "cells": [[2,2],[2,1],[1,1],[1,2],[1,3]] },
+    { "id": "a10", "type": "Basic", "dir": "Left", "cells": [[3,5],[3,4],[3,3],[2,3]] },
+    { "id": "a11", "type": "Basic", "dir": "Down", "cells": [[5,3],[6,3],[6,4],[5,4],[5,5],[4,5],[4,4],[4,3]] },
+    { "id": "a12", "type": "Basic", "dir": "Right", "cells": [[3,1],[3,2],[4,2]] },
+    { "id": "a13", "type": "Basic", "dir": "Right", "cells": [[3,0],[4,0],[4,1],[5,1],[5,2],[6,2]] },
+    { "id": "a14", "type": "Basic", "dir": "Up", "cells": [[5,0],[6,0],[7,0],[7,1],[7,2]] },
+    { "id": "a15", "type": "Basic", "dir": "Right", "cells": [[0,0],[1,0],[2,0]] }
+  ],
+  "solution": ["a1", "a2", "a3", "a5", "a6", "a7", "a8", "a9", "a10", "a14", "a13", "a15", "a4", "a12", "a11"],
+  "meta": { "author": "desktop", "difficulty": 5, "minTaps": 15, "freeAtStart": 2, "depth": 7, "pathLength": 80, "bends": 33, "note": "21~25 고비: 15개, 깊이 7" }
+}

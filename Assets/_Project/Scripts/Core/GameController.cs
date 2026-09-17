@@ -32,7 +32,14 @@ namespace NanaArrow.Core
         [SerializeField, Tooltip("클리어 후 GameConfig.clearPopupDelay 뒤")] private UnityEvent levelCleared = new UnityEvent();
         [SerializeField, Tooltip("하트 0 즉시")] private UnityEvent levelFailed = new UnityEvent();
 
+        private const string LanePreviewSeenKey = "lane_preview_seen";
+
         private LevelStats _stats;
+
+        /// <summary>새 세션이 만들어져 보드가 등장한 직후 (UI 가 하트·튜토리얼을 다시 묶는 시점).</summary>
+        public event System.Action<GameSession> SessionStarted;
+        /// <summary>길게 눌러 레인 미리보기가 켜진 순간 (튜토리얼 FirstLongPress 감지용).</summary>
+        public event System.Action<Arrow> LanePreviewShown;
 
         public GameSession Session { get; private set; }
         public LevelCatalog Catalog => catalog;
@@ -100,8 +107,15 @@ namespace NanaArrow.Core
             var progress = App.Progress;
             _stats = new LevelStats(level.Id, level.Width, level.Height, level.Arrows.Length,
                 progress.IsCleared(level.Id), progress.IncrementAttempts(level.Id), reason);
+            SessionStarted?.Invoke(Session);
             GameEvents.RaiseLevelStarted(_stats);
         }
+
+        /// <summary>HUD 다시하기 버튼용 (UnityEvent 는 인자 없는 메서드만 연결 가능).</summary>
+        public void RestartFromHud() => Restart(LevelStartReason.RetryHud);
+
+        /// <summary>실패 팝업 다시하기 버튼용 (실패 횟수에 포함, 광고 판단은 AdsManager).</summary>
+        public void RestartFromFailPopup() => Restart(LevelStartReason.RetryFail);
 
         /// <summary>HUD 다시하기 (실패로 안 셈, 광고 없음) / 실패 팝업 다시하기.</summary>
         public void Restart(LevelStartReason reason = LevelStartReason.RetryHud)
@@ -153,7 +167,13 @@ namespace NanaArrow.Core
             var arrow = Session?.Board.GetArrowAt(cell);
             if (arrow == null) return;
             _stats.CountLanePreview();
+            if (PlayerPrefs.GetInt(LanePreviewSeenKey, 0) == 0)
+            {
+                PlayerPrefs.SetInt(LanePreviewSeenKey, 1);
+                GameEvents.RaiseLanePreviewFirst(CurrentLevel);
+            }
             boardView.ShowLanePreview(arrow, Session.Preview(arrow));
+            LanePreviewShown?.Invoke(arrow);
         }
 
         private void OnLanePreviewReleased() => boardView.HideLanePreview();

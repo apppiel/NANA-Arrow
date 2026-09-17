@@ -126,5 +126,47 @@ namespace NanaArrow.Tests.EditMode
 
             Assert.AreEqual(MaxLives, tracker.Lives);
         }
+    
+        [Test]
+        public void LivesChanged_RaisedOnLoss_WithNewValue()
+        {
+            var tracker = new LivesTracker(MaxLives, true);
+            var received = -1;
+            tracker.LivesChanged += lives => received = lives;
+
+            tracker.OnBlocked(NewArrow("a"));
+
+            Assert.AreEqual(MaxLives - 1, received);
+        }
+
+        [Test]
+        public void LivesChanged_NotRaised_WhenAlreadyMarked()
+        {
+            var tracker = new LivesTracker(MaxLives, true);
+            var arrow = NewArrow("a");
+            tracker.OnBlocked(arrow);
+            var calls = 0;
+            tracker.LivesChanged += _ => calls++;
+
+            tracker.OnBlocked(arrow);
+
+            Assert.AreEqual(0, calls);
+        }
+
+        [Test]
+        public void LivesChanged_RaisedOnAddLives_OnlyWhenValueChanges()
+        {
+            var tracker = new LivesTracker(MaxLives, true);
+            tracker.OnBlocked(NewArrow("a"));
+            var calls = 0;
+            var received = -1;
+            tracker.LivesChanged += lives => { calls++; received = lives; };
+
+            tracker.AddLives(1);
+            tracker.AddLives(1); // 이미 최대
+
+            Assert.AreEqual(1, calls);
+            Assert.AreEqual(MaxLives, received);
+        }
     }
 }

@@ -13,6 +13,15 @@ namespace NanaArrow.UI
         /// <summary>지금 열려 있는 팝업. 없으면 null.</summary>
         public static PopupBase Current { get; private set; }
 
+        /// <summary>
+        /// 팝업이 열린 채로 뒤로가기를 받은 프레임 (닫히지 않는 팝업 포함). 화면 쪽 핸들러가 같은 프레임에
+        /// 이중 처리(팝업 닫힘 → 종료 확인 열림)하지 않도록 <see cref="ConsumedBack"/> 로 확인한다.
+        /// </summary>
+        private static int _backConsumedFrame = -1;
+
+        /// <summary>이번 프레임 뒤로가기를 팝업이 처리했거나 팝업이 열려 있으면 true.</summary>
+        public static bool ConsumedBack => Current != null || _backConsumedFrame == Time.frameCount;
+
         [SerializeField, Tooltip("Dim 탭 또는 Android 뒤로가기로 닫기 허용 (실패·응모 코드 팝업은 끔)")]
         private bool closableByBack = true;
         [SerializeField] private UnityEvent opened = new UnityEvent();
@@ -70,7 +79,9 @@ namespace NanaArrow.UI
 
         private void OnBackPressed()
         {
-            if (IsOpen && Current == this) CloseIfAllowed();
+            if (!IsOpen || Current != this) return;
+            _backConsumedFrame = Time.frameCount;
+            CloseIfAllowed();
         }
 
         private void SetVisible(bool visible)

@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d0912b15ece484d943306ad9d1b121, type: 3}
+  m_Name: TutorialConfig
+  m_EditorClassIdentifier: NanaArrow.UI::NanaArrow.UI.Tutorial.TutorialConfig
+  steps:
+  - level: 1
+    trigger: 1
+    textKey: tut.tap
+    targetArrowId: a2
+    fingerAnchor: 1
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 3
+  - level: 2
+    trigger: 1
+    textKey: tut.free_first
+    targetArrowId: a3
+    fingerAnchor: 0
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 2
+  - level: 2
+    trigger: 4
+    textKey: tut.block
+    targetArrowId: 
+    fingerAnchor: 0
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 0
+  - level: 4
+    trigger: 1
+    textKey: tut.long_press
+    targetArrowId: 
+    fingerAnchor: 0
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 6
+  - level: 16
+    trigger: 1
+    textKey: tut.frozen
+    targetArrowId: a2
+    fingerAnchor: 0
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 5
+  - level: 26
+    trigger: 1
+    textKey: tut.key
+    targetArrowId: a12
+    fingerAnchor: 0
+    fingerOffsetCells: {x: 0, y: 0}
+    hideOn: 3
+  hideDelay: 3
+  showOnReplay: 0

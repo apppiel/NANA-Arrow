@@ -13,6 +13,9 @@ namespace NanaArrow.Gameplay
         public int Lives { get; private set; }
         public bool IsOutOfLives => Lives <= 0;
 
+        /// <summary>목숨 수가 바뀔 때 (새 값). 하트 UI·진동용.</summary>
+        public event Action<int> LivesChanged;
+
         /// <param name="maxLives">GameConfig.maxLives</param>
         /// <param name="markedResetOnExit">GameConfig.markedResetOnExit</param>
         public LivesTracker(int maxLives, bool markedResetOnExit)
@@ -32,6 +35,7 @@ namespace NanaArrow.Gameplay
                 return false;
 
             Lives = Math.Max(0, Lives - 1);
+            LivesChanged?.Invoke(Lives);
             return true;
         }
 
@@ -47,7 +51,9 @@ namespace NanaArrow.Gameplay
         /// <summary>이어하기 (AdsConfig.continueLives). MaxLives 를 넘지 않는다.</summary>
         public void AddLives(int amount)
         {
+            var before = Lives;
             Lives = Math.Min(MaxLives, Lives + amount);
+            if (Lives != before) LivesChanged?.Invoke(Lives);
         }
     }
 }

@@ -23,6 +23,8 @@ namespace NanaArrow.Gameplay.View
         private int _firing;
 
         public BoardLayout Layout { get; private set; }
+        /// <summary>보드를 그리는 카메라 (UI 가 셀 → 화면 좌표로 바꿀 때).</summary>
+        public Camera TargetCamera => targetCamera;
 
         /// <summary>Fire 연출 중인 Arrow 가 있는지 (allowInputDuringFire = false 일 때 입력 차단용).</summary>
         public bool IsFiring => _firing > 0;

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": 42,
+  "width": 9,
+  "height": 12,
+  "arrows": [
+    { "id": "a1", "type": "Frozen", "dir": "Left", "cells": [[8,11],[7,11],[6,11],[5,11],[4,11],[3,11],[2,11],[1,11],[0,11]], "hits": 2 },
+    { "id": "a2", "type": "Basic", "dir": "Right", "cells": [[0,10],[1,10],[2,10]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[0,6],[0,7],[0,8],[0,9]] },
+    { "id": "a4", "type": "Locked", "dir": "Right", "cells": [[3,10],[4,10],[5,10],[6,10],[6,9],[7,9]], "keyGroup": "red" },
+    { "id": "a5", "type": "Basic", "dir": "Right", "cells": [[3,8],[3,7],[4,7],[5,7]] },
+    { "id": "a6", "type": "Key", "dir": "Down", "cells": [[7,7],[6,7],[6,8],[7,8],[8,8],[8,7]], "keyGroup": "blue" },
+    { "id": "a7", "type": "Basic", "dir": "Down", "cells": [[1,9],[1,8],[1,7],[1,6]] },
+    { "id": "a8", "type": "Basic", "dir": "Up", "cells": [[0,2],[0,3],[0,4],[0,5]] },
+    { "id": "a9", "type": "Basic", "dir": "Left", "cells": [[5,9],[5,8],[4,8],[4,9],[3,9],[2,9],[2,8],[2,7],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[7,5],[6,5],[5,5]] },
+    { "id": "a10", "type": "Basic", "dir": "Down", "cells": [[4,4],[4,3],[3,3],[3,4],[2,4],[2,3]] },
+    { "id": "a11", "type": "Basic", "dir": "Right", "cells": [[4,5],[3,5],[2,5],[1,5],[1,4],[1,3],[1,2],[2,2]] },
+    { "id": "a12", "type": "Basic", "dir": "Down", "cells": [[3,2],[4,2],[5,2],[5,3],[5,4],[6,4],[7,4],[7,3],[7,2]] },
+    { "id": "a13", "type": "Basic", "dir": "Up", "cells": [[1,1],[1,0],[0,0],[0,1]] },
+    { "id": "a14", "type": "Locked", "dir": "Left", "cells": [[4,1],[3,1],[2,1]], "keyGroup": "blue" },
+    { "id": "a15", "type": "Basic", "dir": "Up", "cells": [[2,0],[3,0],[4,0],[5,0],[5,1]] },
+    { "id": "a16", "type": "Basic", "dir": "Down", "cells": [[6,3],[6,2],[6,1]] },
+    { "id": "a17", "type": "Frozen", "dir": "Down", "cells": [[8,6],[8,5],[8,4],[8,3],[8,2],[8,1]], "hits": 2 },
+    { "id": "a18", "type": "Key", "dir": "Right", "cells": [[7,1],[7,0],[8,0]], "keyGroup": "red" }
+  ],
+  "solution": ["a1", "a16", "a18", "a4", "a12", "a17", "a2", "a3", "a6", "a8", "a11", "a13", "a14", "a5", "a7", "a9", "a15", "a10"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 20, "freeAtStart": 3, "depth": 8, "pathLength": 104, "bends": 26, "note": "18개, 깊이 8" }
+}

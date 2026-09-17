@@ -19,7 +19,20 @@ namespace NanaArrow.Core
         /// <summary>메인으로 나가기 / 앱 종료. bool = 앱 종료(pause) 인지, int = 남은 Arrow, int = 남은 하트.</summary>
         public static event Action<LevelStats, bool, int, int> LevelQuit;
 
+        /// <summary>튜토리얼 항목 표시 (level, textKey, trigger 이름).</summary>
+        public static event Action<int, string, string> TutorialStepShown;
+        /// <summary>튜토리얼 항목 종료 (level, textKey, 경과 초).</summary>
+        public static event Action<int, string, float> TutorialDone;
+        /// <summary>사용자 첫 길게 누르기 (앱 설치 후 1회).</summary>
+        public static event Action<int> LanePreviewFirst;
+        /// <summary>레벨 선택 패널 열림 (최고 클리어 레벨).</summary>
+        public static event Action<int> LevelSelectOpened;
+
         public static void RaiseLevelStarted(LevelStats stats) => LevelStarted?.Invoke(stats);
+        public static void RaiseTutorialStepShown(int level, string textKey, string trigger) => TutorialStepShown?.Invoke(level, textKey, trigger);
+        public static void RaiseTutorialDone(int level, string textKey, float elapsedSec) => TutorialDone?.Invoke(level, textKey, elapsedSec);
+        public static void RaiseLanePreviewFirst(int level) => LanePreviewFirst?.Invoke(level);
+        public static void RaiseLevelSelectOpened(int highestLevel) => LevelSelectOpened?.Invoke(highestLevel);
         public static void RaiseLevelCleared(LevelStats stats, int livesLeft) => LevelCleared?.Invoke(stats, livesLeft);
         public static void RaiseLevelFailed(LevelStats stats, int arrowsLeft) => LevelFailed?.Invoke(stats, arrowsLeft);
         public static void RaiseRetryPressed(LevelStats stats, LevelStartReason source, int arrowsLeft) => RetryPressed?.Invoke(stats, source, arrowsLeft);
