@@ -2,12 +2,12 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
-### W-005 + W-006 완료 · W-009 조사 보고 (2026-09-17) — 브랜치 `feat/board-view` → `feat/level-editor-tools` (스택)
+### W-005 + W-006 완료 · W-009 조사 보고 (2026-09-17) — 브랜치 `feat/board-view`(PR #28) → `feat/level-editor-tools`(PR #29, 스택)
 
 **⚠ 팀장 조치 필요 — PR #1 머지가 안 됐습니다.** 자동 모드 권한 분류기가 "리뷰 없는 머지"로 `gh pr merge` 를 차단했습니다. 아래 중 하나로 처리해 주세요:
 - 터미널에서 `! gh pr merge 1 --merge --delete-branch` (또는 GitHub 웹에서 Merge), 이후 `git checkout main && git pull`
 - 다음 지시에 "PR 머지 허용" 을 명시하면 제가 시도합니다 (권한 프롬프트가 뜰 수 있음)
-- 이번 브랜치들은 PR #1 위에 스택으로 올렸으므로 #1 → `feat/board-view`(PR) → `feat/level-editor-tools`(PR) 순서로 머지하면 됩니다. GitHub 이 앞 PR 머지 시 base 를 자동으로 main 으로 옮깁니다
+- 이번 브랜치들은 PR #1 위에 스택으로 올렸으므로 PR #1 → PR #28 → PR #29 순서로 머지하면 됩니다. GitHub 이 앞 PR 머지 시 base 를 자동으로 main 으로 옮깁니다
 
 **GitHub 이슈 등록 (W-005)** — ISSUES.md 21+5건 등록 완료. PR #1 이 번호 1을 써서 **실제 번호 = 초안 번호 + 1** (초안 #1→#2 … #21→#22, P1~P5 → #23~#27). 라벨 `logic/view/editor/data/ads/release/planning` + `P0/P1/P2`, 마일스톤 M1/M2/M3 생성.
 - 바로 close: #2(기본 구성), #3(Gameplay 코어). PR #1 본문에 `Closes #4, #5` 연결 (머지 시 자동 close), #6(GameSession) 은 `feat/board-view` 에서 마무리
