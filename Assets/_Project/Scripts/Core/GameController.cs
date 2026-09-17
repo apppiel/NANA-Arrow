@@ -21,6 +21,7 @@ namespace NanaArrow.Core
         [Header("씬 참조")]
         [SerializeField] private BoardView boardView;
         [SerializeField] private TapInput tapInput;
+        [SerializeField, Tooltip("Main Camera 의 BoardCameraController (없으면 줌·팬 없음)")] private BoardCameraController boardCamera;
 
         [Header("레벨")]
         [SerializeField, Tooltip("레벨 목록 (Settings/LevelCatalog)")] private LevelCatalog catalog;
@@ -91,8 +92,10 @@ namespace NanaArrow.Core
             Session.Cleared += OnCleared;
             Session.Failed += OnFailed;
 
+            if (boardCamera != null) boardCamera.ResetZoom();
             boardView.Build(Session.Board);
             boardView.Refresh(Session.Board, Session.Lives);
+            if (boardCamera != null) boardCamera.Attach(boardView.Layout);
 
             var progress = App.Progress;
             _stats = new LevelStats(level.Id, level.Width, level.Height, level.Arrows.Length,
@@ -165,6 +168,7 @@ namespace NanaArrow.Core
 
         private void OnCleared()
         {
+            if (boardCamera != null) boardCamera.ResetZoom();
             App.Progress.MarkCleared(CurrentLevel);
             GameEvents.RaiseLevelCleared(_stats, Session.Lives.Lives);
             StartCoroutine(RaiseClearedAfterDelay());
@@ -172,6 +176,7 @@ namespace NanaArrow.Core
 
         private void OnFailed()
         {
+            if (boardCamera != null) boardCamera.ResetZoom();
             GameEvents.RaiseLevelFailed(_stats, Session.Board.Arrows.Count);
             levelFailed.Invoke();
         }

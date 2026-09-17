@@ -13,6 +13,8 @@ namespace NanaArrow.Gameplay.View
         [SerializeField] private GameConfig config;
         [SerializeField] private ArrowViewStyle style;
         [SerializeField, Tooltip("비우면 Camera.main")] private Camera targetCamera;
+        [SerializeField, Tooltip("있으면 줌 1.0 기준 카메라 크기로 셀을 계산 (줌 상태에서 재시작해도 셀 크기 고정)")]
+        private NanaArrow.Gameplay.Input.BoardCameraController boardCamera;
 
         private readonly Dictionary<Arrow, ArrowView> _views = new Dictionary<Arrow, ArrowView>();
         private Transform _arrowsRoot;
@@ -59,6 +61,15 @@ namespace NanaArrow.Gameplay.View
         {
             cell = default;
             return Layout != null && Layout.TryWorldToCell(world, out cell);
+        }
+
+        /// <summary>그 셀에 (아직 Exit 안 한) Arrow 가 있는지. 탭 vs 빈 곳 탭 구분용.</summary>
+        public bool HasArrowAt(Vector2Int cell)
+        {
+            foreach (var arrow in _views.Keys)
+                for (var i = 0; i < arrow.Cells.Count; i++)
+                    if (arrow.Cells[i] == cell) return true;
+            return false;
         }
 
         /// <summary>TapResult 를 연출로 옮긴다. Exit 된 Arrow 는 목록에서 빠진다.</summary>
@@ -136,7 +147,8 @@ namespace NanaArrow.Gameplay.View
         {
             // 외부(캡처 툴 등)가 camera.aspect 를 덮어쓴 채 남겨 두면 셀이 찌그러진다 — 게임 뷰 기준으로 되돌린 뒤 읽는다.
             targetCamera.ResetAspect();
-            return targetCamera.orthographicSize * 2f * targetCamera.aspect;
+            var orthographicSize = boardCamera != null ? boardCamera.BaseOrthographicSize : targetCamera.orthographicSize;
+            return orthographicSize * 2f * targetCamera.aspect;
         }
 
         private static int KeyGroupIndex(Arrow arrow, Dictionary<string, int> keyGroups)
