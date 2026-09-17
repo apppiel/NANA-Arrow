@@ -112,6 +112,40 @@ namespace NanaArrow.Tests.EditMode
         }
 
         [Test]
+        public void IsLocked_LockedWithKeyOfSameGroupOnBoard_IsTrue()
+        {
+            var board = new Board(5, 5);
+            var locked = new Arrow("l", ArrowType.Locked, Direction.Up, new[] { new Vector2Int(0, 0) }, Arrow.DefaultHits, "red");
+            board.Place(locked);
+            board.Place(new Arrow("k", ArrowType.Key, Direction.Up, new[] { new Vector2Int(1, 0) }, Arrow.DefaultHits, "red"));
+
+            Assert.IsTrue(board.IsLocked(locked));
+        }
+
+        [Test]
+        public void IsLocked_KeyOfOtherGroupOrNoKey_IsFalse()
+        {
+            var board = new Board(5, 5);
+            var locked = new Arrow("l", ArrowType.Locked, Direction.Up, new[] { new Vector2Int(0, 0) }, Arrow.DefaultHits, "red");
+            board.Place(locked);
+            Assert.IsFalse(board.IsLocked(locked));
+
+            board.Place(new Arrow("k", ArrowType.Key, Direction.Up, new[] { new Vector2Int(1, 0) }, Arrow.DefaultHits, "blue"));
+            Assert.IsFalse(board.IsLocked(locked));
+        }
+
+        [Test]
+        public void IsLocked_NonLockedArrow_IsFalse()
+        {
+            var board = new Board(5, 5);
+            var key = new Arrow("k", ArrowType.Key, Direction.Up, new[] { new Vector2Int(1, 0) }, Arrow.DefaultHits, "red");
+            board.Place(key);
+
+            Assert.IsFalse(board.IsLocked(key));
+            Assert.IsFalse(board.IsLocked(Basic("b", 2, 2)));
+        }
+
+        [Test]
         public void Remove_AfterRemove_CellIsFreeForNewArrow()
         {
             var board = new Board(5, 5);

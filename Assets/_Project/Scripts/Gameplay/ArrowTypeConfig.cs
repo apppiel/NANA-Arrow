@@ -31,7 +31,7 @@ namespace NanaArrow.Gameplay
         private int longMaxLength = 3;
 
         [Header("Frozen")]
-        [SerializeField, Min(1), Tooltip("Exit 까지 총 탭 수 (마지막 Fire 포함). 레벨 JSON 의 hits 생략 시 기본값")]
+        [SerializeField, Min(2), Tooltip("Exit 까지 총 탭 수 (마지막 Fire 포함, 2 이상). 레벨 JSON 의 hits 생략 시 기본값")]
         private int frozenDefaultHits = 2;
 
         public int LongMinLength => longMinLength;

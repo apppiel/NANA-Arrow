@@ -18,6 +18,11 @@
 - 프로그래머는 씬·프리팹을 직접 수정하지 않고 "팀장이 에디터에서 할 일" 목록을 PR에 첨부
 - 기획자/PM은 코드 파일을 직접 만들지 않고 초안·리뷰까지만
 
+## 작업 파일
+- docs/WORK.md — 지시 (디렉터만 씀)
+- docs/REPORT_PROGRAMMER.md — 프로그래머만 씀
+- docs/REPORT_PLANNER.md — 기획자만 씀
+
 ## 각자 읽는 문서
 - 디렉터: 전부
 - 기획자/PM: docs/CLAUDE_DESKTOP.md → GAME_RULES → LEVEL_FORMAT
