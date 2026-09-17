@@ -16,22 +16,28 @@ namespace NanaArrow.Gameplay
         [SerializeField, Tooltip("어떤 Arrow 든 Exit 되면 Marked(빨간색) 전부 해제")]
         private bool markedResetOnExit = true;
 
-        [Header("보드 (GAME_RULES §4, LEVEL_FORMAT 3~10)")]
-        [SerializeField, Min(1), Tooltip("보드 한 변 최소 칸 수 (검증기)")]
+        [Header("보드 (GAME_RULES v0.7 §4)")]
+        [SerializeField, Min(1), Tooltip("보드 가로·세로 최소 칸 수 (검증기)")]
         private int minBoardSize = 3;
 
-        [SerializeField, Min(1), Tooltip("보드 한 변 최대 칸 수 (검증기)")]
-        private int maxBoardSize = 10;
+        [SerializeField, Min(1), Tooltip("보드 가로 최대 칸 수 (검증기)")]
+        private int maxBoardWidth = 10;
 
-        [SerializeField, Min(0.01f), Tooltip("셀 한 칸 최대 크기 (월드 단위). 보드가 영역보다 크면 축소, 작아도 확대하지 않음")]
-        private float cellSize = 1f;
+        [SerializeField, Min(1), Tooltip("보드 세로 최대 칸 수 (검증기)")]
+        private int maxBoardHeight = 14;
 
-        [SerializeField, Min(0f), Tooltip("셀 사이 간격 (월드 단위). 경로형에서는 선 사이 여백에만 영향")]
-        private float cellGap = 0f;
-
-        [Header("Arrow 경로 (GAME_RULES v0.6 §0)")]
         [SerializeField, Min(1), Tooltip("Arrow 경로 최대 칸 수 (검증기)")]
-        private int maxArrowLength = 12;
+        private int maxArrowLength = 40;
+
+        [Header("셀 크기 (GAME_RULES v0.7 §9): cell = min(화면폭 × cellWidthFraction, 화면폭 × maxAreaFraction ÷ 가로칸수)")]
+        [SerializeField, Range(0.01f, 0.5f), Tooltip("보드 크기와 무관한 기본 셀 크기 = 화면 폭 × 이 값")]
+        private float cellWidthFraction = 0.052f;
+
+        [SerializeField, Range(0.1f, 1f), Tooltip("보드가 차지할 수 있는 화면 폭 최대 비율 (넓은 보드는 이 안에 맞춰 축소)")]
+        private float maxAreaFraction = 0.9f;
+
+        [SerializeField, Range(0f, 0.5f), Tooltip("셀 사이 간격 = 셀 × 이 값 (0 = 선이 이어짐)")]
+        private float cellGapRatio = 0f;
 
         [Header("연출 타이밍 (GAME_RULES §8)")]
         [SerializeField, Min(0.1f), Tooltip("Fire 시 머리가 레인을 직진하는 속도 (셀/초). 몸통은 경로를 따라 같은 속도로 따라간다")]
@@ -75,10 +81,12 @@ namespace NanaArrow.Gameplay
         public int MaxLives => maxLives;
         public bool MarkedResetOnExit => markedResetOnExit;
         public int MinBoardSize => minBoardSize;
-        public int MaxBoardSize => maxBoardSize;
-        public float CellSize => cellSize;
-        public float CellGap => cellGap;
+        public int MaxBoardWidth => maxBoardWidth;
+        public int MaxBoardHeight => maxBoardHeight;
         public int MaxArrowLength => maxArrowLength;
+        public float CellWidthFraction => cellWidthFraction;
+        public float MaxAreaFraction => maxAreaFraction;
+        public float CellGapRatio => cellGapRatio;
         public float FireSpeedCellsPerSec => fireSpeedCellsPerSec;
         public float LaneFlashDuration => laneFlashDuration;
         public float BlockBounceDuration => blockBounceDuration;

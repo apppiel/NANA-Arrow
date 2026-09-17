@@ -53,9 +53,10 @@ namespace NanaArrow.Editor
 
         private static void CheckSchema(LevelData level, GameConfig config, List<LevelValidationError> errors)
         {
-            if (!IsInRange(level.Width, config) || !IsInRange(level.Height, config))
+            if (level.Width < config.MinBoardSize || level.Width > config.MaxBoardWidth ||
+                level.Height < config.MinBoardSize || level.Height > config.MaxBoardHeight)
                 errors.Add(new LevelValidationError(LevelRule.Schema,
-                    $"Board {level.Width}x{level.Height} must be {config.MinBoardSize}~{config.MaxBoardSize}."));
+                    $"Board {level.Width}x{level.Height} must be {config.MinBoardSize}~{config.MaxBoardWidth} wide and {config.MinBoardSize}~{config.MaxBoardHeight} tall."));
 
             if (level.Arrows == null || level.Arrows.Length == 0)
             {
@@ -82,9 +83,6 @@ namespace NanaArrow.Editor
                     errors.Add(new LevelValidationError(LevelRule.Schema, $"Frozen '{arrow.Id}' hits must be {FrozenMinHits} or more."));
             }
         }
-
-        private static bool IsInRange(int size, GameConfig config) =>
-            size >= config.MinBoardSize && size <= config.MaxBoardSize;
 
         // 규칙 1: 보드 안 + 서로 다른 Arrow 끼리 겹침 없음 (자기 겹침은 규칙 2)
         private static void CheckCellsInBoundsAndDisjoint(LevelData level, List<LevelValidationError> errors)
@@ -113,18 +111,18 @@ namespace NanaArrow.Editor
             }
         }
 
-        // 규칙 2 (v0.6): 경로 = 상하좌우 인접 연결, 자기 겹침 없음, dir 이 마지막 세그먼트와 일치, 길이 1~maxArrowLength
+        // 규칙 2 (v0.7): (a) 상하좌우 인접 (b) 자기 겹침 없음 (c) dir = 마지막 세그먼트 (d) 길이 ≤ maxArrowLength (e) 자기 Lane 위에 자기 몸통 없음
         private static void CheckPathShape(LevelData level, GameConfig config, List<LevelValidationError> errors)
         {
             foreach (var arrow in level.Arrows)
             {
                 var cells = LevelLoader.ToCells(arrow);
+                var visited = new HashSet<Vector2Int> { cells[0] };
 
                 if (cells.Length > config.MaxArrowLength)
                     errors.Add(new LevelValidationError(LevelRule.PathShape,
                         $"Arrow '{arrow.Id}' has {cells.Length} cells, max is {config.MaxArrowLength}."));
 
-                var visited = new HashSet<Vector2Int> { cells[0] };
                 for (var i = 1; i < cells.Length; i++)
                 {
                     if (!DirectionExtensions.TryFromOffset(cells[i] - cells[i - 1], out _))
@@ -136,11 +134,27 @@ namespace NanaArrow.Editor
                             $"Arrow '{arrow.Id}' crosses itself at {cells[i]}."));
                 }
 
+                var direction = arrow.Direction;
                 if (cells.Length >= 2 &&
-                    DirectionExtensions.TryFromOffset(cells[cells.Length - 1] - cells[cells.Length - 2], out var pathDirection) &&
-                    pathDirection != arrow.Direction)
+                    DirectionExtensions.TryFromOffset(cells[cells.Length - 1] - cells[cells.Length - 2], out var pathDirection))
+                {
+                    if (pathDirection != arrow.Direction)
+                        errors.Add(new LevelValidationError(LevelRule.PathShape,
+                            $"Arrow '{arrow.Id}' dir {arrow.Direction} must match its last step ({pathDirection})."));
+                    direction = pathDirection;
+                }
+
+                // (e) 머리 앞 Lane(가장자리까지) 에 자기 몸통 셀이 있으면 안 됨 — 런타임은 막지 않지만 레벨에서 금지
+                var step = direction.ToOffset();
+                for (var cell = cells[cells.Length - 1] + step;
+                     cell.x >= 0 && cell.x < level.Width && cell.y >= 0 && cell.y < level.Height;
+                     cell += step)
+                {
+                    if (!visited.Contains(cell)) continue;
                     errors.Add(new LevelValidationError(LevelRule.PathShape,
-                        $"Arrow '{arrow.Id}' dir {arrow.Direction} must match its last step ({pathDirection})."));
+                        $"Arrow '{arrow.Id}' has its own body on its lane at {cell}."));
+                    break;
+                }
             }
         }
 

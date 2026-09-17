@@ -5,7 +5,7 @@ using UnityEngine;
 namespace NanaArrow.Gameplay.View
 {
     /// <summary>
-    /// 논리 Board → ArrowView 생성과 연출 재생. 격자·셀 배경은 그리지 않는다 (GAME_RULES v0.6.1 §0).
+    /// 논리 Board → ArrowView 생성과 연출 재생. 격자·셀 배경은 그리지 않는다 (GAME_RULES v0.7 §9). 세로 중앙 = 이 오브젝트의 위치.
     /// 판정은 하지 않는다 (TapResult / FireResult 만 받는다).
     /// </summary>
     public sealed class BoardView : MonoBehaviour
@@ -13,12 +13,6 @@ namespace NanaArrow.Gameplay.View
         [SerializeField] private GameConfig config;
         [SerializeField] private ArrowViewStyle style;
         [SerializeField, Tooltip("비우면 Camera.main")] private Camera targetCamera;
-
-        [Header("배치 (레퍼런스: 보드 폭 = 화면 폭의 약 절반, 세로 중앙)")]
-        [SerializeField, Range(0.1f, 1f), Tooltip("카메라 가로 폭 중 보드가 쓸 비율")]
-        private float areaWidthFraction = 0.5f;
-        [SerializeField, Range(0.1f, 1f), Tooltip("카메라 세로 높이 중 보드가 쓸 비율 (HUD 공간 제외)")]
-        private float areaHeightFraction = 0.6f;
 
         private readonly Dictionary<Arrow, ArrowView> _views = new Dictionary<Arrow, ArrowView>();
         private Transform _arrowsRoot;
@@ -40,7 +34,8 @@ namespace NanaArrow.Gameplay.View
         public void Build(Board board)
         {
             Clear();
-            Layout = new BoardLayout(board.Width, board.Height, config.CellSize, config.CellGap, AvailableSize(), transform.position);
+            var cellSize = BoardLayout.CellSizeFor(CameraWidth(), board.Width, config.CellWidthFraction, config.MaxAreaFraction);
+            Layout = new BoardLayout(board.Width, board.Height, cellSize, cellSize * config.CellGapRatio, transform.position);
 
             _arrowsRoot = new GameObject("Arrows").transform;
             _arrowsRoot.SetParent(transform, false);
@@ -136,13 +131,12 @@ namespace NanaArrow.Gameplay.View
             Layout = null;
         }
 
-        private Vector2 AvailableSize()
+        /// <summary>카메라가 보는 화면 폭 (월드 단위). 셀 크기 규칙의 "화면폭".</summary>
+        private float CameraWidth()
         {
             // 외부(캡처 툴 등)가 camera.aspect 를 덮어쓴 채 남겨 두면 셀이 찌그러진다 — 게임 뷰 기준으로 되돌린 뒤 읽는다.
             targetCamera.ResetAspect();
-            var height = targetCamera.orthographicSize * 2f;
-            var width = height * targetCamera.aspect;
-            return new Vector2(width * areaWidthFraction, height * areaHeightFraction);
+            return targetCamera.orthographicSize * 2f * targetCamera.aspect;
         }
 
         private static int KeyGroupIndex(Arrow arrow, Dictionary<string, int> keyGroups)

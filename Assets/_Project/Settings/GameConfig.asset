@@ -15,10 +15,12 @@ MonoBehaviour:
   maxLives: 3
   markedResetOnExit: 1
   minBoardSize: 3
-  maxBoardSize: 10
-  cellSize: 1
-  cellGap: 0
-  maxArrowLength: 12
+  maxBoardWidth: 10
+  maxBoardHeight: 14
+  maxArrowLength: 40
+  cellWidthFraction: 0.052
+  maxAreaFraction: 0.9
+  cellGapRatio: 0
   fireSpeedCellsPerSec: 24
   blockBounceDuration: 0.15
   blockBounceDistance: 0.2
