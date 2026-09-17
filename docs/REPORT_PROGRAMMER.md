@@ -2,6 +2,38 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-011 완료 (2026-09-17) — 브랜치 `feat/ads-reward` (base main)
+- 테스트 **267/267** (+34), 컴파일 에러 0. 플레이 모드(에디터 광고 스킵 경로)에서 하트 0 → 실패 팝업 → 이어하기(보상형 = 에디터는 시청 완료 처리) → 하트 +1·팝업 닫힘·보드 유지 → 다시 하트 0 → 이어하기 버튼 숨김(레벨당 1회) → 다시하기 → 재시작(RetryFail) 확인. 클리어 팝업 → `AfterLevelCleared` → 이동 콜백 확인. 씬·프리팹은 안 건드림
+- 겸사겸사: docs 스냅샷 커밋 (LEVEL_DESIGN 21~50, LEVEL_FORMAT v0.6, UI_FLOW L26 a12, REPORT_PLANNER)
+
+**변경 요약 (PR)**
+- **`Core/AdsManager`** 순수 C# (테스트 11): NO.3 InterstitialGate 확장. `LevelCleared(level, alreadyCleared)` → `NotDue / SkippedFreeLevel / Due` (adFreeLevels 이하는 세지도 않음, 그 위 N번째 클리어마다 Due + 카운터 0, 재클리어도 카운트) · `RetryPressed(failCount)` → 같은 레벨 실패 횟수가 interstitialAfterFails 의 배수면 Due · `ContinueRequested(continuesUsed)` → maxContinues 미만이면 허용. 값은 `AdsManager.FromConfig(AdsConfig)`. 앱 세션 안에서만 (저장 안 함)
+- **`Core/AdsController`** (Game 씬 MonoBehaviour, UI_FLOW §8 연결점): `AfterLevelCleared(then)` (클리어 팝업 두 버튼) · `RetryFromFailPopup()` (실패 횟수 세서 판정 → 재시작) · `RequestContinue(done)` (보상형 → **시청 완료(OnUserEarnedReward)일 때만** `GameController.Continue(continueLives)`) · `CanOfferContinue` / `IsRewardedReady`. 전면 광고가 준비 안 됐으면 기다리지 않고 바로 이동. 광고 중 `AudioManager.PauseBgm`. 레벨별 실패 횟수·판당 이어하기 횟수는 세션 안에서만
+- **`Core/IInterstitialAd` / `IRewardedAd`** (`IsReady`, `Awaitable<bool> ShowAsync()`) + `App.Interstitial / App.Rewarded` (Services 가 등록. Core 는 SDK 를 모름)
+- **`Services/AdMobService`** (NO.3 이식): 첫 씬 로드 전 자가 생성 → `App.SetAds`. Google **테스트 광고 단위 ID** (실제 ID 상수는 비어 있음 → 테스트 ID 폴백 + 경고). 콜백은 volatile 플래그 → Update 에서 처리, 전면 90초 안전장치, 닫히면 재로드, 포커스 복귀 시 재시도. **에디터**: 전면 즉시 스킵(false) / 보상형 시청 완료(true) — `#if UNITY_EDITOR` 격리. iOS ATT 브릿지는 미이식 (v1 Android)
+- `GameController.Continue(lives)`: 보드·Marked 그대로 목숨만 회복 + `LevelStats.ContinuesUsed`
+- **`Core/RewardCode`** (NO.3 이식, 테스트 14): XXXX-XXXX, 0/O/1/I 제외 32자, `Generate(nextIndex)` 결정적, `IsWellFormed`. **`RewardConfig` SO** (`rewardLevel` 100, `claimUrl` nanabox.co.kr/reward-claim.html) → `Settings/RewardConfig.asset` 생성됨. `RewardCodeStatus` enum, `IRewardCodeService` + `App.RewardCodes` / `App.RewardCodeIssued` 통지
+- **`Services/RewardCodeService`** (NO.3 이식): 자가 생성. 로컬(PlayerPrefs `nanaarrow.reward.*`) 먼저 → Firestore `rewards`(기기당 1) + `code_index` WriteBatch. 서버 실패해도 유저는 코드를 받고, 미동기화면 앱 실행마다 조용히 재시도. Firebase 대기 전부 타임아웃. 발급되면 `PlayerProgress.MarkRewardCodeIssued()` (Main 의 응모 버튼 표시). 에디터 = 네이티브 없음 → 즉시 로컬 발급
+- **UI**: `Game/FailPopup`(PopupBase 파생): 이어하기 버튼은 남은 횟수 있을 때만, 광고 준비 안 됐으면 비활성 + `fail.ad_unavailable` 표시, 끝까지 안 보면 팝업 유지. `RewardCodePanel`(PopupBase 파생, Game·Main 공용): 열리면 발급 요청, 코드·상태 문구, 복사(클립보드 + `raffle.copied`), 상품 받으러 가기(URL). `ClearPopup`: 두 버튼이 `AdsController.AfterLevelCleared` 를 거쳐 이동, **응모 레벨 클리어면 응모 팝업이 먼저** 뜨고 닫히면 클리어 팝업이 다시 열림 (§6-5)
+- 애널리틱스 (ANALYTICS.md §3-2, §3-4 전부): `continue_offer(ad_ready)` / `continue_request` / `continue_granted(lives_after)` / `ad_interstitial(trigger, result, level)` / `ad_rewarded_result(result, level)` / `reward_code_issued(synced)` / `reward_code_copy` / `reward_link_open` + 사용자 속성 `reward_issued`
+- `Strings_ko.asset` 에 **`raffle.status.checking / saving / issued / reissued / offline / save_failed`** 6키 추가 (UI_FLOW §9 에 없는 키 — 디렉터가 §9 에 반영해 주시면 됨. 문구는 NO.3 것)
+
+**가정 (디렉터 확인)**
+- "같은 레벨 N번 실패마다" 의 실패 횟수 = 앱 실행 후 그 레벨의 실패 팝업 횟수 (HUD 다시하기·이어하기는 안 셈). 앱 재시작하면 0
+- 이어하기 뒤 다시 하트 0 → 이어하기 버튼 **숨김** (§6-2 "주 버튼 숨김"). 광고 준비 안 됨은 **비활성 + 문구**
+- 보상형 광고가 준비 안 된 상태로 이어하기를 눌렀을 때(경합) `ad_rewarded_result(failed_to_show)` 만 남기고 팝업 유지
+- 응모 코드 Firestore 컬렉션 이름은 NO.3 과 같음 (`rewards`, `code_index`) — Firebase 프로젝트가 새로 생기니 충돌 없음. 홈페이지 검증 규칙 동일
+- 실제 AdMob 앱 ID·광고 단위 ID 는 팀장 콘솔 작업 뒤 `AdMobService` 상수 + `GoogleMobileAdsSettings.asset` 을 한 커밋으로 바꿈 (출시 전 필수)
+
+**팀장 에디터 할 일 — "씬에 붙일 것"**
+1. **Game 씬** 빈 오브젝트 `Ads` → **AdsController** → Ads Config = `Settings/AdsConfig`, Game Controller
+2. `Popup_Fail` 은 PopupBase 대신 **FailPopup** (Closable By Back **끔**) → Ads = Ads 오브젝트, Continue Button = PrimaryButton, Ad Unavailable Text. PrimaryButton.OnClick → FailPopup.**OnContinue**, SecondaryButton → FailPopup.**OnRetry** (W-017 에서 GameController.RestartFromFailPopup 에 직접 연결했다면 이걸로 교체)
+3. `Popup_Clear` 의 ClearPopup → **Ads** = Ads 오브젝트, **Reward Panel** = Popup_Raffle
+4. `Popup_Raffle` (Game·Main 각 1개, §12-5) 는 PopupBase 대신 **RewardCodePanel** (Closable By Back 끔) → Strings, Config = `Settings/RewardConfig`, Code Text, Status Text(선택, 작은 TMP 하나 추가 권장), Copy Button, Go Button. CopyButton.OnClick → **CopyCode**, GoButton → **OpenClaimPage**, CloseButton → PopupBase.**Close**
+5. Main 씬 `MainMenu` → **Raffle Popup** = Popup_Raffle
+6. 확인: Play(Game) → 하트 0 → 이어하기(에디터는 광고 없이 바로 +1) → 다시 0 → 버튼 없음 → 다시하기. 응모 팝업은 치트 창 레벨 점프로 100 클리어해야 보임 (카탈로그 50개라 당장은 `RewardConfig.rewardLevel` 을 임시로 낮춰 확인 가능)
+7. Android 빌드 전: EDM Force Resolve, Firebase 프로젝트의 `google-services.json` 넣기 (없으면 Firestore 저장은 실패하고 로컬 발급으로 감 — 정상)
+
 ### W-017 완료 (2026-09-17) — 브랜치 `feat/ui-scripts` (base main)
 - 테스트 **233/233** (+28), 컴파일 에러 0. 플레이 모드에서 임시 캔버스로 튜토리얼(레벨 16: 말풍선 + 손가락이 a2 머리 위) → 얼음 깨기로 사라짐, 하트 감소(흔들림 → 빈 하트) · 회복 연출 확인. 씬·프리팹은 안 건드림
 - 겸사겸사: 기획자가 올린 **레벨 21~50** 을 Level Validator 로 검증 **30/30 통과**(minTaps 전부 일치) 후 커밋. UI_FLOW §7-2 의 L26 손가락 대상 "(W-013 에서 확정)" → 레벨 26 의 Key 화살표 **a12** 로 채움
