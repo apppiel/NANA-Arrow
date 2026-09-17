@@ -23,7 +23,7 @@ namespace NanaArrow.Gameplay
         [SerializeField, Min(1), Tooltip("보드 한 변 최대 칸 수 (검증기)")]
         private int maxBoardSize = 10;
 
-        [SerializeField, Min(0.01f), Tooltip("셀 한 칸 크기 (월드 단위). 화면에 맞춰 자동 스케일")]
+        [SerializeField, Min(0.01f), Tooltip("셀 한 칸 최대 크기 (월드 단위). 보드가 영역보다 크면 축소, 작아도 확대하지 않음")]
         private float cellSize = 1f;
 
         [SerializeField, Min(0f), Tooltip("셀 사이 간격 (월드 단위)")]
@@ -45,6 +45,19 @@ namespace NanaArrow.Gameplay
         [SerializeField, Min(0f), Tooltip("레벨 시작 시 셀 등장 간격 (초)")]
         private float cellSpawnStagger = 0.03f;
 
+        [Header("연출 타이밍 — 추가분 (GAME_RULES §8 미기재, 디렉터 확인)")]
+        [SerializeField, Min(0f), Tooltip("셀·Arrow 하나가 등장하는 데 걸리는 시간 (초)")]
+        private float cellSpawnDuration = 0.15f;
+
+        [SerializeField, Min(0f), Tooltip("Frozen 얼음 깨기 연출 시간 (초)")]
+        private float iceBreakDuration = 0.15f;
+
+        [SerializeField, Min(0f), Tooltip("잠긴 Locked 탭 시 흔들림 시간 (초)")]
+        private float lockShakeDuration = 0.2f;
+
+        [SerializeField, Min(0f), Tooltip("잠긴 Locked 탭 시 흔들림 진폭 (셀 단위)")]
+        private float lockShakeDistance = 0.08f;
+
         [Header("입력 (GAME_RULES §9)")]
         [SerializeField, Tooltip("Fire 연출 중에도 다른 Arrow 탭 허용 (연속 탭)")]
         private bool allowInputDuringFire = true;
@@ -60,6 +73,10 @@ namespace NanaArrow.Gameplay
         public float BlockBounceDistance => blockBounceDistance;
         public float ClearPopupDelay => clearPopupDelay;
         public float CellSpawnStagger => cellSpawnStagger;
+        public float CellSpawnDuration => cellSpawnDuration;
+        public float IceBreakDuration => iceBreakDuration;
+        public float LockShakeDuration => lockShakeDuration;
+        public float LockShakeDistance => lockShakeDistance;
         public bool AllowInputDuringFire => allowInputDuringFire;
     }
 }
