@@ -1,83 +1,22 @@
 {
   "version": 1,
   "id": 18,
-  "width": 6,
-  "height": 6,
+  "width": 8,
+  "height": 10,
   "arrows": [
-    {
-      "id": "a1",
-      "type": "Long",
-      "dir": "Right",
-      "cells": [[0,5],[1,5]]
-    },
-    {
-      "id": "a2",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[5,5]]
-    },
-    {
-      "id": "a3",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[1,4]]
-    },
-    {
-      "id": "a4",
-      "type": "Long",
-      "dir": "Down",
-      "cells": [[2,4],[2,5]]
-    },
-    {
-      "id": "a5",
-      "type": "Basic",
-      "dir": "Left",
-      "cells": [[4,4]]
-    },
-    {
-      "id": "a6",
-      "type": "Frozen",
-      "dir": "Right",
-      "cells": [[0,3]],
-      "hits": 2
-    },
-    {
-      "id": "a7",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[5,3]]
-    },
-    {
-      "id": "a8",
-      "type": "Long",
-      "dir": "Down",
-      "cells": [[4,2],[4,3]]
-    },
-    {
-      "id": "a9",
-      "type": "Basic",
-      "dir": "Left",
-      "cells": [[5,2]]
-    },
-    {
-      "id": "a10",
-      "type": "Frozen",
-      "dir": "Right",
-      "cells": [[2,0]],
-      "hits": 2
-    },
-    {
-      "id": "a11",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[3,0]]
-    }
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[0,7],[0,8],[0,9]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[4,9],[3,9],[3,8],[3,7],[3,6],[2,6],[2,7],[2,8],[2,9],[1,9]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[2,5],[3,5],[3,4],[2,4],[1,4],[1,5],[1,6],[1,7],[1,8]] },
+    { "id": "a4", "type": "Basic", "dir": "Right", "cells": [[7,9],[6,9],[5,9],[5,8],[6,8],[7,8]] },
+    { "id": "a5", "type": "Basic", "dir": "Down", "cells": [[4,8],[4,7],[4,6],[4,5],[5,5],[5,6],[5,7],[6,7],[6,6]] },
+    { "id": "a6", "type": "Basic", "dir": "Up", "cells": [[3,2],[4,2],[4,3],[3,3],[2,3],[2,2],[1,2],[1,3]] },
+    { "id": "a7", "type": "Basic", "dir": "Right", "cells": [[7,7],[7,6],[7,5],[6,5],[6,4],[5,4],[5,3],[6,3]] },
+    { "id": "a8", "type": "Basic", "dir": "Down", "cells": [[0,6],[0,5],[0,4],[0,3],[0,2],[0,1]] },
+    { "id": "a9", "type": "Frozen", "dir": "Left", "cells": [[4,1],[3,1],[2,1],[1,1]], "hits": 2 },
+    { "id": "a10", "type": "Frozen", "dir": "Down", "cells": [[7,4],[7,3],[7,2],[6,2],[5,2],[5,1]], "hits": 2 },
+    { "id": "a11", "type": "Basic", "dir": "Left", "cells": [[7,0],[7,1],[6,1]] },
+    { "id": "a12", "type": "Basic", "dir": "Left", "cells": [[6,0],[5,0],[4,0],[3,0],[2,0],[1,0],[0,0]] }
   ],
-  "solution": ["a2","a7","a8","a9","a11","a6","a10","a4","a1","a3","a5"],
-  "meta": {
-    "author": "desktop",
-    "difficulty": 4,
-    "minTaps": 13,
-    "note": "Frozen 2개, 깊이 6"
-  }
+  "solution": ["a1", "a2", "a3", "a4", "a6", "a12", "a8", "a9", "a10", "a11", "a7", "a5"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 14, "freeAtStart": 3, "depth": 5, "pathLength": 79, "bends": 26, "note": "Frozen 2개, 거의 꽉 참" }
 }

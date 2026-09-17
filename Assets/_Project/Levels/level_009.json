@@ -1,75 +1,19 @@
 {
   "version": 1,
   "id": 9,
-  "width": 5,
-  "height": 5,
+  "width": 7,
+  "height": 9,
   "arrows": [
-    {
-      "id": "a1",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[1,4]]
-    },
-    {
-      "id": "a2",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[3,4]]
-    },
-    {
-      "id": "a3",
-      "type": "Long",
-      "dir": "Down",
-      "cells": [[2,3],[2,4]]
-    },
-    {
-      "id": "a4",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[4,3]]
-    },
-    {
-      "id": "a5",
-      "type": "Basic",
-      "dir": "Left",
-      "cells": [[1,1]]
-    },
-    {
-      "id": "a6",
-      "type": "Basic",
-      "dir": "Left",
-      "cells": [[2,1]]
-    },
-    {
-      "id": "a7",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[4,1]]
-    },
-    {
-      "id": "a8",
-      "type": "Long",
-      "dir": "Up",
-      "cells": [[0,0],[0,1]]
-    },
-    {
-      "id": "a9",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[1,0]]
-    },
-    {
-      "id": "a10",
-      "type": "Long",
-      "dir": "Up",
-      "cells": [[3,0],[3,1],[3,2]]
-    }
+    { "id": "a1", "type": "Basic", "dir": "Down", "cells": [[4,7],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[1,2],[1,3],[1,4],[2,4],[2,5],[1,5],[1,6],[2,6],[3,6],[3,7],[2,7]] },
+    { "id": "a3", "type": "Basic", "dir": "Down", "cells": [[4,6],[5,6],[5,7],[5,8],[6,8],[6,7],[6,6],[6,5]] },
+    { "id": "a4", "type": "Basic", "dir": "Up", "cells": [[4,2],[4,3],[4,4],[4,5],[3,5],[3,4],[3,3],[3,2],[2,2],[2,3]] },
+    { "id": "a5", "type": "Basic", "dir": "Down", "cells": [[5,5],[5,4],[6,4],[6,3]] },
+    { "id": "a6", "type": "Basic", "dir": "Down", "cells": [[0,6],[0,5],[0,4],[0,3],[0,2]] },
+    { "id": "a7", "type": "Basic", "dir": "Left", "cells": [[0,0],[1,0],[1,1],[0,1]] },
+    { "id": "a8", "type": "Basic", "dir": "Right", "cells": [[3,1],[2,1],[2,0],[3,0]] },
+    { "id": "a9", "type": "Basic", "dir": "Down", "cells": [[5,0],[4,0],[4,1],[5,1],[5,2],[6,2],[6,1],[6,0]] }
   ],
-  "solution": ["a2","a7","a8","a10","a4","a5","a6","a3","a1","a9"],
-  "meta": {
-    "author": "desktop",
-    "difficulty": 4,
-    "minTaps": 10,
-    "note": "10개, 선택지 3 / 깊이 6"
-  }
+  "solution": ["a7", "a9", "a5", "a6", "a8", "a1", "a2", "a3", "a4"],
+  "meta": { "author": "desktop", "difficulty": 3, "minTaps": 9, "freeAtStart": 2, "depth": 5, "pathLength": 61, "bends": 27, "note": "7×9, 9개, 깊이 5" }
 }

@@ -1,77 +1,22 @@
 {
   "version": 1,
   "id": 17,
-  "width": 6,
-  "height": 6,
+  "width": 8,
+  "height": 10,
   "arrows": [
-    {
-      "id": "a1",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[3,4]]
-    },
-    {
-      "id": "a2",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[2,3]]
-    },
-    {
-      "id": "a3",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[3,3]]
-    },
-    {
-      "id": "a4",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[2,2]]
-    },
-    {
-      "id": "a5",
-      "type": "Frozen",
-      "dir": "Left",
-      "cells": [[0,1]],
-      "hits": 2
-    },
-    {
-      "id": "a6",
-      "type": "Long",
-      "dir": "Down",
-      "cells": [[1,1],[1,2],[1,3]]
-    },
-    {
-      "id": "a7",
-      "type": "Basic",
-      "dir": "Down",
-      "cells": [[3,1]]
-    },
-    {
-      "id": "a8",
-      "type": "Long",
-      "dir": "Left",
-      "cells": [[4,1],[5,1]]
-    },
-    {
-      "id": "a9",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[0,0]]
-    },
-    {
-      "id": "a10",
-      "type": "Frozen",
-      "dir": "Left",
-      "cells": [[1,0]],
-      "hits": 2
-    }
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[0,7],[0,8],[0,9]] },
+    { "id": "a2", "type": "Basic", "dir": "Left", "cells": [[4,9],[3,9],[2,9],[1,9]] },
+    { "id": "a3", "type": "Frozen", "dir": "Left", "cells": [[7,9],[7,8],[6,8],[6,9],[5,9]], "hits": 2 },
+    { "id": "a4", "type": "Basic", "dir": "Right", "cells": [[0,6],[1,6],[1,7],[1,8],[2,8],[3,8],[4,8]] },
+    { "id": "a5", "type": "Basic", "dir": "Up", "cells": [[4,7],[3,7],[3,6],[4,6],[5,6],[5,7],[5,8]] },
+    { "id": "a6", "type": "Basic", "dir": "Up", "cells": [[1,4],[2,4],[3,4],[3,3],[3,2],[4,2],[4,3],[5,3],[5,4],[5,5]] },
+    { "id": "a7", "type": "Basic", "dir": "Down", "cells": [[2,7],[2,6],[2,5],[1,5],[0,5],[0,4]] },
+    { "id": "a8", "type": "Basic", "dir": "Left", "cells": [[2,3],[1,3],[0,3]] },
+    { "id": "a9", "type": "Basic", "dir": "Down", "cells": [[7,3],[7,4],[7,5],[6,5],[6,4],[6,3]] },
+    { "id": "a10", "type": "Frozen", "dir": "Left", "cells": [[0,0],[0,1],[1,1],[2,1],[2,2],[1,2],[0,2]], "hits": 2 },
+    { "id": "a11", "type": "Basic", "dir": "Left", "cells": [[7,2],[6,2],[5,2],[5,1],[4,1]] },
+    { "id": "a12", "type": "Basic", "dir": "Left", "cells": [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[7,1],[6,1]] }
   ],
-  "solution": ["a4","a5","a7","a9","a10","a2","a3","a6","a8","a1"],
-  "meta": {
-    "author": "desktop",
-    "difficulty": 4,
-    "minTaps": 12,
-    "note": "Frozen 2개. 그중 막힌 Frozen 은 얼음은 깨져도 발사하면 Block — 순서 학습"
-  }
+  "solution": ["a1", "a2", "a3", "a5", "a6", "a8", "a10", "a11", "a12", "a4", "a7", "a9"],
+  "meta": { "author": "desktop", "difficulty": 4, "minTaps": 14, "freeAtStart": 3, "depth": 5, "pathLength": 72, "bends": 24, "note": "Frozen 2개, 막힌 Frozen 포함" }
 }

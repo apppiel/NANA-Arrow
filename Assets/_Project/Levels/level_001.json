@@ -2,32 +2,12 @@
   "version": 1,
   "id": 1,
   "width": 5,
-  "height": 5,
+  "height": 6,
   "arrows": [
-    {
-      "id": "a1",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[1,2]]
-    },
-    {
-      "id": "a2",
-      "type": "Basic",
-      "dir": "Right",
-      "cells": [[3,2]]
-    },
-    {
-      "id": "a3",
-      "type": "Basic",
-      "dir": "Up",
-      "cells": [[2,4]]
-    }
+    { "id": "a1", "type": "Basic", "dir": "Up", "cells": [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5]] },
+    { "id": "a2", "type": "Basic", "dir": "Up", "cells": [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5]] },
+    { "id": "a3", "type": "Basic", "dir": "Up", "cells": [[4,0],[4,1],[4,2],[4,3],[4,4],[4,5]] }
   ],
-  "solution": ["a2","a3","a1"],
-  "meta": {
-    "author": "desktop",
-    "difficulty": 1,
-    "minTaps": 3,
-    "note": "튜토리얼: 탭하면 날아간다. a1 은 막혀 있어 Block·목숨 차감을 처음 경험"
-  }
+  "solution": ["a1", "a2", "a3"],
+  "meta": { "author": "desktop", "difficulty": 1, "minTaps": 3, "freeAtStart": 3, "depth": 1, "pathLength": 18, "bends": 0, "note": "튜토리얼: 곧은 화살표 3개, 모두 바로 나감" }
 }
