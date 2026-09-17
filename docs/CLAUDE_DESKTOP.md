@@ -35,17 +35,13 @@
 - [ ] 출시 목표 시점
 
 ## 다음 할 일
-- [x] docs/GAME_RULES.md 초안 (v0.4, 이후 수정은 디렉터)
-- [x] docs/LEVEL_FORMAT.md v0.2 (2026-09-17: 풀 수 없던 예시 레벨 교체, 검증 규칙 보강)
-- [x] 디렉터 확인 요청 7건 답변 완료 → GAME_RULES v0.5 반영됨 (아래 답변 참고)
-- [x] LEVEL_FORMAT v0.3 (GAME_RULES v0.5 반영) → 클로드 코드 전달 가능
-- [x] GAME_RULES §9·§5 잔여 불일치 → v0.5.1 해결
-- [x] GitHub 이슈 초안 → docs/ISSUES.md (21건 + 기획 트랙 5건). **GitHub 등록은 팀장/클로드 코드**
-- [x] docs/LEVEL_DESIGN.md v0.1 (난이도 곡선 + 레벨 1~10 JSON, 프로젝트 코드로 풀이 검증)
-- [ ] 디렉터 확인: 보드 크기 전환 레벨 11 / 21 / 40 (LEVEL_DESIGN §3)
-- [ ] 팀장 확인: CLAUDE.md 의 Undo·힌트 비용 잔재 (ISSUES.md 하단)
-- [x] LEVEL_DESIGN 11~20 (W-008, v0.3 §7)
-- [ ] UI_FLOW.md
+> 작업 지시는 docs/WORK.md 의 "기획자" 항목, 보고는 docs/REPORT_PLANNER.md (2026-09-17 부터)
+- [x] W-016 경로형 레벨 1~20 · LEVEL_FORMAT v0.5 · LEVEL_DESIGN v1.0
+- [x] W-012 UI_FLOW v0.2 + 프리팹 가이드 + TutorialConfig
+- [x] W-014 ANALYTICS.md
+- [ ] W-013 레벨 21~30 — maxArrowLength·보드 구간 결정 + W-015 머지 대기
+- [ ] W-015 머지 후 레벨 1~20 Level Validator 재검증
+- [ ] STORE.md (스토어 문구·스크린샷·개인정보처리방침)
 
 ## v0.5 검토 잔여 → **해결됨 (v0.5.1)**. 디렉터 실수였음: v0.3 치환이 §9 한 줄에 붙어 있어 미적용. §9 HUD·§5 별점 모두 수정 완료. GitHub 이슈 정리 진행 OK.
 

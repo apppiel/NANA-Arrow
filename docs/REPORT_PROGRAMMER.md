@@ -2,6 +2,48 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-015 완료 (2026-09-17) — 브랜치 `feat/path-arrows` (base main, 단독 PR)
+- 테스트 **155/155 통과**, 컴파일 에러 0. `FireResolver`·`TapHandler`·`LivesTracker`·`GameSession` 로직은 바꾸지 않았고 기존 테스트가 그대로 통과함 (Lane 추가만)
+- **W-010 / W-011 은 착수하지 않음**: 선행 W-015 + "스택 PR 금지" 규칙 → 이 PR 이 main 에 머지된 뒤 다음 지시에서 진행
+
+**변경 요약 (PR)**
+- **Gameplay**: `Arrow` = 꼬리→머리 순서 경로. `Head = cells[^1]`, `Tail`, `Length`. `Direction` 은 길이≥2 면 마지막 두 칸에서 계산(인자 dir 과 불일치·비인접이면 `ArgumentException` → 로더가 `FormatException` 으로 감쌈), 길이 1 이면 인자. `ArrowType.Long` 삭제, `ArrowTypeConfig` 의 long* 필드 삭제, `GameConfig.maxArrowLength`(12) 추가
+- `FireResolver`: 레인 판정 동일 + **자기 몸통은 레인을 막지 않음**(GAME_RULES §0 "다른 Arrow"). `FireResult.Lane` / `TapResult.Lane`(머리 앞 빈 칸 목록, `FreeCells = Lane.Count`). `GameSession.Preview(arrow)` (길게 누르기용, 상태 변화 없음)
+- **Validator 규칙 2 교체**: (a) 이웃 셀 상하좌우 인접 (b) 자기 겹침 없음 (c) 길이≥2 면 dir = 마지막 세그먼트 (d) 길이 ≤ maxArrowLength. 규칙 1 은 서로 다른 Arrow 끼리만 겹침 검사. `LevelRule.LongShape` → `PathShape`
+- **뷰 재작성**: `ArrowView` = `LineRenderer` 폴리라인(둥근 꺾임 `cornerVertices`·둥근 꼬리 `capVertices`) + 머리 삼각 화살촉 + 머리 위 타입 아이콘(Frozen 얼음/Locked 자물쇠/Key 원, 임시 도형). Fire = 경로+레인 연장 폴리라인 위의 창(window)을 `fireSpeedCellsPerSec` 로 밀어 머리는 직진·몸통은 경로를 따라 이동, 꼬리가 나가면 파괴. Block = `LaneView` 빨간 번쩍(`laneFlashDuration`) + 머리 살짝 튕김. Marked = 선·머리 전체 빨강. 미리보기 = 선 파란 강조 + 레인 하이라이트
+- `BoardView`: **격자·셀 배경 제거**, 보드 폭 = 카메라 폭 × `areaWidthFraction`(기본 0.5), 세로 중앙. `Build()` 에서 `camera.ResetAspect()` 후 계산
+- `TapInput`: 탭은 **놓을 때** 확정, `longPressSeconds` 이상 누르면 `LanePreviewRequested(cell)` → 놓으면 `LanePreviewReleased` (미리보기로 시작된 누름은 탭으로 세지 않음 = 목숨 차감 없음). Arrow 의 어느 셀을 눌러도 히트 (Board 가 모든 셀을 매핑)
+- `ArrowViewStyle` 전면 개편: `lineColor`(#141A33), `lineWidthCellRatio` 0.15, `cornerVertices`/`capVertices` 8, `arrowHeadLength/WidthCellRatio` 0.45, `markedColor`, `laneFlashColor`, `lanePreviewColor`, `previewLineColor`, `laneWidthCellRatio`, 아이콘 크기·색·스프라이트, 정렬 순서. 스프라이트/머티리얼 비우면 임시 도형 / Sprites-Default
+- `GameConfig`: `fireDuration` → **`fireSpeedCellsPerSec`(24)** 로 교체(경로 길이가 달라 시간보다 속도가 맞음 — §8 문서 갱신 요청), `laneFlashDuration` 0.35, `longPressSeconds` 0.35, `cellGap` 기본 0 (선이 이어져야 하므로). `GameConfig.asset` 도 같이 갱신함
+
+**스크린샷 (Game 뷰 1080×1920, 레퍼런스 `docs/reference/ref _lv4.jpeg` 와 비교)**
+- `docs/screenshots/W-015_path_arrows_9x16.png` — 6×6 테스트 레벨 정지 상태 (남색 선·둥근 꺾임·화살촉·격자 없음·보드 폭 ≈ 화면 절반)
+- `docs/screenshots/W-015_fire_midflight.png` — Fire 중간 포즈: 머리는 오른쪽 레인으로 직진(보드 밖까지), 몸통은 꺾인 경로를 따라 올라옴
+- `docs/screenshots/W-015_lane_preview.png` — 길게 누르기: 선 파란 강조 + 레인 하이라이트
+- 배경이 순백이 아닌 건 씬 카메라 배경색(팀장 설정) 때문 — 아래 할 일 3
+- 레퍼런스 대비 차이: 머리 삼각형이 조금 작고 선이 약간 굵어 보임 → `ArrowViewStyle` 값으로 조정 가능 (화살촉 0.45→0.55, 선 0.15→0.13 정도 제안)
+
+**"셀 4:1 찌그러짐" 조사**
+- 지금 에디터에서는 재현 안 됨 (Game 뷰 1080×2340, `camera.aspect` 0.462 정상). `BoardLayout` 은 가로·세로에 같은 Scale 을 쓰므로 레이아웃 자체로는 비정사각이 나올 수 없음
+- 유력 원인: MCP `capture_game_view`(기획자/제 캡처)가 다른 해상도로 렌더하면서 `Camera.aspect` 를 덮어쓴 채 남김 → 이후 Game 뷰 비율과 달라져 화면 전체가 늘어남. `BoardView.Build()` 에서 `ResetAspect()` 로 방어해 둠. 재발하면 인스펙터에서 Main Camera 를 잠깐 껐다 켜거나 Game 뷰 비율을 바꿔 보면 풀림
+
+**기획자 레벨 확인**: W-016 으로 다시 쓴 `Levels/level_001~020.json` 20개를 새 검증기로 돌림 → **20/20 통과, solution·minTaps 모두 파일 값과 일치**. 파일은 기획자 작성본 그대로이며 이 브랜치에 `chore: sync levels` 커밋으로만 실었음 (내용 수정 없음)
+
+**가정 (디렉터 확인)**
+- 자기 몸통이 레인 위에 있어도 막지 않음 (§0 문구대로). 연출상 머리와 꼬리가 같은 칸을 스치는 순간이 생길 수 있음 — 레퍼런스와 다르면 규칙 4 에 "자기 레인 위에 몸통 금지" 를 추가하면 됨
+- 길이 1 Arrow 는 머리 뒤로 반 칸짜리 짧은 선으로 표시
+- Frozen/Locked/Key 표시는 머리 위 임시 아이콘 (원/자물쇠/원). 아트 오면 `ArrowViewStyle` 스프라이트 교체
+- HUD(하트·뒤로가기·다시하기)는 W-015 범위 밖 (이슈 #13)
+
+**팀장 에디터 할 일**
+1. `Input` 오브젝트의 **TapInput → Config 에 `GameConfig` 연결** (새 필드, 비어 있으면 탭 시 NullReference)
+2. `Board` 오브젝트의 **BoardView → Area Width Fraction 을 0.5 로** (씬에 이전 기본값 0.9 가 저장돼 있어 보드가 너무 큼)
+3. Main Camera → Background 를 **순백 #FFFFFF** 로 (GAME_RULES §0)
+4. `Settings/ArrowViewStyle.asset` 인스펙터 확인: 필드가 새로 바뀌었음 (Line Color, Line Width Cell Ratio 등). 기본값 그대로 두면 레퍼런스와 비슷함. 재생성 불필요
+5. `Settings/GameConfig.asset` 은 제가 갱신함 (Fire Speed Cells Per Sec, Lane Flash Duration, Long Press Seconds, Cell Gap 0). 인스펙터에서 확인만
+6. Play → 탭으로 발사, **화살표를 0.35초 이상 누르고 있으면** 레인 미리보기, 놓으면 해제. Level Jump 치트로 기획자의 새 1~20 레벨 확인
+7. Game 뷰를 9:16 으로 두고 레퍼런스와 나란히 보며 `ArrowViewStyle` 값 조정 (선 굵기·화살촉 비율·색)
+
 ### W-005 + W-006 완료 · W-009 조사 보고 (2026-09-17) — 브랜치 `feat/board-view`(PR #28) → `feat/level-editor-tools`(PR #29, 스택)
 
 **⚠ 팀장 조치 필요 — PR #1 머지가 안 됐습니다.** 자동 모드 권한 분류기가 "리뷰 없는 머지"로 `gh pr merge` 를 차단했습니다. 아래 중 하나로 처리해 주세요:
