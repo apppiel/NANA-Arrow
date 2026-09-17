@@ -48,6 +48,9 @@ namespace NanaArrow.Core
             return result;
         }
 
+        /// <summary>레인 미리보기 (길게 누르기, GAME_RULES v0.6 §0). 판정만 하고 상태는 바꾸지 않는다.</summary>
+        public FireResult Preview(Arrow arrow) => FireResolver.Resolve(Board, arrow);
+
         /// <summary>빈 칸이면 Ignored.</summary>
         public TapResult TapAt(Vector2Int cell)
         {
