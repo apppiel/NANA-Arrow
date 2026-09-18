@@ -13,8 +13,8 @@ namespace NanaArrow.UI.Game
     public sealed class LaneGuideToggleButton : MonoBehaviour
     {
         [SerializeField, Tooltip("버튼 배경 (비우면 이 오브젝트의 Image)")] private Image background;
-        [SerializeField, Tooltip("레인 가이드 켜짐 색")] private Color onColor = new Color(0.078f, 0.102f, 0.2f);
-        [SerializeField, Tooltip("레인 가이드 꺼짐 색")] private Color offColor = new Color(0.914f, 0.894f, 1f);
+        [SerializeField, Tooltip("켜짐/꺼짐 색을 가져올 팔레트 (Settings/UITheme). 비우면 색을 건드리지 않는다")]
+        private UITheme theme;
 
         private Button _button;
 
@@ -41,10 +41,11 @@ namespace NanaArrow.UI.Game
             SettingsStore.LaneGuideOn = !SettingsStore.LaneGuideOn;
         }
 
+        /// <summary>색은 <see cref="UITheme"/> 에서만 가져온다 — 코드에 팔레트를 박지 않는다 (W-028).</summary>
         private void Refresh(bool on)
         {
-            if (background != null)
-                background.color = on ? onColor : offColor;
+            if (background == null || theme == null) return;
+            background.color = on ? theme.ToggleOn : theme.ToggleOff;
         }
     }
 }

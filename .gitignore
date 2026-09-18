@@ -93,6 +93,8 @@ ProjectSettings/keystore.local.json
 
 # Crashlytics generated file
 crashlytics-build.properties
+# 빌드할 때마다 새 GUID 로 다시 써지는 생성 파일 (W-028)
+Assets/Plugins/Android/FirebaseCrashlytics.androidlib/res/values/crashlytics_build_id.xml
 
 # TestRunner generated files
 InitTestScene*.unity*
