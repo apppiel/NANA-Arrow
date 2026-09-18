@@ -22,14 +22,14 @@ UI 는 당분간 신경 쓰지 않음. 아래 순서대로. 항목마다 GameCon
 4. **씬 시작 시 팝업이 전부 겹쳐 보임** (클리어·실패·응모 팝업 + HUD 동시 표시, 사진 확인). 원인: 팝업 오브젝트가 씬에 활성 상태로 저장됨. 수정: `PopupBase.Awake` 에서 무조건 `SetActive(false)`(자기 루트) — 씬 저장 상태와 무관하게. `GameController.Start` 에서도 모든 팝업 닫기 호출. 팀장에게 '씬에서 팝업 4종 비활성 상태로 저장' 도 요청
 5. **레벨 선택 화면에서 뒤로가기 안 됨** (안드로이드 뒤로가기·화면 뒤로가기 버튼 둘 다 확인). `PopupBase.ConsumedBack`/`LevelSelectView` 경로 점검
 6. **난이도 라벨(어려움/쉬움) 가운데 정렬 안 됨** — 텍스트 anchor·alignment 를 코드에서 강제하지 말고, 프리팹 쪽 문제면 "팀장이 고칠 것" 으로 보고에 적기. TMP `alignment=Center` + RectTransform 중앙 앵커
-7. **격자가 셀에 안 맞음** (사진 확인): 간격 불균일, 화면 전체를 가로지름, 일부 줄 누락. `GridOverlay` 는 **셀 경계 좌표로 (width+1)×(height+1) 줄을 균일하게**, 보드 영역 + `gridMarginCells`(1) 만큼만. BoardLayout 의 셀 크기·원점을 그대로 써야 함 (화살표 셀 좌표로 긋지 말 것). 줌·팬 시 보드와 함께 움직이게 보드 로컬 좌표
-8. **빈 칸마다 옅은 점이 보임** (사진 확인): BoardView 의 빈 셀 마커. 레퍼런스엔 없음. `ArrowViewStyle.showEmptyCellDots` 토글 추가하고 **기본 꺼짐**, 기존 에셋 값도 꺼짐으로
+7. **`#` 토글 = 레인 가이드 (표 격자 아님).** 레퍼런스(docs/reference/ref_video 및 팀장 사진) 확인: 균일한 표가 아니라 **각 Arrow 의 머리가 있는 행(가로 방향 Arrow) 또는 열(세로 방향 Arrow)에 화면 끝에서 끝까지** 옅은 연보라 선을 긋는다. Arrow 가 없는 행·열엔 선 없음. 즉 "모든 Arrow 의 레인을 한꺼번에 보여주는" 기능. 현재의 균일 격자 `GridOverlay` 를 `LaneGuideOverlay` 로 교체: Arrow 마다 머리 셀의 행/열 중심선을 카메라 뷰 폭·높이 전체로 그림, Arrow 가 Exit 되면 그 선도 제거, 줌·팬 시 보드와 함께. 색·굵기는 ArrowViewStyle (`laneGuideColor` 연보라, `laneGuideWidthCellRatio` 0.06)
+8. **빈 칸 점(dot) 추가.** 레퍼런스는 격자 토글과 무관하게 **보드 사각형 안의 빈 칸마다 옅은 점을 항상** 찍는다 (셀 중앙, 연회색, 지름 ≈ 셀의 0.12). Arrow 가 나가면 그 칸에도 점이 생김. `ArrowViewStyle.emptyCellDotColor / emptyCellDotRadiusCellRatio / showEmptyCellDots(기본 켜짐)`. 보드 바깥엔 없음
 - 각 항목 수정 후 Play 로 확인, 보고에 항목별 "수정됨 / 팀장 확인 필요" 표시
 
 
 ### W-021 v0.7.2 반영 + 빌드 준비 (브랜치 `feat/build-prep`)
 - 디렉터 승인: W-011 가정 5건 전부 (실패 횟수 정의, 이어하기 버튼 숨김, 광고 경합 처리, Firestore 컬렉션명, ID 교체 시점). `raffle.status.*` 키 6개 승인
-- v0.7.2: `GridOverlay` 토글이 W-020 에 들어갔는지 확인, 없으면 추가. HUD `DifficultyLabel`(meta.difficulty 1~3 → `hud.difficulty.easy/normal/hard`) + `GridToggleButton` — W-017 에 없으면 추가. `zoomMin` 기본 0.5
+- (W-025 7 로 대체됨: GridOverlay → LaneGuideOverlay) HUD `DifficultyLabel`(meta.difficulty 1~3 → `hud.difficulty.easy/normal/hard`) + `GridToggleButton` — W-017 에 없으면 추가. `zoomMin` 기본 0.5
 - **Android 빌드**: Build Profile(Android, IL2CPP, ARM64+ARMv7, minSdk 25), `Editor/BuildScript`(메뉴 한 번에 개발 빌드 APK → `Builds/`), keystore 는 팀장 (경로·비번은 로컬 파일, git 제외). EDM Force Resolve 자동화
 - `docs/BUILD.md`: 팀장이 따라 할 개발 빌드 → 폰 설치 순서 (5줄 이내)
 - 실기 체크리스트 `docs/QA_DEVICE.md`: 첫 빌드에서 확인할 20항목 (터치·줌·광고 테스트 ID·저장·회전 잠금·Safe Area·뒤로가기)

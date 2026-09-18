@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.7.2 — 레퍼런스 후반 영상 반영 + W-019 검토 3건 + 프로그래머 가정 승인)
+# NANA-Arrow — GAME_RULES.md (v0.7.3 — `#` 는 레인 가이드, 빈 칸 점 항상 표시로 정정)
 > 작성: 디렉터. **이 파일이 유일한 규칙 기준.** 이전 버전 문구와 충돌하면 이 파일이 우선.
 > 레퍼런스: **Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)**. 스크린샷 docs/reference/.
 > 모든 수치는 ScriptableObject(GameConfig / ArrowTypeConfig / AdsConfig / ArrowViewStyle / RewardConfig) 인스펙터 값. 여기 적힌 값은 기본값.
@@ -87,7 +87,7 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 | longPressSeconds | 0.35s |
 
 ## 9. 그래픽 (ArrowViewStyle, 레퍼런스 스크린샷 기준)
-- **기본은 격자·셀 배경 없음.** 순백 #FFFFFF 배경에 선만. **우하단 `#` 원형 버튼으로 옅은 격자 토글** (`gridColor` 연회색, `gridLineWidthCellRatio` 0.03). 상태는 PlayerPrefs 저장
+- **격자 없음, 셀 배경 없음.** 순백 #FFFFFF 배경에 선 + **보드 안 빈 칸마다 옅은 점(항상 표시)**. **우하단 `#` 버튼 = 레인 가이드 토글**: 모든 Arrow 의 머리 행/열에 화면 끝까지 옅은 연보라 선 (표 격자가 아님). 상태는 PlayerPrefs 저장. 값은 ArrowViewStyle
 - 선: #141A33, `lineWidthCellRatio` 0.13~0.15, 둥근 꺾임(round join)·둥근 꼬리(round cap). 머리 삼각 화살촉 `arrowHead*CellRatio` 0.45~0.55
 - Marked = 선·머리 빨강 / Block = Lane 빨간 번쩍 / 미리보기 = 선 파랑 + Lane 하이라이트
 - **셀 크기 규칙 (기획자 W-016 제안 승인)**: 보드 크기와 무관하게 셀 간격 일정. `cell = min(화면폭 × cellWidthFraction(0.052), 화면폭 × maxAreaFraction(0.9) ÷ 가로칸수)`. 세로 중앙. (기존 `areaWidthFraction 0.5` 방식 폐기)
