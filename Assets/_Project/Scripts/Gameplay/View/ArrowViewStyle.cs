@@ -42,14 +42,22 @@ namespace NanaArrow.Gameplay.View
             new Color(0.15f, 0.65f, 0.6f),
         };
 
-        [Header("격자 (GAME_RULES v0.7.2 §9 — 기본 꺼짐, 우하단 # 버튼으로 토글)")]
-        [SerializeField, Tooltip("옅은 격자 선 색 (연회색)")]
-        private Color gridColor = new Color(0.85f, 0.86f, 0.89f);
-        [SerializeField, Range(0.005f, 0.2f), Tooltip("격자 선 굵기 = 셀 × 이 값")]
-        private float gridLineWidthCellRatio = 0.03f;
+        [Header("레인 가이드 (GAME_RULES v0.7.3 §9 — 우하단 # 버튼으로 토글, 기본 꺼짐)")]
+        [SerializeField, Tooltip("Arrow 머리의 행·열에 긋는 옅은 선 색 (연보라). 표 격자가 아니다")]
+        private Color laneGuideColor = new Color(0.914f, 0.894f, 1f);
+        [SerializeField, Range(0.005f, 0.3f), Tooltip("레인 가이드 굵기 = 셀 × 이 값")]
+        private float laneGuideWidthCellRatio = 0.06f;
+
+        [Header("빈 칸 점 (GAME_RULES v0.7.3 §9 — 토글과 무관하게 항상)")]
+        [SerializeField, Tooltip("보드 안 빈 칸마다 찍는 점 (항상 표시)")]
+        private bool showEmptyCellDots = true;
+        [SerializeField, Tooltip("빈 칸 점 색 (연회색)")]
+        private Color emptyCellDotColor = new Color(0.82f, 0.83f, 0.86f);
+        [SerializeField, Range(0.02f, 0.4f), Tooltip("빈 칸 점 반지름 = 셀 × 이 값")]
+        private float emptyCellDotRadiusCellRatio = 0.12f;
 
         [Header("정렬 순서")]
-        [SerializeField, Tooltip("격자는 모든 것 뒤")] private int gridOrder = 0;
+        [SerializeField, Tooltip("레인 가이드·빈 칸 점은 모든 것 뒤")] private int guideOrder = 0;
         [SerializeField] private int laneOrder = 5;
         [SerializeField] private int lineOrder = 10;
         [SerializeField] private int headOrder = 11;
@@ -75,9 +83,12 @@ namespace NanaArrow.Gameplay.View
         public Sprite IceSprite => iceSprite != null ? iceSprite : PlaceholderSprites.Circle;
         public Sprite LockSprite => lockSprite != null ? lockSprite : PlaceholderSprites.Padlock;
         public Sprite KeySprite => keySprite != null ? keySprite : PlaceholderSprites.Circle;
-        public Color GridColor => gridColor;
-        public float GridLineWidthCellRatio => gridLineWidthCellRatio;
-        public int GridOrder => gridOrder;
+        public Color LaneGuideColor => laneGuideColor;
+        public float LaneGuideWidthCellRatio => laneGuideWidthCellRatio;
+        public bool ShowEmptyCellDots => showEmptyCellDots;
+        public Color EmptyCellDotColor => emptyCellDotColor;
+        public float EmptyCellDotRadiusCellRatio => emptyCellDotRadiusCellRatio;
+        public int GuideOrder => guideOrder;
         public int LaneOrder => laneOrder;
         public int LineOrder => lineOrder;
         public int HeadOrder => headOrder;

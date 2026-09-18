@@ -31,6 +31,7 @@ MonoBehaviour:
   iceBreakDuration: 0.15
   lockShakeDuration: 0.2
   lockShakeDistance: 0.08
+  targetFrameRate: 60
   allowInputDuringFire: 1
   longPressSeconds: 0.35
   zoomMin: 0.5
@@ -39,3 +40,4 @@ MonoBehaviour:
   dragThresholdCells: 0.3
   panMarginCells: 1
   doubleTapSeconds: 0.3
+  exitMarginCells: 2

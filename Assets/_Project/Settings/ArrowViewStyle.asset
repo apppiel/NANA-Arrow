@@ -35,9 +35,12 @@ MonoBehaviour:
   - {r: 0.9, g: 0.64, b: 0.24, a: 1}
   - {r: 0.61, g: 0.15, b: 0.69, a: 1}
   - {r: 0.15, g: 0.65, b: 0.6, a: 1}
-  gridColor: {r: 0.85, g: 0.86, b: 0.89, a: 1}
-  gridLineWidthCellRatio: 0.03
-  gridOrder: 0
+  laneGuideColor: {r: 0.914, g: 0.894, b: 1, a: 1}
+  laneGuideWidthCellRatio: 0.06
+  showEmptyCellDots: 1
+  emptyCellDotColor: {r: 0.82, g: 0.83, b: 0.86, a: 1}
+  emptyCellDotRadiusCellRatio: 0.12
+  guideOrder: 0
   laneOrder: 5
   lineOrder: 10
   headOrder: 11

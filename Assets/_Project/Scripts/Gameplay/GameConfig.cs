@@ -71,6 +71,10 @@ namespace NanaArrow.Gameplay
         [SerializeField, Min(0f), Tooltip("잠긴 Locked 탭 시 흔들림 진폭 (셀 단위)")]
         private float lockShakeDistance = 0.08f;
 
+        [Header("성능 (W-025)")]
+        [SerializeField, Min(30), Tooltip("목표 프레임. 모바일은 기본값(-1)이면 30 으로 잡히므로 BootLoader 가 이 값을 적용한다")]
+        private int targetFrameRate = 60;
+
         [Header("입력 (GAME_RULES §9, v0.6 §0)")]
         [SerializeField, Tooltip("Fire 연출 중에도 다른 Arrow 탭 허용 (연속 탭)")]
         private bool allowInputDuringFire = true;
@@ -96,6 +100,10 @@ namespace NanaArrow.Gameplay
 
         [SerializeField, Min(0.05f), Tooltip("빈 곳 더블 탭 = 줌 리셋 판정 간격 (초)")]
         private float doubleTapSeconds = 0.3f;
+
+        [Header("Fire 연출 (W-025 1)")]
+        [SerializeField, Min(0f), Tooltip("Exit 연출에서 화면 경계를 넘어 더 나아가는 여유 (셀 단위). 꼬리까지 확실히 화면 밖으로 보낸다")]
+        private float exitMarginCells = 2f;
 
         public int MaxLives => maxLives;
         public bool MarkedResetOnExit => markedResetOnExit;
@@ -124,5 +132,7 @@ namespace NanaArrow.Gameplay
         public float DragThresholdCells => dragThresholdCells;
         public float PanMarginCells => panMarginCells;
         public float DoubleTapSeconds => doubleTapSeconds;
+        public int TargetFrameRate => targetFrameRate;
+        public float ExitMarginCells => exitMarginCells;
     }
 }

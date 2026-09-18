@@ -22,8 +22,9 @@ namespace NanaArrow.UI.Main
 
         public bool IsOpen => gameObject.activeSelf;
 
-        private void Awake() => BackButton.Pressed += OnBackPressed;
-        private void OnDestroy() => BackButton.Pressed -= OnBackPressed;
+        // 패널은 닫혀 있을 때 비활성이라 Awake 가 돌지 않는다 → 열려 있는 동안만 구독한다 (W-025 5).
+        private void OnEnable() => BackButton.Pressed += OnBackPressed;
+        private void OnDisable() => BackButton.Pressed -= OnBackPressed;
 
         /// <summary>칸 상태 규칙: 클리어 / 바로 다음 하나 / 잠김.</summary>
         public static LevelCellState StateFor(int level, int highestCleared)

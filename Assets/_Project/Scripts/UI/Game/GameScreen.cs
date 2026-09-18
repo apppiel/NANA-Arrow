@@ -11,6 +11,9 @@ namespace NanaArrow.UI.Game
         private void Awake() => BackButton.Pressed += OnBackPressed;
         private void OnDestroy() => BackButton.Pressed -= OnBackPressed;
 
+        /// <summary>씬에 활성으로 저장된 팝업이 게임 시작과 동시에 겹쳐 보이는 것을 막는다 (W-025 4).</summary>
+        private void Start() => PopupBase.CloseAll();
+
         private void OnBackPressed()
         {
             if (PopupBase.ConsumedBack || confirmMainPopup == null) return;
