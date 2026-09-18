@@ -1076,8 +1076,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NanaArrow.UI::NanaArrow.UI.Game.GridToggleButton
   background: {fileID: 0}
-  onColor: {r: 1, g: 1, b: 1, a: 1}
-  offColor: {r: 0.75, g: 0.75, b: 0.78, a: 1}
+  theme: {fileID: 11400000, guid: 512d13548d6df4475a97990680f9f234, type: 2}
 --- !u!1 &256194004
 GameObject:
   m_ObjectHideFlags: 0

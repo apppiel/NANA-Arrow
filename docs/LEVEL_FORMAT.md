@@ -62,7 +62,7 @@ y0   1○   ·   ·   ·  4○
 | arrows[].cells | int[][] | O | 꼬리→머리 경로. 다른 Arrow 와 겹치지 않음 |
 | arrows[].hits | int | X | Frozen 전용. 총 탭 수(마지막 Fire 포함), 기본 2. 얼음 깨기 탭은 레인·잠금과 무관, 목숨 차감 없음 |
 | arrows[].keyGroup | string | X | Locked/Key 전용 |
-| mask | int[][] | X | **예약 (v1.1)**. 비직사각 보드에서 사용할 수 있는 칸 목록. v1 로더는 무시 |
+| mask | string[] | X | 비직사각 보드. 위→아래 행, `#`=포함 `.`=제외. 행 수=height, 행 길이=width. 생략 시 전체 사각형 (v0.7) |
 | solution | string[] | X | 정답 Exit 순서 (검증기가 채움, 얼음 깨기 탭 제외) |
 | meta | object | X | 자유. 검증기는 `minTaps` 만 기록 |
 | meta.minTaps | int | X | Arrow 수 + Σ(Frozen.hits − 1) |

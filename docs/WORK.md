@@ -11,6 +11,7 @@
 - [ ] Play 확인: 하트 0 → 이어하기 → 다시하기 / 핀치 줌·드래그 / Level Jump 26·40·50
 - [ ] 끝나면 디렉터에게 "씬 커밋해줘" + 스크린샷
 - [ ] (출시 전) AdMob 앱·광고 단위, Unity Ads 미디에이션, Firebase 새 프로젝트 + google-services.json, Android keystore
+- [ ] **FreeButtonSet 라이선스 확인** (docs/ASSETS.md 참조): 어디서 받았는지·상업 이용 가능한지. 불명이면 출시 전 교체 — 어차피 임시 아트라 정식 아트로 바꾸는 게 답
 
 ## 프로그래머
 
