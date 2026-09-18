@@ -156,14 +156,16 @@
 - Add Component → **Horizontal Layout Group**: Spacing 16, Child Alignment = Middle Center, **Control Child Size 폭·높이 둘 다 끔**
 - Add Component → **`Lives View`**
 - `Hearts` 아래에 UI → Image 를 3개 만들고 이름 **`Heart_0`, `Heart_1`, `Heart_2`**
-  - 각각 크기 64 × 64, Source Image = **`Knob`**, Color = `E8453C`
+  - 각각 크기 64 × 64, Source Image = **`Art/Sprites/Heart`**
+  - **Color 는 흰색(`FFFFFF`) 그대로 두세요.** Image 는 스프라이트 색에 Color 를 **곱하므로**, 이미 빨간 하트에 빨강을 또 곱하면 어두운 자주색이 됩니다 (스프라이트 없이 `Knob` 으로 할 때만 `E8453C` 를 씁니다)
 - `Hearts` 의 **Lives View** 필드 채우기
 
 | 필드 | 넣을 것 |
 |---|---|
 | Game Controller | Hierarchy 의 **`GameController`** |
 | Hearts | Size = **3** → Element 0/1/2 에 `Heart_0`/`Heart_1`/`Heart_2` 드래그 |
-| Full Sprite / Empty Sprite | **비워 둠** (스프라이트가 없으면 알파로 표현 — `Empty Alpha` 0.3) |
+| Full Sprite | `Art/Sprites/Heart` |
+| Empty Sprite | **비워 둠** — 빈 하트 그림이 아직 없어서, 같은 하트가 투명도 30%(`Empty Alpha`)로 흐려집니다. 회색 하트가 생기면 그때 넣으면 됩니다 |
 | Shake Duration / Vibrate On Life Lost | 기본값 그대로 |
 
 **2-2. `BackButton`** — `HUD` 우클릭 → UI → **Button - TextMeshPro** (팝업 뜨면 "TMP Essentials 는 이미 설치됨" 이므로 그냥 생성됨)
@@ -418,10 +420,22 @@
 
 | 항목 | 담당 | 없으면 |
 |---|---|---|
-| 하트(가득/빈), 손가락, ←·↻·톱니·체크·자물쇠 아이콘 스프라이트 | 팀장(아트) | `Knob`/`UISprite` 로 임시 진행. 나중에 Source Image 만 교체 |
+| ~~하트(가득)~~ | ✅ 완료 | `Art/Sprites/Heart.png` (2026-09-18 팀장 추가) |
+| 하트(빈), 손가락, ←·↻·톱니·체크·자물쇠 아이콘 스프라이트 | 팀장(아트) | `Knob`/`UISprite` 로 임시 진행. 빈 하트는 없으면 가득 하트를 알파 30% 로 씀 |
 | 사운드 13종 클립 | 팀장 | 무음 (정상 동작) |
 | AdMob 실제 앱 ID·광고 단위 ID | 팀장(콘솔) | 테스트 광고로 동작. 출시 전 필수 |
 | Firebase `google-services.json` | 팀장(콘솔) | 응모 코드가 로컬 발급만 됨. 출시 전 필수 |
+
+#### 에셋 출처 기록 (디렉터께 — 정식 문서로 옮기실지 판단 부탁드립니다)
+
+스토어 심사·분쟁 대비로 아트 에셋 출처를 남겨 둡니다. 저는 `docs/` 에 새 파일을 만들 수 없어 여기 적습니다.
+
+| 에셋 | 출처 | 상업적 이용 | 확인 |
+|---|---|---|---|
+| `Art/Sprites/Heart.png` | **망고보드** | 팀장 확인 "사용해도 괜찮음" | 2026-09-18 |
+| `Art/Fonts/NanumGothic.otf` (+ SDF) | 나눔고딕 | OFL (자유 이용) | — |
+
+> 망고보드는 **플랜·용도에 따라 이용 범위가 다릅니다** (앱 스토어 배포·재판매 포함 여부). 출시 전에 현재 플랜이 모바일 앱 배포를 포함하는지 한 번만 확인해 두시면 안전합니다. 개발·테스트 단계에서는 문제없습니다.
 
 ---
 
