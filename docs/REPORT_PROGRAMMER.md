@@ -2,6 +2,59 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-021 완료 (2026-09-18) — 브랜치 `feat/build-prep`
+
+- 테스트 **288/288** (+21), 컴파일 에러 0, 콘솔 경고 0. 씬·프리팹은 안 건드림
+- W-011 가정 5건이 전부 승인돼서 코드 조정은 없음 (이미 그 전제로 구현돼 있었음)
+
+**변경 요약 (PR)**
+
+**1. GAME_RULES v0.7.2 §10 — 줌**
+- `zoomMin` 이 "최소 = 기본" 이었던 걸 분리: **`zoomMin` 0.5 / `zoomDefault` 1.0 / `zoomMax` 3.0**. `BoardCameraModel` 은 시작·리셋을 `zoomDefault` 로 하고 `[zoomMin, zoomMax]` 로 클램프. `IsDefault` 도 기본 줌 기준
+- **`Clamp()` 판정 교체**: "줌이 최소면 항상 중앙" → **"보드(+여백)가 화면에 다 들어오면 중앙"**. v0.7.2 가 "후반 레벨은 보드가 화면 폭을 넘는다" 를 허용하므로, 기본 줌에서도 보드가 화면보다 크면 이동이 돼야 합니다. 예전 코드는 이 경우 이동을 막았습니다
+- `GameConfig.asset` 값도 갱신 (`zoomMin: 1` → `0.5`, `zoomDefault: 1` 추가). **C# 기본값만 바꾸면 이미 직렬화된 에셋은 안 바뀌어서 에셋을 직접 고쳤습니다**
+
+**2. §9 — 격자 토글 (W-020 에 없었음 → 새로 추가)**
+- **`Gameplay/View/GridOverlay`**: 셀 경계를 옅은 선으로. `BoardLayout.GridMin`·`GridMax` 로 영역 계산 (셀 중심이 격자 칸 한가운데 오도록)
+- `ArrowViewStyle` 에 `gridColor`(연회색) / `gridLineWidthCellRatio`(0.03) / `gridOrder`(0, 모든 것 뒤) — §9 수치 그대로. 에셋에도 기록
+- **`SettingsStore.GridOn`** (PlayerPrefs, **기본 꺼짐**) + `GridChanged` 이벤트
+- **`UI/Game/GridToggleButton`**: 우하단 `#` 버튼. onClick 을 스스로 등록하므로 인스펙터 연결 불필요
+- 배선 주의: `BoardView`(Gameplay)는 `SettingsStore`(Core)를 **참조할 수 없어서**(Core → Gameplay 단방향) `GameController` 가 중계합니다
+
+**3. §10 — 난이도 라벨 (W-017 에 없었음 → 새로 추가)**
+- `LevelData.Difficulty`: `meta.difficulty` 1~3, 없거나 범위 밖·타입 불일치면 **0 = 숨김**
+- **`UI/Game/DifficultyLabel`**: 1/2/3 → `hud.difficulty.easy/normal/hard`. `KeyFor` 는 static 이라 테스트 가능
+- `GameController.CurrentLevelData` 노출 (기존엔 `LevelData` 를 안 들고 있었음)
+- `Strings_ko.asset` 에 **`hud.difficulty.easy/normal/hard`** 3키 추가 (`쉬움`/`보통`/`어려움`, 총 45키)
+
+**4. Android 빌드**
+- **`Editor/BuildScript`**: 메뉴 `NanaArrow/Build/` 에 **개발 빌드 APK (`Cmd+Shift+B`)** / 릴리스 빌드 APK / EDM Force Resolve. 결과 = `Builds/NANA-Arrow_<버전>_<dev|release>_<날짜>.apk`, 끝나면 폴더를 열어 줌
+- 빌드 전에 Scene List 비었는지·플랫폼이 Android 인지 확인하고 **EDM Force Resolve 를 먼저 실행**. EDM 은 asmdef 가 없어 `Assembly-CSharp-Editor` 에 들어가므로 **리플렉션**으로 `GooglePlayServices.PlayServicesResolver.MenuResolve` 를 호출합니다 (에디터에서 조회 성공 확인)
+- 릴리스 서명은 **`ProjectSettings/keystore.local.json`** 에서 읽음 (`keystorePath`/`keystorePass`/`keyaliasName`/`keyaliasPass`). 없으면 릴리스만 막히고 개발 빌드는 정상
+- `.gitignore` 에 `/Builds/`, `keystore.local.json`, `*.keystore`, `*.jks` 추가
+- **Player Settings 는 손대지 않았습니다** — 이미 요구사항을 만족합니다: Android / IL2CPP / ARM64+ARMv7(`AndroidTargetArchitectures: 3`) / `AndroidMinSdkVersion: 25` / Portrait 고정 / 씬 Boot·Main·Game 순서 / `com.nanabox.arrow`
+
+**5. 팀장용 조립 가이드 갱신**
+- 이번에 HUD 에 `DifficultyLabel`·`GridToggleButton` 이 생겨서, 아래 조립 가이드 **STEP 2 에 2-4·2-5 를 추가**했습니다
+
+**디렉터께 — 커밋 부탁드립니다**
+`docs/BUILD.md` 와 `docs/QA_DEVICE.md` 를 만들어 두었지만 **커밋하지 않았습니다**. TEAM.md "커밋 담당" 규칙 (2) 가 *프로그래머는 `docs/` 를 add 하지 않는다 — `REPORT_PROGRAMMER.md`, `HANDOFF_PROGRAMMER.md` 만 예외* 라서입니다. WORK.md W-021 은 두 문서를 프로그래머 항목으로 적어 두셨는데, 두 규칙이 같은 날짜라 충돌합니다. **작업 트리에 untracked 로 있으니 main 에서 커밋해 주시면 됩니다.** (앞으로 이런 경우 제가 커밋해도 되는지도 알려 주시면 그대로 따르겠습니다)
+
+**가정 (디렉터 확인)**
+- 격자 토글 상태를 **PlayerPrefs 에 저장**했습니다 (§9 "상태는 PlayerPrefs 저장" 그대로). 레벨마다 초기화하지 않습니다
+- 격자 기본값은 **꺼짐** (§9 "기본은 격자·셀 배경 없음")
+- 난이도 라벨은 `meta.difficulty` 가 없는 레벨에서 **숨김**. 현재 레벨 1~50 에는 전부 들어 있어 항상 보입니다
+- 릴리스 빌드는 APK 로 만듭니다. 스토어 업로드용 **AAB** 가 필요하면 말씀해 주시면 메뉴를 추가하겠습니다
+- `BuildScript` 의 출력 폴더·키스토어 경로는 Editor 전용 도구라 인스펙터가 없어 `const` 로 뒀습니다 (게임 밸런스 값이 아니라 SO 로 빼지 않았습니다)
+
+**팀장 에디터 할 일 — "씬에 붙일 것"**
+1. **Game 씬 HUD**: `DifficultyLabel`(TMP + DifficultyLabel), `GridToggleButton`(Button + GridToggleButton) — 아래 조립 가이드 **STEP 2-4·2-5**
+2. 첫 개발 빌드: **NanaArrow → Build → 개발 빌드 APK** (`docs/BUILD.md`), 폰에서 `docs/QA_DEVICE.md` 20항목 확인
+3. (출시 전) 서명 키 만들고 `ProjectSettings/keystore.local.json` 작성 + **키 백업** (분실 시 스토어 업데이트 불가)
+
+---
+
+
 ### 씬·프리팹 조립 가이드 (2026-09-18) — 팀장용 단계별
 
 > 팀장님이 "에디터에서 뭘 해야 할지 모르겠다" 고 하셔서, W-010·W-017·W-011·W-020 의 "씬에 붙일 것" 을 **순서대로 따라 하기만 하면 되는 형태**로 다시 정리했습니다.
@@ -128,7 +181,32 @@
 **2-3. `RetryButton`** — `BackButton` 을 Ctrl+D 복제 → 이름 `RetryButton`, Pos (244, -100)
 - OnClick → **+** → `GameController` 드래그 → 함수 = **GameController → RestartFromHud()**
 
-**[확인]** Play → 하트 3개가 빨갛게 보이고, 화살표가 막힌 곳을 탭하면 **하트가 하나 흐려짐**. RetryButton 누르면 레벨이 처음부터 다시 시작
+**2-4. `DifficultyLabel`** (GAME_RULES v0.7.2 §10 — 상단 중앙, 하트 위) — `HUD` 우클릭 → UI → **Text - TextMeshPro**
+- 이름 `DifficultyLabel`, 앵커 top-center, Pos (0, -40), 크기 300 × 50
+- TMP: 크기 36, 가운데 정렬, 색 `141A33`
+- Add Component → **`Difficulty Label`**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Strings | `Settings/Strings_ko` |
+| Game Controller | `GameController` |
+| Label | 비워 둠 (같은 오브젝트의 TMP 를 자동으로 씀) |
+
+> 레벨 파일의 `meta.difficulty` 1/2/3 → `쉬움 / 보통 / 어려움`. difficulty 가 없는 레벨에서는 **자동으로 숨겨집니다** (안 보이는 게 정상).
+
+**2-5. `GridToggleButton`** (§9 — 우하단 `#` 격자 토글) — `SafeArea` 우클릭 → UI → **Button - TextMeshPro**
+- 이름 `GridToggleButton`, 앵커 **bottom-right**, Pos (-100, 100), 크기 120 × 120
+- Image: Source Image = `Knob`
+- 자식 Text: `#`, 크기 48, 흰색
+- Add Component → **`Grid Toggle Button`** (필드는 전부 기본값으로 두면 됩니다 — Background 를 비우면 같은 오브젝트의 Image 를 씁니다)
+
+> **OnClick 은 연결하지 마세요.** 이 스크립트가 직접 등록합니다. 켜짐/꺼짐은 버튼 색으로 구분되고, 상태는 PlayerPrefs 에 저장돼 앱을 껐다 켜도 유지됩니다.
+
+**[확인]** Play →
+- 하트 3개가 빨갛게 보이고, 화살표가 막힌 곳을 탭하면 **하트가 하나 흐려짐**
+- RetryButton 누르면 레벨이 처음부터 다시 시작
+- 상단 중앙에 난이도(`쉬움` 등)가 뜸
+- 우하단 `#` 버튼을 누르면 **옅은 격자가 켜지고 꺼짐**
 
 ---
 

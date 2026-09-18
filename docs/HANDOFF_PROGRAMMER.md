@@ -17,8 +17,11 @@
 | W-020 | 보드 줌·팬 (`BoardCameraModel` 순수 + `BoardCameraController`), TapInput 드래그/핀치 | #32 |
 | W-017 | UI 스크립트 8건 + 접착 (`LivesView`, `TutorialPresenter`+`TutorialFlow`, `MainMenu`, `LevelSelectView`/`LevelCell`, `SettingsPopup`, `ClearPopup`, `GameScreen`, `Strings`/`LocalizedText`) + 레벨 21~50 커밋 | #33 |
 | W-011 | 광고(`AdsManager` 순수 + `AdsController` + `AdMobService`), 응모 코드(`RewardCode`/`RewardCodeService`/`RewardConfig`/`RewardCodePanel`), `FailPopup` | #34 |
+| W-021 | v0.7.2(줌 3단 분리 + 격자 `GridOverlay`/`GridToggleButton` + `DifficultyLabel`), Android `Editor/BuildScript`, `docs/BUILD.md`·`QA_DEVICE.md`(미커밋) | #37 |
 
-**WORK.md 의 프로그래머 항목은 이 시점에 전부 처리됨.** 다음 세션은 WORK.md 에 새 항목이 있는지부터 본다.
+**2026-09-18 기준 남은 프로그래머 항목: W-022 (팀장이 씬을 커밋한 뒤 `Editor/SceneLintWindow` 로 빈 SerializeField 검사).** 팀장 조립이 끝나야 시작할 수 있다 — 그 전까지는 WORK.md 에 새 항목이 있는지부터 본다.
+
+**커밋 담당이 2026-09-18 에 확정됨 (docs/TEAM.md)**: 나는 코드·테스트·패키지·SDK 만 커밋하고 `docs/` 는 add 하지 않는다 (`REPORT_PROGRAMMER.md`, `HANDOFF_PROGRAMMER.md` 만 예외). docs·레벨·씬·에셋은 디렉터가 main 에 직접 커밋한다. W-021 에서 만든 `docs/BUILD.md`·`docs/QA_DEVICE.md` 는 그래서 **untracked 로 남겨 두고 REPORT 에 커밋 요청**을 적었다.
 
 ## 2. 코드 지도 (어셈블리 → 폴더)
 - `NanaArrow.Gameplay` (`Scripts/Gameplay`): 순수 규칙. `Board`, `Arrow`(경로형: cells 꼬리→머리), `FireResolver`, `TapHandler`, `LivesTracker`(`LivesChanged` 이벤트), `GameConfig`/`ArrowTypeConfig`/`ArrowViewStyle` SO. `View/` (`BoardView`, `ArrowView`, `LaneView`, `BoardLayout`), `Input/` (`TapInput`, `BoardCameraModel`, `BoardCameraController`)
