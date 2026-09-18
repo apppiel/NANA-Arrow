@@ -78,11 +78,14 @@ namespace NanaArrow.Gameplay
         [SerializeField, Min(0.05f), Tooltip("이 시간 이상 누르면 탭 대신 레인 미리보기 (초)")]
         private float longPressSeconds = 0.35f;
 
-        [Header("보드 확대·축소·이동 (GAME_RULES v0.7.1 §10)")]
-        [SerializeField, Min(1f), Tooltip("최소 줌 = 기본 크기 (1.0 에서는 이동 불가)")]
-        private float zoomMin = 1f;
+        [Header("보드 확대·축소·이동 (GAME_RULES v0.7.2 §10)")]
+        [SerializeField, Min(0.1f), Tooltip("핀치 최소 축소 배율. 기본보다 작게도 줄일 수 있다 (레퍼런스)")]
+        private float zoomMin = 0.5f;
 
-        [SerializeField, Min(1f), Tooltip("핀치 최대 확대 배율")]
+        [SerializeField, Min(0.1f), Tooltip("레벨 시작·리셋 시의 줌 배율 (후반 보드는 이 배율에서 화면을 넘칠 수 있다)")]
+        private float zoomDefault = 1f;
+
+        [SerializeField, Min(0.1f), Tooltip("핀치 최대 확대 배율")]
         private float zoomMax = 3f;
 
         [SerializeField, Min(0.01f), Tooltip("이 거리(셀 단위) 이상 움직여야 드래그(이동)로 판정. 그 전까지는 탭/길게 누르기 후보")]
@@ -116,6 +119,7 @@ namespace NanaArrow.Gameplay
         public bool AllowInputDuringFire => allowInputDuringFire;
         public float LongPressSeconds => longPressSeconds;
         public float ZoomMin => zoomMin;
+        public float ZoomDefault => zoomDefault;
         public float ZoomMax => zoomMax;
         public float DragThresholdCells => dragThresholdCells;
         public float PanMarginCells => panMarginCells;

@@ -31,6 +31,12 @@ namespace NanaArrow.Gameplay.View
             _origin = center - BoardSize * 0.5f + new Vector2(cellSize, cellSize) * 0.5f;
         }
 
+        /// <summary>격자가 덮는 영역의 좌하단 (셀 피치 기준 — 가장자리 셀의 바깥 경계). <see cref="GridMax"/> 와 쌍.</summary>
+        public Vector2 GridMin => Center - new Vector2(Width, Height) * Pitch * 0.5f;
+
+        /// <summary>격자가 덮는 영역의 우상단.</summary>
+        public Vector2 GridMax => Center + new Vector2(Width, Height) * Pitch * 0.5f;
+
         /// <summary>cell = min(화면폭 × cellWidthFraction, 화면폭 × maxAreaFraction ÷ 가로칸수).</summary>
         public static float CellSizeFor(float screenWidth, int boardWidth, float cellWidthFraction, float maxAreaFraction) =>
             screenWidth * Mathf.Min(cellWidthFraction, maxAreaFraction / boardWidth);

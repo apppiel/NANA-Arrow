@@ -33,5 +33,21 @@ namespace NanaArrow.Data
         /// <summary>자유 형식. 검증기는 "minTaps" 만 기록한다.</summary>
         [JsonProperty("meta")]
         public JObject Meta { get; set; }
+
+        /// <summary>
+        /// meta.difficulty 1~3 (쉬움·보통·어려움, GAME_RULES v0.7.2 §10 난이도 라벨).
+        /// 없거나 1~3 밖이면 0 = 표시하지 않음.
+        /// </summary>
+        [JsonIgnore]
+        public int Difficulty
+        {
+            get
+            {
+                if (Meta == null || !Meta.TryGetValue("difficulty", out var token) || token.Type != JTokenType.Integer)
+                    return 0;
+                var value = token.Value<int>();
+                return value >= 1 && value <= 3 ? value : 0;
+            }
+        }
     }
 }

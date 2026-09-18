@@ -29,7 +29,7 @@ namespace NanaArrow.Gameplay.Input
             _camera = GetComponent<Camera>();
             _baseOrthographicSize = _camera.orthographicSize;
             _basePosition = transform.position;
-            _model = new BoardCameraModel(config.ZoomMin, config.ZoomMax, config.DoubleTapSeconds);
+            _model = new BoardCameraModel(config.ZoomMin, config.ZoomDefault, config.ZoomMax, config.DoubleTapSeconds);
 
             tapInput.Pan += OnPan;
             tapInput.Pinch += OnPinch;
