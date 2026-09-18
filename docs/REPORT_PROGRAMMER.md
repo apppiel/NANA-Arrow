@@ -2,6 +2,66 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### 씬 조립 대행 (2026-09-18) — 팀장 요청
+
+> **CLAUDE.md 예외**: "씬·프리팹 직접 수정 금지, 컴포넌트 연결은 사용자가 에디터에서 함" 규칙이 있으나, **팀장이 직접 "나머지는 해줄 수 있습니까" 라고 요청**해서 이번 건에 한해 프로그래머가 조립했습니다. 디렉터께서 아셔야 씬 커밋이 가능하므로 여기 남깁니다. 앞으로도 프로그래머가 조립해도 되는지는 디렉터 판단으로 정해 주세요.
+>
+> **씬·프리팹·에셋은 커밋하지 않았습니다** (TEAM.md: 디렉터 담당). 작업 트리에 변경분이 있습니다.
+
+**팀장이 직접 하신 것 (STEP 0~3 앞부분)**: `GameController.catalog`, UICanvas/SafeArea/Popups, EventSystem(InputSystemUIInputModule), HUD(하트 3·BackButton·RetryButton·DifficultyLabel·GridToggleButton), `Popup_Clear` 의 뼈대, `Art/Sprites/Heart.png`, `Art/FreeButtonSet` 임포트
+
+**프로그래머가 이어서 한 것**
+
+| 씬/에셋 | 내용 |
+|---|---|
+| Game | `Popup_Clear` 완성(Dim/Panel 이름·Panel 구성·Title/Subtitle/버튼 2종), `Popup_Fail`·`Popup_ConfirmMain`·`Popup_Raffle` 신규, `Ads`(AdsController), `TutorialBubble`+`Finger`+`Tutorial`(TutorialPresenter), `GameScreen`, `BoardView.boardCamera`, 모든 필드·onClick 배선, `GameController.levelCleared/levelFailed` 이벤트 |
+| Main | 전체 신규 — UICanvas/EventSystem/SafeArea/Popups, Logo, StartButton(+LevelLabel), LevelSelectButton, SettingsButton, RaffleButton, LevelSelectPanel(Header+ScrollRect+GridLayout), `Popup_Settings`·`Popup_Quit`·`Popup_Raffle`, `MainMenu` 배선 |
+| Boot | 전체 신규 — UICanvas/SafeArea/Logo/Loading, `Boot`(BootLoader → Main), `Audio`(AudioManager) |
+| 프리팹 | `Assets/_Project/Prefabs/UI/LevelCell.prefab` 신규 |
+
+**실제로 돌려서 확인한 것 (플레이 모드)**
+
+- Boot → Main 자동 전환. Main 이 `레벨 5` 표시 (저장된 최고 레벨 4 기준)
+- 레벨 선택: 칸 **50개** 생성, 1~4 체크 / 5 강조 테두리 / 6+ 잠김
+- 설정 팝업: 사운드·진동 토글이 `SettingsStore`(PlayerPrefs)와 양방향 연동
+- Game: 레벨 1 로드(화살표 3), HUD 하트 3, 난이도 "쉬움", `#` 격자 버튼
+- 팝업 4종 전부 `Open()`/`Close()` 동작. 클리어 팝업은 `Strings` 로 "레벨 1"·"다음 레벨" 자동 채움
+- **콘솔 에러 0**. 경고 2건은 에디터에서 Firebase 네이티브가 없어 나는 알려진 정상 건
+- EditMode 테스트 **288/288**
+
+**조립 중 발견한 내 가이드의 오류 2건 (가이드 수정함)**
+
+1. **팝업을 비활성으로 두라고 쓴 것 — 틀렸습니다.** `PopupBase.Awake()` 가 `CanvasGroup` 을 잡아 `SetVisible(false)` 로 숨기는 구조라, 비활성이면 Awake 가 돌지 않아 `_group` 이 null → `Open()` 에서 **NRE** 로 죽습니다. 팝업은 **활성**으로 두고 숨김은 CanvasGroup 이 담당합니다. 실제로 6개(Game 3 + Main 3)를 활성으로 되돌렸습니다
+   - 비활성이 맞는 건 PopupBase 가 아닌 것들뿐: `AdUnavailableText`, `TutorialBubble`, `Finger`, `RaffleButton`, `LevelSelectPanel`
+2. **버튼 색을 남색(`141A33`)으로 칠하라고 쓴 것 — 스프라이트가 생겼으니 틀렸습니다.** `FreeButtonSet` 버튼은 이미 금색으로 그려진 스프라이트입니다. Image 는 스프라이트 색에 Color 를 **곱하므로** 남색을 곱하면 "시작하기" 가 검은 덩어리가 됩니다 (하트 때와 같은 문제). **버튼 Image = 흰색, 라벨 = 남색**으로 바꿨습니다 (14개)
+
+**만들면서 고친 것**
+
+- `LevelCell` 프리팹: 잠금 아이콘이 가운데라 **숫자와 겹쳤음** → 우하단 48px 반투명으로 이동 (`Bind()` 는 숫자를 항상 켜 두므로 가운데는 쓸 수 없습니다). `Highlight` 는 루트 Image 보다 뒤로 갈 수 없어 칸을 통째로 덮었음 → **9-slice `fillCenter = false`** 로 테두리만 그리게 변경
+- `GridToggleButton` 의 `onColor`/`offColor` 를 금색 스프라이트에 맞게 흰색/흐린 회색으로 (남색을 곱하면 탁해짐)
+
+**가정 (디렉터 확인)**
+
+- **팔레트가 GAME_RULES §9 와 달라졌습니다.** 규칙은 남색 `141A33` + 연보라 `E9E4FF` 인데, 팀장이 넣으신 `FreeButtonSet` 이 금색 계열이라 버튼이 전부 금색입니다. 색을 규칙대로 맞추려면 **색이 칠해지지 않은(흰색/회색) 버튼 스프라이트**가 필요합니다. 지금은 팀장 선택을 존중해 금색 그대로 뒀습니다
+- Main 의 Logo 는 스프라이트가 없어 **TMP 글자("NANA Arrow")**로 뒀습니다. 로고 이미지가 나오면 교체
+- `AudioManager` 의 클립 목록은 **비워** 뒀습니다 (무음으로 정상 동작). 사운드 13종이 준비되면 채우면 됩니다
+- 팝업 문구를 코드가 덮어쓰지 않는 자리(제목 등)는 **한국어를 직접 넣었습니다**. `Strings` 키로 빼야 하면 `LocalizedText` 를 붙이면 됩니다
+- 잠금 아이콘이 `x` 입니다 — `FreeButtonSet` 에 **자물쇠가 없습니다**. 자물쇠 스프라이트가 생기면 교체 권장
+
+**주의 — 팀장님 저장 파일이 바뀌었습니다**
+
+플레이 검증 중 응모 코드 팝업을 열어서 **로컬 응모 코드가 발급됐습니다** (`App.Progress.RewardCodeIssued = true`). 그래서 Main 에 "응모 코드 확인" 버튼이 보입니다. 원래 상태로 돌리려면 **NanaArrow → Cheat → Level Jump** 창의 "저장 초기화" 를 쓰시면 됩니다 (최고 레벨 4도 함께 초기화됩니다).
+
+**남은 팀장 에디터 할 일**
+
+1. **없습니다 — 씬 조립은 끝났습니다.** 열어서 눈으로 확인만 해 주세요
+2. 디렉터께 **"씬 커밋해줘"** (Game/Main/Boot `.unity` + `Prefabs/UI/LevelCell.prefab` + `Art/FreeButtonSet` + `Art/Sprites` + `NanumGothic SDF.asset`)
+3. 첫 개발 빌드: **NanaArrow → Build → 개발 빌드 APK** (`docs/BUILD.md`) → 폰에서 `docs/QA_DEVICE.md` 20항목
+4. (선택) 자물쇠·빈 하트·로고 스프라이트, 사운드 13종
+
+---
+
+
 ### W-021 완료 (2026-09-18) — 브랜치 `feat/build-prep`
 
 - 테스트 **288/288** (+21), 컴파일 에러 0, 콘솔 경고 0. 씬·프리팹은 안 건드림
@@ -247,7 +307,7 @@
 
 - `PrimaryButton` OnClick → `Popup_Clear` 드래그 → **ClearPopup → OnPrimary()**
 - `SecondaryButton` OnClick → `Popup_Clear` 드래그 → **ClearPopup → OnSecondary()**
-- 다 됐으면 `Popup_Clear` 를 **비활성(이름 왼쪽 체크 해제)**
+- ⚠️ **`Popup_Clear` 는 활성(체크 켠) 상태로 둡니다.** `PopupBase.Awake()` 가 CanvasGroup 을 잡아서 스스로 숨기는 구조라, 비활성으로 두면 Awake 가 돌지 않아 `Open()` 이 NRE 로 죽습니다 (2026-09-18 실제로 확인). 화면에는 안 보이는 게 맞습니다
 
 **3-3. `GameController` 에 팝업 연결** — `GameController` 선택
 - **Level Cleared** 이벤트 → **+** → `Popup_Clear` 드래그 → 함수 = **PopupBase → Open()**
@@ -263,7 +323,7 @@
 
 - `Popup_Clear` 의 **Reward Panel** 필드에 `Popup_Raffle` 을 넣어 주세요 (응모 레벨 클리어 시 응모 팝업이 먼저 뜹니다)
 - `BackButton`(STEP 2-2) OnClick → `Popup_ConfirmMain` → **PopupBase → Open()**
-- 팝업 4개 모두 **비활성** 상태로 두기
+- ⚠️ **팝업 4개는 전부 활성 상태로 둡니다** (위 경고와 같은 이유 — 숨기는 건 `PopupBase` 가 CanvasGroup 으로 합니다). 비활성으로 두어야 하는 건 `AdUnavailableText`·`TutorialBubble`·`Finger`·`RaffleButton`·`LevelSelectPanel` 처럼 **PopupBase 가 아닌** 오브젝트뿐입니다
 
 **3-5. `GameScreen`** — `UICanvas` 선택 → Add Component → **`Game Screen`**
 - Confirm Main Popup = `Popup_ConfirmMain`
@@ -351,7 +411,7 @@
    - **`Popup_Settings`**: **`Settings Popup`** 컴포넌트 / `Panel` 에 `SoundToggle`·`VibrationToggle`(UI → Toggle, 행 높이 120) + 우상단 `CloseButton` / Primary·Secondary 삭제 / 필드: Sound Toggle, Vibration Toggle / CloseButton OnClick → **PopupBase → Close()**
    - **`Popup_Quit`**: `Popup Base` / PrimaryButton OnClick → (다음 단계의 `MainMenu`) → **MainMenu → Quit()**, SecondaryButton OnClick → **PopupBase → Close()**
    - **`Popup_Raffle`**: Game 씬에서 만든 것을 그대로 복사 (Main 에서도 씀)
-   - 셋 다 **비활성**
+   - ⚠️ 셋 다 **활성** 상태로 (PopupBase 파생이라 비활성이면 Awake 가 안 돕니다)
 
 6. **`MainMenu`** — `UICanvas` 선택 → Add Component → **`Main Menu`**
 
