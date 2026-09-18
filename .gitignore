@@ -79,11 +79,17 @@ sysinfo.txt
 mono_crash.*
 
 # Builds
+/Builds/
 *.apk
 *.aab
 *.unitypackage
 *.unitypackage.meta
 *.app
+
+# 서명 키 — 절대 커밋하지 않는다 (W-021, 팀장이 로컬에만 보관)
+ProjectSettings/keystore.local.json
+*.keystore
+*.jks
 
 # Crashlytics generated file
 crashlytics-build.properties
