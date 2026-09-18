@@ -50,6 +50,11 @@ google-services.json, GoogleService-Info.plist, GoogleMobileAdsSettings.asset �
   - `[Range]`, `[Min]`, `[Header]` 로 인스펙터에서 안전하게 조정 가능하게
 - 커밋 메시지: `feat:`, `fix:`, `test:`, `chore:` 접두어
 
+## git 규칙 (docs/TEAM.md 커밋 담당)
+- 시작: `git checkout main && git pull`. 끝: PR 머지 후 main 으로 복귀
+- **docs/ 는 add 하지 않는다** (REPORT_PROGRAMMER.md, HANDOFF_PROGRAMMER.md 만 예외). 문서·레벨·에셋 커밋은 디렉터 담당. "chore: sync docs" 류 커밋 금지
+- 스택 PR 금지. main 기준 브랜치 하나씩
+
 ## 작업 흐름
 0. **항상 docs/WORK.md 를 먼저 읽고 "프로그래머" 항목만 수행한다. WORK.md 는 절대 수정하지 않는다. 결과 보고는 docs/REPORT_PROGRAMMER.md 맨 위에 추가한다 (이 파일만 쓴다)**
 1. GitHub 이슈 확인 → 브랜치 생성

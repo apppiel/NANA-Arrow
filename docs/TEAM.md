@@ -27,3 +27,13 @@
 - 디렉터: 전부
 - 기획자/PM: docs/CLAUDE_DESKTOP.md → GAME_RULES → LEVEL_FORMAT
 - 프로그래머: CLAUDE.md → GAME_RULES → LEVEL_FORMAT
+
+## 커밋 담당 (2026-09-18 확정)
+| 파일 | 담당 | 브랜치 |
+|---|---|---|
+| 코드·테스트·패키지·SDK | 프로그래머 | feature 브랜치 → PR → 본인 머지 |
+| docs/* (기획자 것 포함), CLAUDE.md | 디렉터 | main 직접 |
+| 씬·프리팹·폰트·에셋 (팀장이 에디터에서 만든 것) | 디렉터 (팀장이 "커밋해줘") | main 직접 |
+| 레벨 JSON | 디렉터 | main 직접 |
+
+규칙: (1) 디렉터·기획자는 작업 트리가 **main 일 때만** 파일을 고친다 (2) 프로그래머는 `docs/` 를 add 하지 않는다 — REPORT_PROGRAMMER.md, HANDOFF_PROGRAMMER.md 만 예외 (3) 프로그래머는 작업 시작 시 `git checkout main && git pull`, 끝나면 main 으로 돌아온다

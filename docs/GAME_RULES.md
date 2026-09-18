@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.7.1 — §10 에 보드 확대·축소·이동 추가)
+# NANA-Arrow — GAME_RULES.md (v0.7.2 — 레퍼런스 후반 영상 반영 + W-019 검토 3건 + 프로그래머 가정 승인)
 > 작성: 디렉터. **이 파일이 유일한 규칙 기준.** 이전 버전 문구와 충돌하면 이 파일이 우선.
 > 레퍼런스: **Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)**. 스크린샷 docs/reference/.
 > 모든 수치는 ScriptableObject(GameConfig / ArrowTypeConfig / AdsConfig / ArrowViewStyle / RewardConfig) 인스펙터 값. 여기 적힌 값은 기본값.
@@ -61,7 +61,7 @@
 Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고는 §7 이어하기 한 곳에만.
 
 ## 7. 실패 / 광고 (확정, 전부 AdsConfig)
-- 하트 0 → 실패 팝업: **광고 보고 이어하기**(보드 유지, 하트 +`continueLives` 1, 레벨당 `maxContinues` 1회) / **다시하기**(무료, 처음부터, 하트 3)
+- 하트 0 → 실패 팝업: **광고 보고 이어하기**(보드 유지, 하트 +`continueLives` 1, 레벨당 `maxContinues` 1회 — 소진 후엔 버튼 숨김, 광고 미준비 시 비활성+문구) / **다시하기**(무료, 처음부터, 하트 3)
 
 | 위치 | 종류 | 값 | 기본 |
 |---|---|---|---|
@@ -70,7 +70,7 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 | 다시하기 반복 | 전면 | interstitialAfterFails | 2 (같은 레벨 2번 실패마다) |
 | 광고 제거 IAP | - | v1 미포함 | - |
 
-- 이미 깬 레벨 재클리어도 전면 카운트 포함. HUD 다시하기·설정 다시하기는 실패로 세지 않고 광고 없음
+- 이미 깬 레벨 재클리어도 전면 카운트 포함. **실패 횟수 = 앱 실행 후 그 레벨의 실패 팝업 횟수** (HUD 다시하기·이어하기는 안 셈, 앱 재시작 시 0). HUD 다시하기는 광고 없음
 - 광고 판단은 `AdsManager` 한 곳. 게임플레이는 이벤트만 발행. SDK: **AdMob 단독 + Unity Ads 미디에이션** (기존 게임과 동일, ID 는 신규 발급)
 - **100단계 클리어 → 응모 코드** (XXXX-XXXX, 0/O/1/I 제외 32자). 기존 RewardCode/RewardCodeService 이식, 홈페이지 `https://nanabox.co.kr/reward-claim.html` 은 `RewardConfig` SO
 
@@ -87,7 +87,7 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 | longPressSeconds | 0.35s |
 
 ## 9. 그래픽 (ArrowViewStyle, 레퍼런스 스크린샷 기준)
-- **격자·셀 배경 없음.** 순백 #FFFFFF 배경에 선만
+- **기본은 격자·셀 배경 없음.** 순백 #FFFFFF 배경에 선만. **우하단 `#` 원형 버튼으로 옅은 격자 토글** (`gridColor` 연회색, `gridLineWidthCellRatio` 0.03). 상태는 PlayerPrefs 저장
 - 선: #141A33, `lineWidthCellRatio` 0.13~0.15, 둥근 꺾임(round join)·둥근 꼬리(round cap). 머리 삼각 화살촉 `arrowHead*CellRatio` 0.45~0.55
 - Marked = 선·머리 빨강 / Block = Lane 빨간 번쩍 / 미리보기 = 선 파랑 + Lane 하이라이트
 - **셀 크기 규칙 (기획자 W-016 제안 승인)**: 보드 크기와 무관하게 셀 간격 일정. `cell = min(화면폭 × cellWidthFraction(0.052), 화면폭 × maxAreaFraction(0.9) ÷ 가로칸수)`. 세로 중앙. (기존 `areaWidthFraction 0.5` 방식 폐기)
@@ -96,16 +96,17 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 
 ## 10. 화면 / UI (UI_FLOW v0.2 기준)
 - 세로 고정
-- **게임 화면 HUD**: 좌상단 원형 버튼 2개(뒤로가기=메인으로 확인 팝업, 다시하기=즉시 재시작) + 상단 중앙 하트 3개. **레벨 번호·설정 버튼 없음**. 게임 중 사운드 끄기 없음 (레퍼런스와 동일, 승인)
+- **게임 화면 HUD**: 좌상단 원형 버튼 2개(뒤로가기=메인으로 확인 팝업, 다시하기=즉시 재시작) + 상단 중앙 **난이도 라벨**(파란 글씨: 쉬움/보통/어려움 = LevelData `meta.difficulty` 1~3) + 그 아래 하트 3개 + HUD 아래 얇은 구분선 + **우하단 `#` 격자 토글**. **레벨 번호·설정 버튼 없음**. 게임 중 사운드 끄기 없음. 우상단은 비워 둠 (레퍼런스의 힌트 버튼 자리, v1 미포함)
 - 설정은 Main 전용: 사운드·**진동**(기본 켜짐, 하트 감소 시만 `vibrateOnLifeLost`)
-- 튜토리얼: 하단 말풍선 + 손가락. `TutorialConfig` SO. Lv1 탭 안내, Lv2 꺾임, **Lv4 길게 누르기 안내(승인)**, Lv16 Frozen, Lv26 Key
+- 튜토리얼: 하단 말풍선 + 손가락. `TutorialConfig` SO (`hideDelay` 3초 — 정답 탭 또는 3초 중 먼저). 단계·문구는 **UI_FLOW §7 이 기준** (Lv1 탭, Lv2 꺾임, Lv4 길게 누르기, Lv16 Frozen, Lv26 Key=a12)
 - 팝업: 클리어 / 실패 / 메인으로 확인 / 설정 / 응모 코드 / 종료 확인
 - 언어: v1 한국어만. 문구는 키로 분리 (`Strings` SO)
 - 레벨 중간 저장 없음. 레벨 로드는 `LevelCatalog` SO
 - **보드 확대·축소·이동 (대표 요구사항, 필수)** — `BoardCameraController`, 값은 GameConfig
-  - 두 손가락 핀치 = 줌 (`zoomMin` 1.0 = 기본 크기, `zoomMax` 3.0). 에디터·PC 는 마우스 휠
+  - 두 손가락 핀치 = 줌 (**`zoomMin` 0.5, 기본 1.0, `zoomMax` 3.0** — 레퍼런스는 기본보다 작게도 줄임). 에디터·PC 는 마우스 휠
+  - **후반 레벨은 보드가 화면 폭을 넘는다** (레퍼런스 영상: 화살표 30~40개). 셀 간격은 §9 규칙대로 유지하고, 보드가 잘리면 줌·팬으로 보게 한다 — 억지로 축소해 맞추지 않음
   - 한 손가락 드래그 = 이동. 단 **드래그 판정은 `dragThresholdCells`(0.3칸) 이상 움직였을 때만** — 그 전까지는 탭/길게 누르기 후보. 드래그로 확정되면 그 터치는 탭·미리보기로 세지 않음 (하트 차감 없음)
-  - 이동 범위: 보드가 화면 밖으로 완전히 나가지 않게 클램프 (`panMarginCells` 1). 줌 1.0 에서는 이동 불가 (항상 중앙)
+  - 이동 범위: 보드가 화면 밖으로 완전히 나가지 않게 클램프 (`panMarginCells` 1). 보드가 화면 안에 다 들어오면 이동 불가 (항상 중앙)
   - **더블 탭 빈 곳 = 줌 리셋** (`doubleTapSeconds` 0.3). Arrow 위 더블 탭은 탭 2회로 처리
   - 레벨 시작·클리어·실패 시 줌 리셋
   - 줌 상태에서 Fire 연출·Lane 번쩍은 그대로. HUD 는 줌 영향 없음 (Screen Space Overlay)
@@ -116,6 +117,7 @@ Hint·Undo·Shuffle 없음. 코인 없음 (쓸 곳이 없음). 보상형 광고�
 Boot(설정·저장 로드) → Main(시작·레벨 선택·설정) → Game → 클리어 팝업 → 다음 레벨 / 실패 팝업 → 이어하기·다시하기 / 뒤로가기 → Main
 
 ## 변경 이력
+- v0.7.2 (09-18) zoomMin 0.5, 후반 보드 화면 초과 허용, 격자 토글, 난이도 라벨, 실패 횟수 정의, 튜토리얼 기준=UI_FLOW, 이어하기 버튼 숨김
 - v0.7.1 (09-17) §10 보드 줌·팬 추가 (대표 요구사항)
 - v0.7 (09-17) 전면 재작성. maxArrowLength 40, 보드 가로·세로 분리, 셀 크기 규칙, 규칙 2-e, Lv4 튜토리얼, 게임 중 설정 없음 확정
 - v0.6.x 레퍼런스 확정, 경로형 전환 / v0.5.x Key·Frozen·Locked 세부, 코인 삭제, 보드 11/21/40 / v0.4 광고 확정 / v0.3 하트·Marked / v0.2 부스터 제외
