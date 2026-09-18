@@ -34,6 +34,7 @@ namespace NanaArrow.UI.Main
 
         private void Start()
         {
+            PopupBase.CloseAll();   // 씬에 활성으로 저장된 팝업 정리 (W-025 4)
             AudioManager.Instance?.PlayBgm(SoundId.BgmMain);
             Refresh();
         }

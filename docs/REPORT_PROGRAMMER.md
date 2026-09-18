@@ -2,6 +2,82 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-025 완료 (2026-09-18) — 브랜치 `fix/playtest-1`
+
+- 테스트 **302/302** (+14), 컴파일 에러 0, 콘솔 에러 0 (경고 2건은 에디터 Firebase 미초기화 — 알려진 정상)
+- 8건 전부 **플레이 모드에서 수치로 확인**했습니다. 아래 표의 "확인" 은 추측이 아니라 실측값입니다
+
+| # | 항목 | 상태 | 확인한 값 |
+|---|---|---|---|
+| 1 | Fire 가 화면 밖까지 | ✅ 수정됨 | 레벨 1 a1: 머리→보드 끝 **0칸**(예전엔 여기서 사라짐) → 머리→화면 끝 **18.3칸** + 여유 2 + 길이 6 |
+| 2 | Lane 미리보기 화면 끝까지 | ✅ 수정됨 | 선 y 0.96→**8.19**, 화면 위 끝 8.00 (보드 끝은 1.15) |
+| 3 | 60fps | ✅ 수정됨 | Boot 경유 시 `targetFrameRate=60`, `vSyncCount=0` |
+| 4 | 팝업 겹침 | ✅ 수정됨 | Game 4개·Main 3개 전부 진입 시 `활성=False, 열림=False` |
+| 5 | 레벨 선택 뒤로가기 | ✅ 수정됨 | 열림=True → 뒤로가기 → 열림=False |
+| 6 | 난이도 라벨 정렬 | ✅ 수정됨 | 원인은 **`alignment=TopLeft`** (아래 설명) |
+| 7 | `#` = 레인 가이드 | ✅ 교체됨 | 세로 Arrow 3개 → 선 3개, 1개 Exit → **선 2개** |
+| 8 | 빈 칸 점 | ✅ 추가됨 | 5×6 보드 Arrow 3개(18칸) → 점 **12개**, 1개 Exit 후 **18개** |
+
+**변경 요약 (PR)**
+
+**1·2. 화면 밖까지 (`BoardView` + `ArrowView` + `LaneView`)**
+- 원인: 이동량을 **보드 레인 길이**로 계산해서, 머리가 이미 보드 가장자리면 이동량이 0이 됐습니다 (레벨 1 이 정확히 그 경우 — 그래서 "가장자리에서 사라짐")
+- `BoardView.CellsToViewEdge(cell, dir)` 신설: **현재 카메라**의 orthographicSize·aspect·position 으로 화면 경계까지의 칸 수를 계산 → 줌·팬 상태에서도 화면 기준
+- Exit = `CellsToViewEdge(머리) + exitMarginCells` + (꼬리까지 길이+1). 미리보기 = 레인 끝에서 화면까지 추가 연장
+- `ArrowView.Sample()` 이 배열 끝에서 **직선 외삽**하도록 변경 (줌 아웃 시 미리 만든 배열보다 멀리 나가므로)
+- `GameConfig.exitMarginCells` (기본 2) 추가
+
+**3. 60fps (`BootLoader` + `GameConfig`)**
+- `GameConfig.targetFrameRate` (기본 60) + `BootLoader.Awake` 에서 `Application.targetFrameRate` 적용, `QualitySettings.vSyncCount = 0` (vSync 가 켜져 있으면 targetFrameRate 가 무시됨)
+
+**4·5. 팝업 겹침과 뒤로가기 — 같은 원인이었습니다 (`PopupBase`)**
+- 원인: `PopupBase.Awake` 가 `CanvasGroup` 을 잡고 `BackButton.Pressed` 를 구독하는데,
+  - 팝업을 **활성**으로 저장하면 → 에디터·시작 순간 전부 겹쳐 보임 (팀장 사진)
+  - 팝업을 **비활성**으로 저장하면 → Awake 가 안 돌아 `Open()` 이 NRE, 뒤로가기도 구독 안 됨
+- 수정: 닫힘 = **비활성 + CanvasGroup 숨김** 둘 다. `Open()` 이 `SetActive(true)` 로 스스로 살아나고 `Close()` 가 다시 비활성으로. `_group` 은 지연 초기화라 어느 상태로 저장돼 있든 동작합니다
+- 뒤로가기 구독을 `Awake/OnDestroy` → **`OnEnable/OnDisable`** 로 이동 (열려 있는 동안만 듣는다). `LevelSelectView` 도 같은 이유로 동일하게 수정 — 이게 5번의 직접 원인이었습니다
+- `PopupBase.CloseAll()` 추가 → `GameScreen.Start` / `MainMenu.Start` 에서 호출. 씬 저장 상태와 무관하게 진입 시 정리
+- 씬 3개의 팝업을 **비활성으로 저장**해 뒀습니다 (이제 안전합니다)
+
+> 디렉터 지시는 "`PopupBase.Awake` 에서 무조건 `SetActive(false)`" 였는데, 그러면 `Open()` 이 오브젝트를 다시 켜지 않아 팝업이 **영원히 안 뜹니다**. 의도(진입 시 안 겹치기)는 그대로 지키면서 동작하도록 `Open/Close` 가 활성 상태를 관리하는 형태로 구현했습니다.
+
+**6. 난이도 라벨 (씬 값, 코드 강제 안 함)**
+- 원인: TMP 의 **`alignment` 이 `TopLeft`** 였습니다 (TMP 기본값). 코드에서 강제하지 않고 **씬 값만** 고쳤습니다: `alignment=Center`, 앵커·피벗 top-center, Pos (0,-24), 400×56
+- 겸사겸사: 라벨(y 2260~2316)과 하트(2208~2272)가 **12만큼 겹쳐** 있었습니다 → 하트를 Pos Y −100 → **−132** 로 내려 겹침 제거 (GAME_RULES §10 "난이도 라벨 아래 하트")
+
+**7. `GridOverlay` → `LaneGuideOverlay` (교체)**
+- `GridOverlay` **삭제**. 균일한 표가 아니라 **Arrow 머리가 있는 행(가로 Arrow)·열(세로 Arrow)** 에만 화면 끝까지 선을 긋습니다. Arrow 가 없는 행·열엔 선 없음, 같은 행·열에 여럿이면 선 하나
+- **`LaneGuides`** (순수 C#, 테스트 11): `IsHorizontal` / `LineFor(arrow)` / `For(arrows)` 중복 제거 / `EmptyCells(w,h,arrows)`
+- `Arrow` 가 Exit 하면 `BoardView.RebuildGuides()` 가 그 선을 제거
+- 선 길이는 `zoomMin` 까지 축소 + 팬 해도 화면을 덮도록 계산 (`GuideHalfSpan`)
+- `ArrowViewStyle.laneGuideColor`(연보라) / `laneGuideWidthCellRatio`(0.06) / `guideOrder`
+- 이름 정리: `GridToggleButton` → **`LaneGuideToggleButton`**, `SettingsStore.GridOn` → **`LaneGuideOn`**(PlayerPrefs 키 `lane_guide_on`), `BoardView.SetGridVisible` → `SetLaneGuideVisible`
+
+**8. 빈 칸 점 (`EmptyCellDots`)**
+- 토글과 **무관하게 항상** 표시. 보드 사각형 안에서 Arrow 가 덮지 않은 칸마다 점. Arrow 가 나가면 그 칸에도 생김
+- `ArrowViewStyle.showEmptyCellDots`(기본 켜짐) / `emptyCellDotColor`(연회색) / `emptyCellDotRadiusCellRatio`(0.12)
+
+**에셋 값** — `GameConfig.asset`: `targetFrameRate 60`, `exitMarginCells 2`. `ArrowViewStyle.asset`: 레인 가이드·점 값 6개
+
+**가정 (디렉터 확인)**
+- 4번을 지시대로가 아니라 `Open/Close` 가 활성 상태를 관리하는 방식으로 구현했습니다 (위 인용 참고). 지시대로가 맞다면 알려 주세요
+- 레인 가이드 선은 **보드 좌표계**라 줌·팬에 보드와 함께 움직입니다 (지시의 "줌·팬 시 보드와 함께" 해석)
+- 빈 칸 점 색·크기는 §9 수치 그대로. 레퍼런스보다 흐리면 `ArrowViewStyle` 에서 조정하시면 됩니다
+- 6번 하트 위치 조정(−100→−132)은 제가 씬에서 했습니다. 디자인상 다른 위치가 좋으면 팀장이 옮기시면 됩니다
+
+**커밋 범위**
+- 커밋함: 코드·테스트 + `GameConfig.asset`·`ArrowViewStyle.asset`
+- **커밋 안 함(디렉터 몫)**: 씬 3개, `Prefabs/UI/LevelCell.prefab`, `Art/*`, `docs/BUILD.md`·`QA_DEVICE.md`, `docs/WORK.md`
+- Unity 가 자동으로 건드린 `ProjectSettings.asset`(Android 기본 배칭값)·`UniversalRP.asset` 등도 손대지 않았습니다
+
+**팀장 에디터 할 일**
+1. **없습니다.** 씬 값(팝업 비활성, 난이도 라벨 정렬, 하트 위치, 토글 컴포넌트 교체)까지 제가 반영했습니다
+2. 디렉터께 **"씬 커밋해줘"**
+3. `#` 버튼을 눌러 레인 가이드가 레퍼런스와 같은지, 빈 칸 점 농도가 적당한지 봐 주세요 — 다르면 `ArrowViewStyle` 에서 색·굵기만 조정하면 됩니다
+
+---
+
+
 ### 씬 조립 대행 (2026-09-18) — 팀장 요청
 
 > **CLAUDE.md 예외**: "씬·프리팹 직접 수정 금지, 컴포넌트 연결은 사용자가 에디터에서 함" 규칙이 있으나, **팀장이 직접 "나머지는 해줄 수 있습니까" 라고 요청**해서 이번 건에 한해 프로그래머가 조립했습니다. 디렉터께서 아셔야 씬 커밋이 가능하므로 여기 남깁니다. 앞으로도 프로그래머가 조립해도 되는지는 디렉터 판단으로 정해 주세요.

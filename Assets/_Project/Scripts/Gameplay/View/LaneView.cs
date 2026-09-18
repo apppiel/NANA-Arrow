@@ -26,11 +26,23 @@ namespace NanaArrow.Gameplay.View
         /// <summary>머리 중심에서 레인 끝까지. 레인이 비어 있으면 머리 칸 가장자리까지 짧게.</summary>
         public void Show(Arrow arrow, IReadOnlyList<Vector2Int> lane, BoardLayout layout, Color color)
         {
+            Show(arrow, lane, layout, color, 0f);
+        }
+
+        /// <summary>
+        /// <paramref name="extendBeyondCells"/> 가 0 보다 크면 레인 끝에서 그만큼 더 연장해 그린다.
+        /// 길게 누르기 미리보기는 보드 가장자리에서 끊지 않고 화면 끝까지 간다 (W-025 2).
+        /// </summary>
+        public void Show(Arrow arrow, IReadOnlyList<Vector2Int> lane, BoardLayout layout, Color color, float extendBeyondCells)
+        {
             StopFlash();
+            var direction = (Vector3)(Vector2)arrow.Direction.ToOffset();
             var from = (Vector3)layout.CellToWorld(arrow.Head);
             var to = lane.Count > 0
                 ? (Vector3)layout.CellToWorld(lane[lane.Count - 1])
-                : from + (Vector3)(Vector2)arrow.Direction.ToOffset() * (layout.CellSize * 0.5f);
+                : from + direction * (layout.CellSize * 0.5f);
+            if (extendBeyondCells > 0f)
+                to += direction * (extendBeyondCells * layout.Pitch);
 
             _line.positionCount = 2;
             _line.SetPosition(0, from);

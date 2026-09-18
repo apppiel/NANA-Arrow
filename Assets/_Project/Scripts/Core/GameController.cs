@@ -55,8 +55,8 @@ namespace NanaArrow.Core
             tapInput.CellTapped += OnCellTapped;
             tapInput.LanePreviewRequested += OnLanePreviewRequested;
             tapInput.LanePreviewReleased += OnLanePreviewReleased;
-            // 격자 설정은 Core 에 있고 BoardView 는 Gameplay 라 Core 를 모른다 — 여기서 이어 준다.
-            SettingsStore.GridChanged += OnGridChanged;
+            // 레인 가이드 설정은 Core 에 있고 BoardView 는 Gameplay 라 Core 를 모른다 — 여기서 이어 준다.
+            SettingsStore.LaneGuideChanged += OnLaneGuideChanged;
         }
 
         private void OnDestroy()
@@ -64,11 +64,11 @@ namespace NanaArrow.Core
             tapInput.CellTapped -= OnCellTapped;
             tapInput.LanePreviewRequested -= OnLanePreviewRequested;
             tapInput.LanePreviewReleased -= OnLanePreviewReleased;
-            SettingsStore.GridChanged -= OnGridChanged;
+            SettingsStore.LaneGuideChanged -= OnLaneGuideChanged;
             Unsubscribe();
         }
 
-        private void OnGridChanged(bool on) => boardView.SetGridVisible(on);
+        private void OnLaneGuideChanged(bool on) => boardView.SetLaneGuideVisible(on);
 
         private void Start()
         {
@@ -108,7 +108,7 @@ namespace NanaArrow.Core
             Session.Failed += OnFailed;
 
             if (boardCamera != null) boardCamera.ResetZoom();
-            boardView.SetGridVisible(SettingsStore.GridOn);
+            boardView.SetLaneGuideVisible(SettingsStore.LaneGuideOn);
             boardView.Build(Session.Board);
             boardView.Refresh(Session.Board, Session.Lives);
             if (boardCamera != null) boardCamera.Attach(boardView.Layout);

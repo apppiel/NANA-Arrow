@@ -19,10 +19,11 @@ namespace NanaArrow.Gameplay.View
         private readonly Dictionary<Arrow, ArrowView> _views = new Dictionary<Arrow, ArrowView>();
         private Transform _arrowsRoot;
         private LaneView _lane;
-        private GridOverlay _grid;
+        private LaneGuideOverlay _laneGuide;
+        private EmptyCellDots _dots;
         private ArrowView _previewView;
         private int _firing;
-        private bool _gridVisible;
+        private bool _laneGuideVisible;
 
         public BoardLayout Layout { get; private set; }
         /// <summary>보드를 그리는 카메라 (UI 가 셀 → 화면 좌표로 바꿀 때).</summary>
@@ -31,12 +32,12 @@ namespace NanaArrow.Gameplay.View
         /// <summary>Fire 연출 중인 Arrow 가 있는지 (allowInputDuringFire = false 일 때 입력 차단용).</summary>
         public bool IsFiring => _firing > 0;
 
-        /// <summary>격자 표시 (GAME_RULES v0.7.2 §9). 설정값은 Core 쪽 SettingsStore 가 들고 있고 GameController 가 넘겨준다.</summary>
-        public void SetGridVisible(bool visible)
+        /// <summary>레인 가이드 표시 (GAME_RULES v0.7.3 §9). 설정값은 Core 쪽 SettingsStore 가 들고 있고 GameController 가 넘겨준다.</summary>
+        public void SetLaneGuideVisible(bool visible)
         {
-            _gridVisible = visible;
-            if (_grid != null)
-                _grid.SetVisible(visible);
+            _laneGuideVisible = visible;
+            if (_laneGuide != null)
+                _laneGuide.SetVisible(visible);
         }
 
         private void Awake()
@@ -51,10 +52,14 @@ namespace NanaArrow.Gameplay.View
             var cellSize = BoardLayout.CellSizeFor(CameraWidth(), board.Width, config.CellWidthFraction, config.MaxAreaFraction);
             Layout = new BoardLayout(board.Width, board.Height, cellSize, cellSize * config.CellGapRatio, transform.position);
 
-            _grid = new GameObject("Grid").AddComponent<GridOverlay>();
-            _grid.transform.SetParent(transform, false);
-            _grid.Build(Layout, style);
-            _grid.SetVisible(_gridVisible);
+            _dots = new GameObject("EmptyCellDots").AddComponent<EmptyCellDots>();
+            _dots.transform.SetParent(transform, false);
+            _dots.Initialize(Layout, style);
+
+            _laneGuide = new GameObject("LaneGuide").AddComponent<LaneGuideOverlay>();
+            _laneGuide.transform.SetParent(transform, false);
+            _laneGuide.Initialize(Layout, style, GuideHalfSpan());
+            _laneGuide.SetVisible(_laneGuideVisible);
 
             _arrowsRoot = new GameObject("Arrows").transform;
             _arrowsRoot.SetParent(transform, false);
@@ -72,6 +77,24 @@ namespace NanaArrow.Gameplay.View
                 _views[arrow] = view;
                 StartCoroutine(PopIn(view.transform, (arrow.Head.x + arrow.Head.y) * config.CellSpawnStagger));
             }
+
+            RebuildGuides();
+        }
+
+        /// <summary>레인 가이드·빈 칸 점을 남아 있는 Arrow 기준으로 다시 그린다 (Arrow 가 나가면 그 선이 사라지고 점이 생긴다).</summary>
+        private void RebuildGuides()
+        {
+            if (_laneGuide != null) _laneGuide.Rebuild(_views.Keys);
+            if (_dots != null) _dots.Rebuild(_views.Keys);
+        }
+
+        /// <summary>레인 가이드 선의 절반 길이. 최대 축소(zoomMin)로 팬해도 화면을 덮도록 보드 + 화면을 넉넉히 감싼다.</summary>
+        private float GuideHalfSpan()
+        {
+            var boardHalf = Mathf.Max(Layout.BoardSize.x, Layout.BoardSize.y) * 0.5f;
+            var viewHalf = CameraWidth() * 0.5f;
+            var zoomOut = config.ZoomMin > 0f ? 1f / config.ZoomMin : 1f;
+            return (boardHalf + viewHalf * zoomOut + config.PanMarginCells * Layout.Pitch) * 2f;
         }
 
         public bool TryGetCell(Vector3 world, out Vector2Int cell)
@@ -100,7 +123,9 @@ namespace NanaArrow.Gameplay.View
                 case TapOutcome.Exit:
                     _views.Remove(arrow);
                     _firing++;
-                    view.PlayFire(result.FreeCells, config.FireSpeedCellsPerSec, () => _firing--);
+                    // 논리 Exit 는 이미 끝났고 연출만 남았다 → 보드 가장자리가 아니라 화면 밖까지 보낸다 (W-025 1)
+                    view.PlayFire(ExitTravelCells(arrow), config.FireSpeedCellsPerSec, () => _firing--);
+                    RebuildGuides();
                     break;
                 case TapOutcome.Blocked:
                     _lane.Flash(arrow, result.Lane, Layout, style.LaneFlashColor, config.LaneFlashDuration);
@@ -123,7 +148,9 @@ namespace NanaArrow.Gameplay.View
                 return;
             _previewView = view;
             view.SetPreview(true);
-            _lane.Show(arrow, preview.Lane, Layout, style.LanePreviewColor);
+            // 보드 가장자리에서 끊지 않고 화면 끝까지 (W-025 2). 레인 끝에서 화면까지 남은 만큼만 더 그린다.
+            var laneEnd = preview.Lane.Count > 0 ? preview.Lane[preview.Lane.Count - 1] : arrow.Head;
+            _lane.Show(arrow, preview.Lane, Layout, style.LanePreviewColor, CellsToViewEdge(laneEnd, arrow.Direction));
         }
 
         public void HideLanePreview()
@@ -152,13 +179,47 @@ namespace NanaArrow.Gameplay.View
             StopAllCoroutines();
             if (_arrowsRoot != null) Destroy(_arrowsRoot.gameObject);
             if (_lane != null) Destroy(_lane.gameObject);
-            if (_grid != null) Destroy(_grid.gameObject);
+            if (_laneGuide != null) Destroy(_laneGuide.gameObject);
+            if (_dots != null) Destroy(_dots.gameObject);
             _views.Clear();
             _previewView = null;
             _lane = null;
-            _grid = null;
+            _laneGuide = null;
+            _dots = null;
             _firing = 0;
             Layout = null;
+        }
+
+        /// <summary>
+        /// Exit 연출에서 머리가 나아가야 할 칸 수 (W-025 1). 보드 가장자리가 아니라 <b>현재 카메라 뷰 밖</b>
+        /// + <see cref="GameConfig.ExitMarginCells"/> 까지 가고, 꼬리까지 빠지도록 Arrow 길이를 더한다.
+        /// 현재 카메라를 읽으므로 줌·팬 상태에서도 화면 기준이 된다.
+        /// </summary>
+        private int ExitTravelCells(Arrow arrow) =>
+            Mathf.CeilToInt(CellsToViewEdge(arrow.Head, arrow.Direction)) + Mathf.CeilToInt(config.ExitMarginCells);
+
+        /// <summary>
+        /// <paramref name="from"/> 셀에서 진행 방향의 카메라 뷰 경계까지 몇 칸인지 (현재 줌·팬 기준).
+        /// 카메라를 못 찾으면 0.
+        /// </summary>
+        private float CellsToViewEdge(Vector2Int from, Direction direction)
+        {
+            var camera = targetCamera != null ? targetCamera : Camera.main;
+            if (camera == null) return 0f;
+
+            var world = Layout.CellToWorld(from);
+            var offset = direction.ToOffset();
+            var halfHeight = camera.orthographicSize;
+            var halfWidth = halfHeight * camera.aspect;
+            var center = (Vector2)camera.transform.position;
+
+            float distance;
+            if (offset.x != 0)
+                distance = offset.x > 0 ? center.x + halfWidth - world.x : world.x - (center.x - halfWidth);
+            else
+                distance = offset.y > 0 ? center.y + halfHeight - world.y : world.y - (center.y - halfHeight);
+
+            return Mathf.Max(0f, distance) / Layout.Pitch;
         }
 
         /// <summary>카메라가 보는 화면 폭 (월드 단위). 셀 크기 규칙의 "화면폭".</summary>

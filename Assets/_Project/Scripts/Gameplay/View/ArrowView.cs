@@ -104,10 +104,14 @@ namespace NanaArrow.Gameplay.View
                 _icon.enabled = locked;
         }
 
-        /// <summary>Exit: 머리는 레인을 직진, 몸통은 경로를 따라. 꼬리가 보드 밖으로 나가면 파괴.</summary>
-        public void PlayFire(int laneCells, float cellsPerSecond, Action onComplete)
+        /// <summary>
+        /// Exit: 머리는 레인을 직진, 몸통은 경로를 따라. <paramref name="travelCells"/> 는 머리가 화면 밖으로
+        /// 나가는 데 필요한 칸 수 (BoardView 가 카메라 기준으로 계산, W-025 1)이고, 여기에 꼬리까지 빠질
+        /// 길이를 더해 달린 뒤 파괴한다.
+        /// </summary>
+        public void PlayFire(int travelCells, float cellsPerSecond, Action onComplete)
         {
-            StartMotion(FireRoutine(laneCells + _arrow.Length + 1, cellsPerSecond, onComplete));
+            StartMotion(FireRoutine(travelCells + _arrow.Length + 1, cellsPerSecond, onComplete));
         }
 
         /// <summary>Block: 머리가 앞으로 살짝 밀렸다가 제자리 (GAME_RULES §2-3). 레인 번쩍은 LaneView 가 한다.</summary>
@@ -147,7 +151,7 @@ namespace NanaArrow.Gameplay.View
             _points.Clear();
             _points.Add(_arrow.Length == 1 ? headCenter - _headDir * (_layout.CellSize * 0.5f) : Sample(start));
             for (var k = Mathf.FloorToInt(start) + 1; k < end; k++)
-                _points.Add(_extended[k]);
+                _points.Add(Sample(k));   // 배열 끝을 넘어가면 Sample 이 직선으로 외삽한다
             _points.Add(headCenter - _headDir * (_headLength * 0.5f));
 
             _line.positionCount = _points.Count;
@@ -160,11 +164,16 @@ namespace NanaArrow.Gameplay.View
                 _icon.transform.localPosition = headLocal;
         }
 
+        /// <summary>
+        /// _extended 위의 위치 (셀 단위). 배열 끝을 넘어가면 머리 방향으로 <b>직선 외삽</b>한다 —
+        /// Exit 연출이 화면 밖까지 가야 해서(W-025 1) 줌 아웃 상태에서는 배열보다 멀리 나갈 수 있다.
+        /// </summary>
         private Vector3 Sample(float u)
         {
+            var last = _extended.Length - 1;
             var index = Mathf.FloorToInt(u);
-            if (index >= _extended.Length - 1)
-                return _extended[_extended.Length - 1];
+            if (index >= last)
+                return _extended[last] + _headDir * ((u - last) * _layout.Pitch);
             if (index < 0)
                 return _extended[0];
             return Vector3.Lerp(_extended[index], _extended[index + 1], u - index);
