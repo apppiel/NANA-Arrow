@@ -55,7 +55,8 @@ REPORT_PROGRAMMER 의 W-010·W-020·W-017·W-011 "팀장 에디터 할 일" 참�
 - Game 씬: `TapInput.config` 비어 있음(플레이 시 NRE), `GameController.catalog/boardCamera`, Main Camera 의 `BoardCameraController`, `Ads`(AdsController), HUD `LivesView`, `Tutorial`(TutorialPresenter), `Screen`(GameScreen), 팝업 4종(`ClearPopup`/`FailPopup`/ConfirmMain/`RewardCodePanel`)
 - Main 씬: `MainMenu`, `LevelSelectView`+`LevelCell` 프리팹, `SettingsPopup`, Quit/Raffle 팝업
 - `LevelCatalog.asset` 에 21~50 추가 (현재 20개만)
-- 한글 TMP 폰트 (없으면 □□□), 하트·손가락·아이콘 스프라이트
+- 한글 TMP 폰트: **완료** (`Art/Fonts/NanumGothic SDF.asset`). 하트·손가락·아이콘 스프라이트는 아직 없음 (`Knob`/`UISprite` 로 임시 진행 가능)
+- **2026-09-18: 위 전부를 STEP 0~8 단계별 가이드로 풀어 `REPORT_PROGRAMMER.md` 맨 위에 적어 둠** (팀장이 "어떻게 하는지 모르겠다" 고 해서). Main·Boot 씬은 빈 씬이고 프리팹은 0개 — 참조 연결이 아니라 UI 를 통째로 만드는 작업임
 - 출시 전: AdMob 실제 앱 ID·광고 단위 ID (`AdMobService` 상수 + `GoogleMobileAdsSettings.asset`), Firebase 새 프로젝트의 `google-services.json`, EDM Force Resolve, `cellWidthFraction` 0.052→0.07 검토(레퍼런스 대비 보드가 작음)
 
 ## 6. 디렉터 확인 대기 중인 가정 (REPORT 에 적어 둠, 답이 오면 코드 조정)

@@ -2,6 +2,359 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### 씬·프리팹 조립 가이드 (2026-09-18) — 팀장용 단계별
+
+> 팀장님이 "에디터에서 뭘 해야 할지 모르겠다" 고 하셔서, W-010·W-017·W-011·W-020 의 "씬에 붙일 것" 을 **순서대로 따라 하기만 하면 되는 형태**로 다시 정리했습니다.
+> 저는 씬·프리팹을 건드리지 않으므로 아래는 전부 팀장님이 에디터에서 하실 일입니다. 막히면 그 단계 번호를 알려주시면 됩니다.
+
+**현재 실제 상태 (제가 확인함)**
+
+| | 상태 |
+|---|---|
+| Game 씬 | 오브젝트 4개 (`Main Camera`, `Board`, `Input`, `GameController`) — **참조가 비어 있어 Play 하면 NRE**, Canvas·EventSystem 없음 |
+| Main 씬 | 완전히 빈 씬 |
+| Boot 씬 | 완전히 빈 씬 |
+| 프리팹 | 0개 |
+| 스프라이트 | 0개 (하트·손가락·아이콘 없음 → 아래는 전부 Unity 기본 스프라이트로 진행) |
+| 한글 TMP 폰트 | ✅ `Assets/_Project/Art/Fonts/NanumGothic SDF.asset` 있음 |
+
+**중요 — STEP 0 만 하면 게임이 일단 돌아갑니다.** UI 40개를 다 만든 뒤에 확인하지 마시고, STEP 0 → Play 로 게임이 되는 걸 먼저 보신 다음 UI 를 얹으세요. 각 단계 끝의 **[확인]** 을 통과하고 다음으로 가시면 됩니다.
+
+---
+
+#### 공통 규칙 (매번 반복)
+
+- 색: 남색 `141A33`, 연보라 `E9E4FF`, 하트 빨강 `E8453C`, 딤 = 검정 알파 50%
+- 스프라이트가 없는 자리는 Image 의 **Source Image = `Knob`** (원형) 또는 **`UISprite`** (둥근 사각형, Image Type = **Sliced**) 로 대체. 둘 다 Unity 내장이라 지금 바로 쓸 수 있습니다
+- TMP 텍스트를 만들면 Font Asset 이 `NanumGothic SDF` 인지 확인 (아니면 □□□ 로 보임). 매번 바꾸기 귀찮으면 **Edit → Project Settings → TextMesh Pro → Settings → Default Font Asset** 에 `NanumGothic SDF` 를 한 번 지정해 두세요
+- 인스펙터 필드에 에셋을 넣을 때는 Project 창에서 **드래그**, 씬 오브젝트를 넣을 때는 Hierarchy 에서 **드래그**
+- 단계가 끝날 때마다 **Ctrl+S** (씬 저장)
+
+---
+
+### STEP 0 — Game 씬이 Play 되게 하기 (5분, 가장 먼저)
+
+기존 4개 오브젝트의 빈 참조만 채웁니다. 새로 만드는 것 없음.
+
+**0-1. `Board` 선택 → BoardView**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Config | `Assets/_Project/Settings/GameConfig` |
+| Style | `Assets/_Project/Settings/ArrowViewStyle` |
+| Target Camera | **비워 둠** (자동으로 Camera.main) |
+
+**0-2. `Input` 선택 → TapInput**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Config | `Settings/GameConfig` |
+| Board View | Hierarchy 의 **`Board`** |
+| Target Camera | 비워 둠 |
+
+**0-3. `Main Camera` 선택 → Add Component → `Board Camera Controller`**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Config | `Settings/GameConfig` |
+| Tap Input | Hierarchy 의 **`Input`** |
+| Board View | Hierarchy 의 **`Board`** |
+
+**0-4. `GameController` 선택 → GameController**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Game Config | `Settings/GameConfig` |
+| Arrow Type Config | `Settings/ArrowTypeConfig` |
+| Board View | `Board` |
+| Tap Input | `Input` |
+| Board Camera | **`Main Camera`** (BoardCameraController 가 붙은) |
+| Catalog | `Settings/LevelCatalog` |
+| Start Level | `1` |
+| Level Cleared / Level Failed | 지금은 비워 둠 (STEP 3 에서 팝업 연결) |
+
+**[확인]** Ctrl+S → Play
+- 화살표 보드가 화면에 나오고, 화살표를 탭하면 발사됨
+- 마우스 휠로 확대·축소, 드래그로 이동 됨
+- 콘솔에 에러 없음
+- 전부 제거하면 클리어 (팝업은 아직 없으니 아무 일도 안 일어나는 게 정상)
+
+> 레벨 1 이 안 보이고 다른 레벨이 나오면, 팀장님 기기의 저장 파일(최고 레벨 4) 때문입니다. **NanaArrow → Cheat → Level Jump** 창의 "저장 초기화" 를 쓰시면 됩니다.
+
+---
+
+### STEP 1 — Game 씬 Canvas 뼈대
+
+1. Hierarchy 빈 곳 우클릭 → **UI → Canvas** → 이름을 **`UICanvas`** 로 변경
+   - Canvas: Render Mode = **Screen Space - Overlay**
+   - Canvas Scaler: UI Scale Mode = **Scale With Screen Size**, Reference Resolution = **1080 × 1920**, Screen Match Mode = Match Width Or Height, **Match = 0**
+2. 같이 생긴 **`EventSystem`** 선택 → 인스펙터에 `Standalone Input Module` 이 있고 **"Replace with InputSystemUIInputModule"** 버튼이 보이면 **반드시 클릭**
+   - 이 프로젝트는 Input System 을 쓰므로, 안 바꾸면 버튼이 눌리지 않습니다
+3. `UICanvas` 우클릭 → Create Empty → 이름 **`SafeArea`**
+   - Rect Transform 앵커 프리셋 아이콘 클릭 → **Alt + Shift 를 누른 채** 오른쪽 맨 아래(stretch-stretch) 선택 → 화면 전체를 채움
+   - Add Component → **`Safe Area Adapter`**
+4. `SafeArea` 우클릭 → Create Empty → 이름 **`Popups`** → 같은 방법으로 stretch-stretch
+   - 팝업은 전부 이 아래에 둡니다 (Hierarchy 에서 아래에 있을수록 화면 위에 그려짐)
+
+**[확인]** Game 뷰에서 보드가 여전히 보이고, Hierarchy 가 `UICanvas > SafeArea > Popups` 구조
+
+---
+
+### STEP 2 — Game 씬 HUD (하트·버튼)
+
+`SafeArea` 우클릭 → Create Empty → **`HUD`**: 앵커 **top-stretch**, Pivot (0.5, 1), Pos Y = 0, Height = 200
+
+**2-1. `Hearts`** — `HUD` 우클릭 → Create Empty → 이름 `Hearts`
+- 앵커 top-center, Pos (0, -100), 크기 240 × 64
+- Add Component → **Horizontal Layout Group**: Spacing 16, Child Alignment = Middle Center, **Control Child Size 폭·높이 둘 다 끔**
+- Add Component → **`Lives View`**
+- `Hearts` 아래에 UI → Image 를 3개 만들고 이름 **`Heart_0`, `Heart_1`, `Heart_2`**
+  - 각각 크기 64 × 64, Source Image = **`Knob`**, Color = `E8453C`
+- `Hearts` 의 **Lives View** 필드 채우기
+
+| 필드 | 넣을 것 |
+|---|---|
+| Game Controller | Hierarchy 의 **`GameController`** |
+| Hearts | Size = **3** → Element 0/1/2 에 `Heart_0`/`Heart_1`/`Heart_2` 드래그 |
+| Full Sprite / Empty Sprite | **비워 둠** (스프라이트가 없으면 알파로 표현 — `Empty Alpha` 0.3) |
+| Shake Duration / Vibrate On Life Lost | 기본값 그대로 |
+
+**2-2. `BackButton`** — `HUD` 우클릭 → UI → **Button - TextMeshPro** (팝업 뜨면 "TMP Essentials 는 이미 설치됨" 이므로 그냥 생성됨)
+- 이름 `BackButton`, 앵커 top-left, Pos (100, -100), 크기 120 × 120
+- Image: Source Image = `Knob`, Color = `E9E4FF`
+- 자식 Text 는 지우거나 비워 두기 (아이콘 스프라이트가 생기면 교체)
+- **OnClick 연결은 STEP 3 에서** (`Popup_ConfirmMain` 이 아직 없음)
+
+**2-3. `RetryButton`** — `BackButton` 을 Ctrl+D 복제 → 이름 `RetryButton`, Pos (244, -100)
+- OnClick → **+** → `GameController` 드래그 → 함수 = **GameController → RestartFromHud()**
+
+**[확인]** Play → 하트 3개가 빨갛게 보이고, 화살표가 막힌 곳을 탭하면 **하트가 하나 흐려짐**. RetryButton 누르면 레벨이 처음부터 다시 시작
+
+---
+
+### STEP 3 — 팝업 (공통 틀 1개 만들고 복제)
+
+여기가 제일 손이 많이 가는 부분입니다. **틀을 하나만 제대로 만들고 복제**하면 됩니다.
+
+**3-1. 공통 틀 만들기** — `Popups` 우클릭 → Create Empty → 이름 **`Popup_Clear`**
+- Rect Transform stretch-stretch
+- Add Component → **Canvas Group**
+- Add Component → **`Clear Popup`** (PopupBase 를 상속하므로 PopupBase 를 따로 붙이지 않습니다)
+
+자식 1 — **`Dim`**: `Popup_Clear` 우클릭 → UI → Image
+- stretch-stretch, Color = 검정 + **알파 50%**(A=128), Raycast Target **켬**
+
+자식 2 — **`Panel`**: `Popup_Clear` 우클릭 → UI → Image
+- 앵커 middle-center, Width **880**, Source Image = `UISprite`, Image Type = **Sliced**, Color 흰색
+- Add Component → **Vertical Layout Group**: Padding 전부 64, Spacing 32, Child Alignment = Upper Center, **Control Child Size = 폭만 켬**, Child Force Expand 전부 끔
+- Add Component → **Content Size Fitter**: Vertical Fit = **Preferred Size**
+
+`Panel` 아래 자식들 (위에서부터 이 순서대로):
+
+| 이름 | 만드는 법 | 설정 |
+|---|---|---|
+| `Title` | UI → Text - TextMeshPro | 크기 64, Bold, 색 `141A33`, 가운데 정렬 |
+| `Subtitle` | UI → Text - TextMeshPro | 크기 40, 색 `141A33` 알파 70% |
+| `PrimaryButton` | UI → Button - TextMeshPro | Image 색 `141A33` / Add Component → **Layout Element** → Preferred Height **140** / 자식 Text 크기 48 흰색 |
+| `SecondaryButton` | `PrimaryButton` 복제 | Image 알파 **0** / Layout Element Preferred Height **120** / 자식 Text 크기 44 색 `141A33` |
+
+**3-2. `Popup_Clear` 의 Clear Popup 필드 채우기**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Closable By Back | **켬** |
+| Strings | `Settings/Strings_ko` |
+| Game Controller | `GameController` |
+| Ads | STEP 4 에서 (지금은 비워 둠 — 비어 있으면 광고 없이 바로 이동) |
+| Reward Panel | STEP 3-4 에서 (비워도 됨) |
+| Subtitle | `Panel/Subtitle` |
+| Primary Label | `Panel/PrimaryButton` 안의 **Text** |
+| Secondary Button | `Panel/SecondaryButton` (GameObject) |
+
+- `PrimaryButton` OnClick → `Popup_Clear` 드래그 → **ClearPopup → OnPrimary()**
+- `SecondaryButton` OnClick → `Popup_Clear` 드래그 → **ClearPopup → OnSecondary()**
+- 다 됐으면 `Popup_Clear` 를 **비활성(이름 왼쪽 체크 해제)**
+
+**3-3. `GameController` 에 팝업 연결** — `GameController` 선택
+- **Level Cleared** 이벤트 → **+** → `Popup_Clear` 드래그 → 함수 = **PopupBase → Open()**
+- **Level Failed** 이벤트 → **+** → (3-4 에서 만들 `Popup_Fail`) → **PopupBase → Open()**
+
+**3-4. 나머지 팝업 — `Popup_Clear` 를 Ctrl+D 복제 후 수정**
+
+| 프리팹 이름 | 컴포넌트 교체 | 수정 내용 |
+|---|---|---|
+| `Popup_Fail` | ClearPopup 제거 → **`Fail Popup`** 추가 | **Closable By Back 끔** / `Subtitle` 삭제 / `Panel` 아래 `AdUnavailableText`(TMP 32, **비활성**) 추가 / 필드: Ads = STEP 4, Continue Button = `PrimaryButton`, Ad Unavailable Text = `AdUnavailableText` / PrimaryButton OnClick → **FailPopup → OnContinue()**, SecondaryButton OnClick → **FailPopup → OnRetry()** |
+| `Popup_ConfirmMain` | ClearPopup 제거 → **`Popup Base`** 추가 | Closable By Back 켬 / `Title` 을 본문(TMP 48)으로 / PrimaryButton OnClick → `GameController` → **GameController → GoToMain()** / SecondaryButton OnClick → `Popup_ConfirmMain` → **PopupBase → Close()** |
+| `Popup_Raffle` | ClearPopup 제거 → **`Reward Code Panel`** 추가 | **Closable By Back 끔** / `Panel` 아래 `CodeText`(TMP 80 Bold, 자간 넓게) 추가 / PrimaryButton → `GoButton` 으로 이름 변경, SecondaryButton → `CopyButton` / 우상단 `CloseButton`(72×72) 추가 / 필드: Strings = `Strings_ko`, Config = `Settings/RewardConfig`, Code Text = `CodeText`, Status Text = `Subtitle`, Copy Button = `CopyButton`, Go Button = `GoButton` / CopyButton OnClick → **RewardCodePanel → CopyCode()**, GoButton OnClick → **RewardCodePanel → OpenClaimPage()**, CloseButton OnClick → **PopupBase → Close()** |
+
+- `Popup_Clear` 의 **Reward Panel** 필드에 `Popup_Raffle` 을 넣어 주세요 (응모 레벨 클리어 시 응모 팝업이 먼저 뜹니다)
+- `BackButton`(STEP 2-2) OnClick → `Popup_ConfirmMain` → **PopupBase → Open()**
+- 팝업 4개 모두 **비활성** 상태로 두기
+
+**3-5. `GameScreen`** — `UICanvas` 선택 → Add Component → **`Game Screen`**
+- Confirm Main Popup = `Popup_ConfirmMain`
+- (Android 뒤로가기 → 메인 확인 팝업)
+
+**[확인]** Play →
+- 클리어하면 `Popup_Clear` 가 뜨고 두 버튼이 동작
+- 하트를 다 잃으면 `Popup_Fail` 이 뜨고 "다시하기" 가 동작 (이어하기는 STEP 4 뒤에 정상 동작)
+- HUD 의 BackButton → 메인 확인 팝업
+
+---
+
+### STEP 4 — Game 씬 Ads
+
+1. Hierarchy 빈 곳 우클릭 → Create Empty → 이름 **`Ads`**
+2. Add Component → **`Ads Controller`**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Ads Config | `Settings/AdsConfig` |
+| Game Controller | `GameController` |
+
+3. 되돌아가서 채우기: `Popup_Clear` 의 **Ads** = `Ads`, `Popup_Fail` 의 **Ads** = `Ads`
+
+**[확인]** Play → 하트 0 → 실패 팝업 → 이어하기 → **하트 +1, 팝업 닫힘, 보드 그대로 유지** (에디터에서는 광고가 시청 완료로 처리됩니다). 다시 하트 0 → 이어하기 버튼이 **사라짐** (레벨당 1회)
+
+---
+
+### STEP 5 — Game 씬 튜토리얼
+
+1. `SafeArea` 우클릭 → UI → Image → 이름 **`TutorialBubble`**
+   - 앵커 bottom-center, Pivot (0.5, 0), Pos Y 240, 크기 820 × 150
+   - Source Image = `UISprite`, Image Type = Sliced, 흰색
+   - 자식으로 UI → Text - TextMeshPro → 이름 `Text`: stretch-stretch, 여백 32, 크기 44, 색 `141A33`, 가운데 정렬
+   - `TutorialBubble` **비활성**
+2. `UICanvas` 바로 아래(SafeArea 밖) 우클릭 → UI → Image → 이름 **`Finger`**
+   - 크기 160 × 160, Source Image = `Knob` (손가락 스프라이트가 생기면 교체), **Raycast Target 끔**, **비활성**
+3. Hierarchy 빈 곳 우클릭 → Create Empty → 이름 **`Tutorial`** → Add Component → **`Tutorial Presenter`**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Config | `Settings/TutorialConfig` |
+| Strings | `Settings/Strings_ko` |
+| Game Controller | `GameController` |
+| Board View | `Board` |
+| Bubble | `TutorialBubble` |
+| Bubble Text | `TutorialBubble/Text` |
+| Finger | `Finger` |
+
+**[확인]** 레벨 1 로 Play (필요하면 치트 창 "저장 초기화") → 말풍선 + 손가락이 뜨고, 안내한 화살표를 탭하면 사라짐
+
+---
+
+### STEP 6 — Main 씬 (지금 빈 씬)
+
+`Assets/_Project/Scenes/Main.unity` 열기.
+
+1. **STEP 1 과 똑같이** `UICanvas` + `EventSystem`(InputSystemUIInputModule 로 교체) + `SafeArea`(SafeAreaAdapter) + `Popups` 만들기
+2. `SafeArea` 아래에 만들기
+
+| 오브젝트 | 만드는 법 | 앵커 / 위치·크기 |
+|---|---|---|
+| `Logo` | UI → Image | top-center, Pos (0, -420), 600 × 300 |
+| `StartButton` | UI → Button - TMP | middle-center, Pos (0, -120), 640 × 180. Image 색 `141A33`. 자식 Text 이름 `Label`(TMP 60 흰색) + 자식 하나 더 `LevelLabel`(TMP 36, 흰색 알파 70%, 아래쪽) |
+| `LevelSelectButton` | UI → Button - TMP | middle-center, Pos (0, -340), 640 × 130. Image 알파 0, Text 색 `141A33` |
+| `SettingsButton` | UI → Button - TMP | top-right, Pos (-100, -100), 120 × 120. Image = `Knob`, 색 `E9E4FF` |
+| `RaffleButton` | UI → Button - TMP | bottom-center, Pos (0, 200), 640 × 120. **비활성** (응모 코드 발급 뒤 MainMenu 가 켬) |
+| `LevelSelectPanel` | Create Empty | stretch-stretch, 자식으로 흰 배경 Image. **비활성** |
+
+3. **`LevelSelectPanel` 내부**
+   - `Header`(top-stretch, 높이 200): 자식 `BackButton`(원형, 좌) + `Title`(TMP 56)
+   - `Scroll`: 우클릭 → UI → **Scroll View**, 앵커 stretch (Top = 200), **Horizontal 끔**, 스크롤바 2개 삭제
+   - `Scroll/Viewport/Content` 선택 → Add Component → **Grid Layout Group**: Cell Size 170 × 170, Spacing 30 × 30, Constraint = **Fixed Column Count = 5**, Child Alignment = Upper Center, Padding 40 / Add Component → **Content Size Fitter**: Vertical = Preferred Size
+   - `LevelSelectPanel` 에 Add Component → **`Level Select View`** → Catalog = `Settings/LevelCatalog`, Cell Prefab = (다음 단계에서)
+   - `Header/BackButton` OnClick → `LevelSelectPanel` → **LevelSelectView → Close()**
+
+4. **`LevelCell` 프리팹 만들기**
+   - Hierarchy 아무 곳에 UI → Button - TextMeshPro → 이름 **`LevelCell`**, 크기 170 × 170, Source Image = `UISprite` Sliced
+   - 자식: `Number`(기존 Text 이름 변경, TMP 56) / `Check`(Image 48×48, 우하단, **비활성**) / `Lock`(Image 64×64, 가운데, **비활성**) / `Highlight`(Image, stretch, 테두리용, 색 `141A33`, **비활성**)
+   - Add Component → **`Level Cell`** → Number = `Number`, Check = `Check`, Lock Icon = `Lock`, Highlight = `Highlight`
+   - Project 창에 `Assets/_Project/Prefabs/UI/` 폴더를 만들고 **`LevelCell` 을 그리로 드래그** → 프리팹 생성 → Hierarchy 의 원본은 **삭제**
+   - `LevelSelectView` 의 **Cell Prefab** 에 방금 만든 프리팹 드래그
+
+5. **팝업 2종** (`Popups` 아래) — Game 씬의 `Popup_ConfirmMain` 을 복사해 오면 빠릅니다
+   - **`Popup_Settings`**: **`Settings Popup`** 컴포넌트 / `Panel` 에 `SoundToggle`·`VibrationToggle`(UI → Toggle, 행 높이 120) + 우상단 `CloseButton` / Primary·Secondary 삭제 / 필드: Sound Toggle, Vibration Toggle / CloseButton OnClick → **PopupBase → Close()**
+   - **`Popup_Quit`**: `Popup Base` / PrimaryButton OnClick → (다음 단계의 `MainMenu`) → **MainMenu → Quit()**, SecondaryButton OnClick → **PopupBase → Close()**
+   - **`Popup_Raffle`**: Game 씬에서 만든 것을 그대로 복사 (Main 에서도 씀)
+   - 셋 다 **비활성**
+
+6. **`MainMenu`** — `UICanvas` 선택 → Add Component → **`Main Menu`**
+
+| 필드 | 넣을 것 |
+|---|---|
+| Strings | `Settings/Strings_ko` |
+| Catalog | `Settings/LevelCatalog` |
+| Start Level Label | `StartButton/LevelLabel` |
+| Level Select | `LevelSelectPanel` |
+| Settings Popup | `Popup_Settings` |
+| Quit Popup | `Popup_Quit` |
+| Raffle Popup | `Popup_Raffle` |
+| Raffle Button | `RaffleButton` |
+
+7. **버튼 OnClick 연결** (전부 `UICanvas` 의 MainMenu 로)
+
+| 버튼 | 함수 |
+|---|---|
+| `StartButton` | MainMenu → **StartGame()** |
+| `LevelSelectButton` | MainMenu → **OpenLevelSelect()** |
+| `SettingsButton` | MainMenu → **OpenSettings()** |
+| `RaffleButton` | MainMenu → **OpenRaffle()** |
+
+**[확인]** Main 씬 Play → "레벨 N" 이 뜨고, 시작하기 → Game 씬으로 이동. 레벨 선택 → 칸이 카탈로그 개수만큼 생기고 잠긴 칸은 자물쇠. 설정 → 사운드·진동 토글이 저장됨
+
+---
+
+### STEP 7 — Boot 씬
+
+`Boot.unity` 열기.
+
+1. STEP 1 과 같이 `UICanvas` + `SafeArea` → 자식 `Logo`(middle-center 600×300) + `Loading`(TMP 36, Logo 아래 Pos Y -260)
+2. Create Empty → **`Boot`** → Add Component → **`Boot Loader`** → Next Scene = **Main**
+3. Create Empty → **`Audio`** → Add Component → **`Audio Manager`**
+   - Clips: Size = 13, 각 Element 의 Id 를 SoundId 별로 지정. **클립 파일이 없으면 비워 두세요 — 무음으로 정상 동작합니다**
+   - (AudioManager 는 DontDestroyOnLoad 라 Boot 씬에만 두면 전 씬에서 삽니다)
+4. **File → Build Profiles → Scene List** 에 **Boot, Main, Game 순서**로 들어가 있는지 확인
+
+**[확인]** Boot 씬에서 Play → 자동으로 Main 으로 넘어감
+
+---
+
+### STEP 8 — LevelCatalog 에 21~50 추가
+
+1. `Assets/_Project/Settings/LevelCatalog.asset` 선택
+2. Levels 의 **Size 를 20 → 50** 으로 변경
+3. Project 창에서 `Assets/_Project/Levels/` 의 `level_021.json` ~ `level_050.json` 을 **한 번에 선택해서** Element 20~49 에 드래그
+
+> 순서가 중요합니다 (`level_001` 부터 순서대로). 드래그 후 Element 20 이 `level_021` 인지 확인해 주세요.
+
+**[확인]** Main 씬 Play → 레벨 선택 패널에 칸이 **50개**
+
+---
+
+### 마지막 확인 (전체 플레이)
+
+- [ ] Boot → Main → 시작하기 → Game → 클리어 → 다음 레벨
+- [ ] 하트 0 → 실패 팝업 → 이어하기 → 계속 진행
+- [ ] Android 뒤로가기(에디터에서는 ESC) → 팝업이 하나씩 닫히고, 마지막에 메인 확인
+- [ ] 콘솔 에러 0
+
+**끝나면 알려 주세요.** 제가 Unity MCP 로 플레이 스모크 테스트를 돌려서 실제로 잘 붙었는지 확인하고, 잘못 연결된 참조가 있으면 어디가 문제인지 짚어 드리겠습니다.
+
+---
+
+#### 아직 없는 것 (나중에, 지금은 없어도 진행 가능)
+
+| 항목 | 담당 | 없으면 |
+|---|---|---|
+| 하트(가득/빈), 손가락, ←·↻·톱니·체크·자물쇠 아이콘 스프라이트 | 팀장(아트) | `Knob`/`UISprite` 로 임시 진행. 나중에 Source Image 만 교체 |
+| 사운드 13종 클립 | 팀장 | 무음 (정상 동작) |
+| AdMob 실제 앱 ID·광고 단위 ID | 팀장(콘솔) | 테스트 광고로 동작. 출시 전 필수 |
+| Firebase `google-services.json` | 팀장(콘솔) | 응모 코드가 로컬 발급만 됨. 출시 전 필수 |
+
+---
+
+
 ### W-011 완료 (2026-09-17) — 브랜치 `feat/ads-reward` (base main)
 - 테스트 **267/267** (+34), 컴파일 에러 0. 플레이 모드(에디터 광고 스킵 경로)에서 하트 0 → 실패 팝업 → 이어하기(보상형 = 에디터는 시청 완료 처리) → 하트 +1·팝업 닫힘·보드 유지 → 다시 하트 0 → 이어하기 버튼 숨김(레벨당 1회) → 다시하기 → 재시작(RetryFail) 확인. 클리어 팝업 → `AfterLevelCleared` → 이동 콜백 확인. 씬·프리팹은 안 건드림
 - 겸사겸사: docs 스냅샷 커밋 (LEVEL_DESIGN 21~50, LEVEL_FORMAT v0.6, UI_FLOW L26 a12, REPORT_PLANNER)
