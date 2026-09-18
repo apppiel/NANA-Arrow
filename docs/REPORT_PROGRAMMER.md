@@ -121,8 +121,22 @@
 1. Hierarchy 빈 곳 우클릭 → **UI → Canvas** → 이름을 **`UICanvas`** 로 변경
    - Canvas: Render Mode = **Screen Space - Overlay**
    - Canvas Scaler: UI Scale Mode = **Scale With Screen Size**, Reference Resolution = **1080 × 1920**, Screen Match Mode = Match Width Or Height, **Match = 0**
-2. 같이 생긴 **`EventSystem`** 선택 → 인스펙터에 `Standalone Input Module` 이 있고 **"Replace with InputSystemUIInputModule"** 버튼이 보이면 **반드시 클릭**
-   - 이 프로젝트는 Input System 을 쓰므로, 안 바꾸면 버튼이 눌리지 않습니다
+2. **`EventSystem` 확인** (Canvas 를 만들면 Hierarchy 에 자동으로 같이 생깁니다)
+
+   `EventSystem` 은 "지금 누른 게 어느 버튼인지" 를 판단해 주는 오브젝트입니다. 그 안에 **마우스·터치를 실제로 읽어 오는 부품**이 하나 들어 있는데, 종류가 두 가지입니다.
+
+   | 부품 이름 | 뭔지 | 이 프로젝트에서 |
+   |---|---|---|
+   | `Input System UI Input Module` | 새 방식 | ✅ **이게 맞습니다** |
+   | `Standalone Input Module` | 옛날 방식 | ❌ 이게 붙어 있으면 **버튼이 아예 안 눌립니다** |
+
+   이 프로젝트는 새 Input System 만 쓰도록 설정돼 있어서(`activeInputHandler: 1`), 옛날 부품으로는 입력이 전혀 안 들어옵니다.
+
+   **하실 일**: `EventSystem` 을 클릭하고 인스펙터를 봅니다.
+   - **`Input System UI Input Module` 이 보이면** → 그대로 두세요. 할 일 없습니다 (요즘 Unity 는 알아서 새것을 붙여 줍니다)
+   - **`Standalone Input Module` 이 보이면** → 그 아래 노란 경고 상자에 **`Replace with InputSystemUIInputModule`** 이라는 버튼이 하나 있습니다. **그걸 누르면 끝입니다** (Unity 가 알아서 옛날 부품을 떼고 새 부품을 붙여 줍니다)
+
+   > 둘 중 어느 쪽이 나와도 정상입니다. Unity 버전·설정에 따라 갈립니다.
 3. `UICanvas` 우클릭 → Create Empty → 이름 **`SafeArea`**
    - Rect Transform 앵커 프리셋 아이콘 클릭 → **Alt + Shift 를 누른 채** 오른쪽 맨 아래(stretch-stretch) 선택 → 화면 전체를 채움
    - Add Component → **`Safe Area Adapter`**
