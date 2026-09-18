@@ -84,9 +84,16 @@ namespace NanaArrow.Editor
             }
         }
 
-        // 규칙 1: 보드 안 + 서로 다른 Arrow 끼리 겹침 없음 (자기 겹침은 규칙 2)
+        // 규칙 1: 보드 안 + 마스크 안 + 서로 다른 Arrow 끼리 겹침 없음 (자기 겹침은 규칙 2)
         private static void CheckCellsInBoundsAndDisjoint(LevelData level, List<LevelValidationError> errors)
         {
+            // W-027: mask 가 있으면 크기가 맞아야 하고, 모든 Arrow 셀이 mask 안이어야 한다
+            if (!BoardMask.TryParse(level.Mask, level.Width, level.Height, out var mask, out var maskError))
+            {
+                errors.Add(new LevelValidationError(LevelRule.CellsInBoundsAndDisjoint, maskError));
+                return;
+            }
+
             var occupied = new Dictionary<Vector2Int, string>();
             foreach (var arrow in level.Arrows)
             {
@@ -96,6 +103,13 @@ namespace NanaArrow.Editor
                     {
                         errors.Add(new LevelValidationError(LevelRule.CellsInBoundsAndDisjoint,
                             $"Arrow '{arrow.Id}' cell {cell} is outside the {level.Width}x{level.Height} board."));
+                        continue;
+                    }
+
+                    if (mask != null && !mask.Contains(cell))
+                    {
+                        errors.Add(new LevelValidationError(LevelRule.CellsInBoundsAndDisjoint,
+                            $"Arrow '{arrow.Id}' cell {cell} is outside the mask (mask marks it '{BoardMask.Excluded}')."));
                         continue;
                     }
 
