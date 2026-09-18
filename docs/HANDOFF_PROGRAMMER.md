@@ -31,7 +31,7 @@
 - `NanaArrow.UI`: `PopupBase`(`Current`, `closableByBack`, `ConsumedBack`), `SafeAreaAdapter`, `Strings`/`StringEntry`/`LocalizedText`, `RewardCodePanel`, `Tutorial/`(`TutorialConfig`·`TutorialStep`·`TutorialTrigger`·`FingerAnchor`·`TutorialFlow`(순수)·`TutorialPresenter`), `Game/`(`LivesView`, `ClearPopup`, `FailPopup`, `GameScreen`), `Main/`(`MainMenu`, `LevelSelectView`, `LevelCell`, `LevelCellState`, `SettingsPopup`)
 - `NanaArrow.Editor`: `LevelValidator`(규칙 0~5, 2-e 포함), `LevelFiles`, `LevelValidatorWindow`, `LevelCheatWindow`(NanaArrow/Cheat/Level Jump)
 - `NanaArrow.Tests.EditMode` (`Assets/_Project/Tests/EditMode`): 267개. 순수 로직은 전부 테스트가 있다 — 새 로직도 같은 방식으로
-- 설정 에셋 (`Assets/_Project/Settings`): `GameConfig`, `ArrowTypeConfig`, `AdsConfig`, `ArrowViewStyle`, `LevelCatalog`(팀장이 만듦, 1~20 만 연결됨), `Strings_ko`(42키), `TutorialConfig`(6행), `RewardConfig`
+- 설정 에셋 (`Assets/_Project/Settings`): `GameConfig`, `ArrowTypeConfig`, `AdsConfig`, `ArrowViewStyle`, `LevelCatalog`(**이 기술은 틀렸었다** — 에셋이 아예 없었고 2026-09-18 에 내가 만들어 50개 연결), `Strings_ko`(42키), `TutorialConfig`(6행), `RewardConfig`
 - 레벨: `Assets/_Project/Levels/level_001~050.json` (기획자 소유, 나는 검증·커밋만)
 
 ## 3. 규칙·관례 (CLAUDE.md 요약 + 세션에서 굳어진 것)
@@ -55,7 +55,8 @@
 
 ## 5. 팀장(에디터) 쪽에 걸려 있는 것 — 코드는 준비됐고 연결만 남음
 REPORT_PROGRAMMER 의 W-010·W-020·W-017·W-011 "팀장 에디터 할 일" 참조. 요약:
-- Game 씬: `TapInput.config` 비어 있음(플레이 시 NRE), `GameController.catalog/boardCamera`, Main Camera 의 `BoardCameraController`, `Ads`(AdsController), HUD `LivesView`, `Tutorial`(TutorialPresenter), `Screen`(GameScreen), 팝업 4종(`ClearPopup`/`FailPopup`/ConfirmMain/`RewardCodePanel`)
+- Game 씬 (**2026-09-18 실측으로 정정** — 아래 취소선 부분은 이전 세션의 잘못된 기술이었다): ~~`TapInput.config` 비어 있음(플레이 시 NRE), Main Camera 의 `BoardCameraController` 붙이기~~ → **둘 다 이미 되어 있다.** `BoardView.config/style`, `TapInput.config/boardView`, `GameController` 의 config·view·tapInput·boardCamera 전부 채워져 있고, **비어 있는 건 `GameController.catalog` 하나뿐** (그리고 선택 사항인 `BoardView.boardCamera`). 아직 없는 것: `Ads`(AdsController), HUD `LivesView`·`DifficultyLabel`·`GridToggleButton`, `Tutorial`(TutorialPresenter), `Screen`(GameScreen), 팝업 4종(`ClearPopup`/`FailPopup`/ConfirmMain/`RewardCodePanel`)
+- **교훈: 인수인계서·이전 보고의 "씬 상태" 기술을 믿지 말고 `SerializedObject` 로 직접 읽어 확인할 것** (MCP eval). 씬은 팀장이 세션 사이에 바꾼다.
 - Main 씬: `MainMenu`, `LevelSelectView`+`LevelCell` 프리팹, `SettingsPopup`, Quit/Raffle 팝업
 - `LevelCatalog.asset` 에 21~50 추가 (현재 20개만)
 - 한글 TMP 폰트: **완료** (`Art/Fonts/NanumGothic SDF.asset`). 하트·손가락·아이콘 스프라이트는 아직 없음 (`Knob`/`UISprite` 로 임시 진행 가능)

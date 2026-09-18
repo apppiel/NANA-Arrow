@@ -64,12 +64,13 @@
 
 | | 상태 |
 |---|---|
-| Game 씬 | 오브젝트 4개 (`Main Camera`, `Board`, `Input`, `GameController`) — **참조가 비어 있어 Play 하면 NRE**, Canvas·EventSystem 없음 |
+| Game 씬 | 오브젝트 4개 (`Main Camera`, `Board`, `Input`, `GameController`). **참조는 거의 다 채워져 있고 비어 있는 건 `GameController.catalog` 하나** (2026-09-18 실측 — STEP 0 참고). Canvas·EventSystem 은 없음 |
 | Main 씬 | 완전히 빈 씬 |
 | Boot 씬 | 완전히 빈 씬 |
 | 프리팹 | 0개 |
 | 스프라이트 | 0개 (하트·손가락·아이콘 없음 → 아래는 전부 Unity 기본 스프라이트로 진행) |
 | 한글 TMP 폰트 | ✅ `Assets/_Project/Art/Fonts/NanumGothic SDF.asset` 있음 |
+| `LevelCatalog.asset` | ✅ 있음 — **처음엔 없었고 2026-09-18 에 제가 만들어 50개 연결** (STEP 8 참고) |
 
 **중요 — STEP 0 만 하면 게임이 일단 돌아갑니다.** UI 40개를 다 만든 뒤에 확인하지 마시고, STEP 0 → Play 로 게임이 되는 걸 먼저 보신 다음 UI 를 얹으세요. 각 단계 끝의 **[확인]** 을 통과하고 다음으로 가시면 됩니다.
 
@@ -85,46 +86,25 @@
 
 ---
 
-### STEP 0 — Game 씬이 Play 되게 하기 (5분, 가장 먼저)
+### STEP 0 — Game 씬이 Play 되게 하기 (2분, 가장 먼저)
 
-기존 4개 오브젝트의 빈 참조만 채웁니다. 새로 만드는 것 없음.
+> **2026-09-18 정정**: 처음엔 "4개 오브젝트의 빈 참조를 전부 채우라" 고 적었는데, 실제로 씬을 열어 직렬화 값을 읽어 보니 **거의 다 이미 채워져 있었습니다.** 인수인계서의 "`TapInput.config` 비어 있음 / Main Camera 에 `BoardCameraController` 를 붙여야 함" 은 **틀린 기술**이었습니다. 실제로 비어 있는 건 **한 칸뿐**입니다.
 
-**0-1. `Board` 선택 → BoardView**
+**이미 되어 있는 것 (건드리지 마세요)**
 
-| 필드 | 넣을 것 |
+| 오브젝트 | 상태 |
 |---|---|
-| Config | `Assets/_Project/Settings/GameConfig` |
-| Style | `Assets/_Project/Settings/ArrowViewStyle` |
-| Target Camera | **비워 둠** (자동으로 Camera.main) |
+| `Board` (BoardView) | Config ✅ Style ✅ |
+| `Input` (TapInput) | Config ✅ Board View ✅ |
+| `GameController` | Game Config ✅ Arrow Type Config ✅ Board View ✅ Tap Input ✅ Board Camera ✅ Start Level 1 ✅ |
+| `Main Camera` | `BoardCameraController` ✅ 이미 붙어 있음 |
 
-**0-2. `Input` 선택 → TapInput**
+**0-1. 딱 한 칸만 채우면 됩니다** — `GameController` 선택 → **Catalog** 에 `Assets/_Project/Settings/LevelCatalog` 드래그
 
-| 필드 | 넣을 것 |
-|---|---|
-| Config | `Settings/GameConfig` |
-| Board View | Hierarchy 의 **`Board`** |
-| Target Camera | 비워 둠 |
+**0-2. (선택, 권장)** `Board` 선택 → BoardView 의 **Board Camera** 에 `Main Camera` 드래그
+- 비워 둬도 동작하지만, 넣으면 **줌 상태에서 재시작해도 셀 크기가 고정**됩니다 (필드 툴팁 그대로)
 
-**0-3. `Main Camera` 선택 → Add Component → `Board Camera Controller`**
-
-| 필드 | 넣을 것 |
-|---|---|
-| Config | `Settings/GameConfig` |
-| Tap Input | Hierarchy 의 **`Input`** |
-| Board View | Hierarchy 의 **`Board`** |
-
-**0-4. `GameController` 선택 → GameController**
-
-| 필드 | 넣을 것 |
-|---|---|
-| Game Config | `Settings/GameConfig` |
-| Arrow Type Config | `Settings/ArrowTypeConfig` |
-| Board View | `Board` |
-| Tap Input | `Input` |
-| Board Camera | **`Main Camera`** (BoardCameraController 가 붙은) |
-| Catalog | `Settings/LevelCatalog` |
-| Start Level | `1` |
-| Level Cleared / Level Failed | 지금은 비워 둠 (STEP 3 에서 팝업 연결) |
+> `Level Cleared` / `Level Failed` 이벤트는 지금 비어 있는 게 맞습니다 — STEP 3 에서 팝업을 연결합니다.
 
 **[확인]** Ctrl+S → Play
 - 화살표 보드가 화면에 나오고, 화살표를 탭하면 발사됨
@@ -398,15 +378,14 @@
 
 ---
 
-### STEP 8 — LevelCatalog 에 21~50 추가
+### STEP 8 — LevelCatalog — ✅ **할 일 없음 (제가 만들었습니다)**
 
-1. `Assets/_Project/Settings/LevelCatalog.asset` 선택
-2. Levels 의 **Size 를 20 → 50** 으로 변경
-3. Project 창에서 `Assets/_Project/Levels/` 의 `level_021.json` ~ `level_050.json` 을 **한 번에 선택해서** Element 20~49 에 드래그
+처음 가이드에는 "Size 를 20 → 50 으로 바꾸고 드래그" 라고 적었지만, **`LevelCatalog.asset` 은 아예 없었습니다** (인수인계서에 "팀장이 만듦, 20개 연결" 로 잘못 적혀 있었습니다). 제가 만들어서 `level_001~050.json` **50개를 순서대로 연결**해 뒀습니다.
 
-> 순서가 중요합니다 (`level_001` 부터 순서대로). 드래그 후 Element 20 이 `level_021` 인지 확인해 주세요.
+- `Assets/_Project/Settings/LevelCatalog.asset`
+- 검증: `Count = 50`, 1번 → `level_001`, 26번 → `level_026`, 50번 → `level_050`, 51번은 없음
 
-**[확인]** Main 씬 Play → 레벨 선택 패널에 칸이 **50개**
+**[확인]** 에셋을 눌러 인스펙터에 Levels 50개가 보이면 됩니다. 나중에 레벨이 늘면 그때 드래그로 추가하시면 됩니다.
 
 ---
 
