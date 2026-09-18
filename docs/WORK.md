@@ -14,6 +14,19 @@
 
 ## 프로그래머
 
+### W-025 팀장 플레이 테스트 버그 (최우선, 브랜치 `fix/playtest-1`) — 09-18
+UI 는 당분간 신경 쓰지 않음. 아래 순서대로. 항목마다 GameConfig/ArrowViewStyle 값으로 빼서 인스펙터 조정 가능하게.
+1. **Fire 연출: 화살표가 보드 밖으로 완전히 나가야 함.** 지금은 보드 가장자리(또는 중간)에서 사라짐. 머리가 **화면 밖**(카메라 뷰 밖 + 여유 `exitMarginCells` 2)까지 직진하고 꼬리까지 화면 밖으로 나간 뒤 제거. 논리 Exit 는 즉시, 연출만 연장. 줌 상태에서도 화면 밖 기준
+2. **길게 누르기 Lane 미리보기도 화면 끝까지.** 보드 가장자리에서 끊지 말고 화면 경계까지 연장해서 그림 (레퍼런스 동일)
+3. **60fps**: `Application.targetFrameRate` 가 -1 이라 모바일에서 30 으로 잡힘. BootLoader 에서 `GameConfig.targetFrameRate`(기본 60) 적용, `vSyncCount` 0
+4. 에디터 상태 이슈 — 팀장 사진 대기 (디렉터가 추가 예정)
+5. **레벨 선택 화면에서 뒤로가기 안 됨** (안드로이드 뒤로가기·화면 뒤로가기 버튼 둘 다 확인). `PopupBase.ConsumedBack`/`LevelSelectView` 경로 점검
+6. **난이도 라벨(어려움/쉬움) 가운데 정렬 안 됨** — 텍스트 anchor·alignment 를 코드에서 강제하지 말고, 프리팹 쪽 문제면 "팀장이 고칠 것" 으로 보고에 적기. TMP `alignment=Center` + RectTransform 중앙 앵커
+7. 그리드 이슈 — 팀장 사진 대기
+8. 점(dot) 이슈 — 팀장 사진 대기
+- 각 항목 수정 후 Play 로 확인, 보고에 항목별 "수정됨 / 팀장 확인 필요" 표시
+
+
 ### W-021 v0.7.2 반영 + 빌드 준비 (브랜치 `feat/build-prep`)
 - 디렉터 승인: W-011 가정 5건 전부 (실패 횟수 정의, 이어하기 버튼 숨김, 광고 경합 처리, Firestore 컬렉션명, ID 교체 시점). `raffle.status.*` 키 6개 승인
 - v0.7.2: `GridOverlay` 토글이 W-020 에 들어갔는지 확인, 없으면 추가. HUD `DifficultyLabel`(meta.difficulty 1~3 → `hud.difficulty.easy/normal/hard`) + `GridToggleButton` — W-017 에 없으면 추가. `zoomMin` 기본 0.5
