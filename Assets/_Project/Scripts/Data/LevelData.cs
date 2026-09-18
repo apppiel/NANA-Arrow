@@ -22,6 +22,14 @@ namespace NanaArrow.Data
         [JsonProperty("lives")]
         public int? Lives { get; set; }
 
+        /// <summary>
+        /// 비직사각 보드 (LEVEL_FORMAT v0.7, W-027). 위→아래 행, `#` = 쓰는 칸 / `.` = 뺀 칸.
+        /// 생략하면 width × height 전체 사각형.
+        /// </summary>
+        [JsonProperty("mask")]
+        [JsonConverter(typeof(InlineArrayConverter))]
+        public string[] Mask { get; set; }
+
         [JsonProperty("arrows", Required = Required.Always)]
         public ArrowData[] Arrows { get; set; }
 

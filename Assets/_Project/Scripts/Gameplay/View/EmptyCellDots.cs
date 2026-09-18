@@ -4,20 +4,25 @@ using UnityEngine;
 namespace NanaArrow.Gameplay.View
 {
     /// <summary>
-    /// 보드 사각형 안의 빈 칸마다 찍는 옅은 점 (GAME_RULES v0.7.3 §9). 레인 가이드 토글과 무관하게 <b>항상</b> 보인다.
-    /// Arrow 가 Exit 해서 칸이 비면 그 칸에도 점이 생기므로 <see cref="Rebuild"/> 를 다시 부른다. 보드 바깥엔 찍지 않는다.
+    /// 보드 안의 빈 칸마다 찍는 옅은 점 (GAME_RULES v0.7.3 §9). 레인 가이드 토글과 무관하게 <b>항상</b> 보인다.
+    /// Arrow 가 Exit 해서 칸이 비면 그 칸에도 점이 생기므로 <see cref="Rebuild"/> 를 다시 부른다.
+    /// 비직사각 보드(W-027)에서는 <b>마스크 안</b>에만 찍는다 — 보드 바깥·마스크 밖엔 없다.
     /// </summary>
     public sealed class EmptyCellDots : MonoBehaviour
     {
         private readonly List<SpriteRenderer> _dots = new List<SpriteRenderer>();
+        private readonly List<Vector2Int> _cells = new List<Vector2Int>();
 
         private BoardLayout _layout;
         private ArrowViewStyle _style;
+        private BoardMask _mask;
 
-        public void Initialize(BoardLayout layout, ArrowViewStyle style)
+        /// <param name="mask">비직사각 보드 마스크. null 이면 사각형 전체.</param>
+        public void Initialize(BoardLayout layout, ArrowViewStyle style, BoardMask mask)
         {
             _layout = layout;
             _style = style;
+            _mask = mask;
             gameObject.SetActive(style.ShowEmptyCellDots);
         }
 
@@ -25,7 +30,11 @@ namespace NanaArrow.Gameplay.View
         {
             if (_layout == null || !_style.ShowEmptyCellDots) return;
 
-            var cells = LaneGuides.EmptyCells(_layout.Width, _layout.Height, arrows);
+            _cells.Clear();
+            foreach (var cell in LaneGuides.EmptyCells(_layout.Width, _layout.Height, arrows))
+                if (_mask == null || _mask.Contains(cell))
+                    _cells.Add(cell);
+            var cells = _cells;
             while (_dots.Count < cells.Count) _dots.Add(CreateDot());
 
             var diameter = _layout.CellSize * _style.EmptyCellDotRadiusCellRatio * 2f;

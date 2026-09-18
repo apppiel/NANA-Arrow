@@ -54,7 +54,7 @@ namespace NanaArrow.Gameplay.View
 
             _dots = new GameObject("EmptyCellDots").AddComponent<EmptyCellDots>();
             _dots.transform.SetParent(transform, false);
-            _dots.Initialize(Layout, style);
+            _dots.Initialize(Layout, style, board.Mask);
 
             _laneGuide = new GameObject("LaneGuide").AddComponent<LaneGuideOverlay>();
             _laneGuide.transform.SetParent(transform, false);

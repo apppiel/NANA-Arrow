@@ -33,7 +33,10 @@ namespace NanaArrow.Data
         /// <param name="frozenDefaultHits">ArrowTypeConfig.frozenDefaultHits. Frozen 의 hits 생략 시 사용.</param>
         public static Board CreateBoard(LevelData level, int frozenDefaultHits)
         {
-            var board = new Board(level.Width, level.Height);
+            if (!BoardMask.TryParse(level.Mask, level.Width, level.Height, out var mask, out var maskError))
+                throw new FormatException($"Level {level.Id}: {maskError}");
+
+            var board = new Board(level.Width, level.Height, mask);
             foreach (var data in level.Arrows)
                 board.Place(CreateArrow(data, frozenDefaultHits));
             return board;

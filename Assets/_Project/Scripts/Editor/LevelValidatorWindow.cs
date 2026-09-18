@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NanaArrow.Data;
 using NanaArrow.Gameplay;
 using UnityEditor;
 using UnityEngine;
@@ -80,14 +81,37 @@ namespace NanaArrow.Editor
             if (report.IsValid)
             {
                 EditorGUILayout.HelpBox(
-                    $"✓ {fileName}  ({report.Level.Width}×{report.Level.Height}, Arrow {report.Level.Arrows.Length}개)\n" +
+                    $"✓ {fileName}  ({report.Level.Width}×{report.Level.Height}, Arrow {report.Level.Arrows.Length}개){MaskSummary(report.Level)}\n" +
                     $"minTaps {report.Result.MinTaps}  solution: {string.Join(" → ", report.Result.Solution)}",
                     MessageType.None);
+                DrawMaskPreview(report.Level);
                 return;
             }
 
             var errors = string.Join("\n", report.Result.Errors.Select(e => $"  {e}"));
             EditorGUILayout.HelpBox($"✗ {fileName}\n{errors}", MessageType.Error);
+            DrawMaskPreview(report.Level);
+        }
+
+        private static string MaskSummary(LevelData level) =>
+            level?.Mask == null || level.Mask.Length == 0
+                ? ""
+                : $"  ·  mask {CountUsable(level)}칸";
+
+        private static int CountUsable(LevelData level) =>
+            level.Mask.Sum(row => row == null ? 0 : row.Count(c => c == BoardMask.Included));
+
+        /// <summary>비직사각 보드 모양을 아스키로 보여 준다 (W-027, 기획자가 파일을 안 열고 확인하도록).</summary>
+        private static void DrawMaskPreview(LevelData level)
+        {
+            if (level?.Mask == null || level.Mask.Length == 0) return;
+
+            EditorGUILayout.LabelField($"mask ({level.Width}×{level.Height}, 위→아래)", EditorStyles.miniBoldLabel);
+            var style = new GUIStyle(EditorStyles.label) { font = EditorStyles.miniFont, richText = false };
+            // 칸을 두 칸 폭으로 벌려야 정사각형처럼 보인다
+            foreach (var row in level.Mask)
+                EditorGUILayout.LabelField("   " + string.Join(" ", (row ?? "").ToCharArray()), style);
+            EditorGUILayout.Space(4f);
         }
 
         private void ValidateAll()
