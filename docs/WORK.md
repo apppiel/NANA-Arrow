@@ -14,6 +14,15 @@
 
 ## 프로그래머
 
+### W-029 레벨 자동 생성기 (W-028 다음, 최우선. 브랜치 `feat/level-generator`)
+배경: 레퍼런스 후반은 Arrow 100~200개. 손 설계 불가 → 생성기 필수 (GAME_RULES v0.8 §4·§12).
+- GameConfig: `maxBoardWidth` 24, `maxBoardHeight` 32, `maxArrowsPerLevel` 200. Validator 규칙 0 갱신
+- `Editor/LevelGenerator` 순수 C# + 테스트: **역방향 생성** — 빈 보드(+mask)에서 Arrow 를 하나씩 "되돌려 넣기"(나갔던 방향의 역으로 밀어 넣어 경로 만들기). 결과는 정의상 해결 가능. 시드 고정 시 재현 가능
+- 파라미터 SO `GeneratorParams`: width/height/mask, arrowCount, 길이 분포(min/max/평균), 꺾임 수 범위, 목표 점유율, Frozen/Locked+Key 개수, free0 목표(외길 vs 넓은 길), 난이도 축(§12), 시드
+- `Editor/LevelGeneratorWindow`: 파라미터 → 생성 → 아스키 미리보기 → Validator 통과 시 `level_###.json` 저장 (meta.generated=true, seed, params 기록). "다시 뽑기" 버튼
+- 성능: 200개 Arrow 에서 생성 < 2초, Validator < 1초. 실기에서 LineRenderer 200 + 점 + 레인 가이드 200줄 60fps 확인 항목을 QA_DEVICE.md 에 추가
+- 보고에 생성 예시 3개(30/100/200개) 아스키 첨부
+
 ### W-028 정리 작업 (브랜치 `chore/assets-doc`)
 - 디렉터 답변: (1) LEVEL_FORMAT v0.7 갱신 완료 (2) **팔레트: GAME_RULES §9 남색+연보라가 목표. 금색 FreeButtonSet 은 임시 에셋**. 코드는 색을 하드코딩하지 말고 ArrowViewStyle/UI 테마 SO 로. 정식 아트는 팀장이 교체 (3) 에셋 출처 → `docs/ASSETS.md` 정식 문서로 (프로그래머가 작성, docs 예외 허용): 파일/폴더, 출처, 라이선스, 상업 이용 가능 여부, 교체 필요 여부
 - `.gitignore` 에 `Assets/Plugins/Android/FirebaseCrashlytics.androidlib/res/values/crashlytics_build_id.xml` 추가 (빌드마다 바뀌는 생성 파일)
@@ -56,7 +65,7 @@ UI 는 당분간 신경 쓰지 않음. 아래 순서대로. 항목마다 GameCon
 
 ## 기획자
 
-### W-026 레벨 다양성 — 추가: mask 레벨에서 마스크 파인 곳(`.`)을 정면으로 관통하는 레인은 보기에 어색하니 피할 것 (로직상은 통과함)
+### W-026 레벨 다양성 — **방향 조정 (v0.8)**: 손 설계는 **1~30 만** 재설계 (10~30 다양성 규칙 적용, 모양 판 포함). 31 이후는 W-029 생성기가 나오면 **파라미터 설계 + 검수** 로 전환. 레벨마다 `meta.axis`(GAME_RULES §12 난이도 축) 기록. 추가: mask 레벨에서 마스크 파인 곳(`.`)을 정면으로 관통하는 레인은 보기에 어색하니 피할 것 (로직상은 통과함)
 
 ### (원문) W-026 레벨 다양성 (최우선 — 팀장 플레이 피드백 09-18: "10단계쯤부터 전부 똑같다. 가로세로도 똑같다. 얼음·자물쇠는 좋다")
 원인: 보드 크기가 구간별로 한 칸씩만 커지고, 매 레벨 점유율 90~100% 로 꽉 채우는 같은 공식. 레퍼런스는 레벨마다 **보드 모양·밀도·리듬**이 다르다 (reference/ 사진·영상 참고).
@@ -73,7 +82,8 @@ UI 는 당분간 신경 쓰지 않음. 아래 순서대로. 항목마다 GameCon
 - Validator 통과 후 저장. 커밋은 디렉터
 
 
-### W-023 레벨 51~80 (W-026 규칙 적용 후)
+### W-023 레벨 31~100 파라미터 설계 (W-029 생성기 머지 후) — 손 설계 아님
+- 레벨별 GeneratorParams 표 (크기·개수·길이·기믹·축·mask). 70+ 는 100~200개 지구력형. 생성 → 검수 → 저장
 - 디렉터 승인: 51 → 9×13, 61 → 10×13, 81 → 10×14. 45~50 방식(화살표 수 대신 경로 길이) 유지
 - 각 레벨 `meta.difficulty` 1~3 부여 기준을 LEVEL_DESIGN 에 추가하고 **1~50 에도 값 채우기** (HUD 난이도 라벨용)
 - 프로젝트 Validator 통과 후 저장. 커밋은 디렉터

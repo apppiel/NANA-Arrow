@@ -1,4 +1,4 @@
-# NANA-Arrow — GAME_RULES.md (v0.7.3 — `#` 는 레인 가이드, 빈 칸 점 항상 표시로 정정)
+# NANA-Arrow — GAME_RULES.md (v0.8 — 난이도 정의, 후반 대형 레벨(100~200개) 방침, 보드 상한 확대, 자동 생성기)
 > 작성: 디렉터. **이 파일이 유일한 규칙 기준.** 이전 버전 문구와 충돌하면 이 파일이 우선.
 > 레퍼런스: **Arrows – Puzzle Escape (Lessmore GmbH, com.ecffri.arrows)**. 스크린샷 docs/reference/.
 > 모든 수치는 ScriptableObject(GameConfig / ArrowTypeConfig / AdsConfig / ArrowViewStyle / RewardConfig) 인스펙터 값. 여기 적힌 값은 기본값.
@@ -46,9 +46,10 @@
 `ArrowType` enum: Basic, Frozen, Locked, Key. 타입 표시는 머리 위 아이콘.
 
 ## 4. 레벨 구조
-- 보드: 가로·세로 독립. `minBoardSize` 3, **`maxBoardWidth` 10, `maxBoardHeight` 14**
+- 보드: 가로·세로 독립. `minBoardSize` 3, **`maxBoardWidth` 24, `maxBoardHeight` 32** (레퍼런스 후반은 화살표 100~200개). `maxArrowsPerLevel` 200. 화면에 다 안 들어오는 건 줌·팬으로 (§10)
 - 구간 (LEVEL_DESIGN v1.0 승인): 1~3 소형(5×6·5×5·4×5) → 4~10 6×7~7×9 → 11~20 7×9→8×10 → 21~30 8×10~8×11 → 이후 기획자 제안. 기믹 도입 레벨(16 Frozen, 26 Key/Locked)과 보드 확대 레벨은 겹치지 않게
 - **`maxArrowLength` 40** (레퍼런스 Lv4 에 34칸 Arrow)
+- **레벨 제작 방식**: 1~30 은 기획자 손 설계. 31 이후는 **역방향 자동 생성기**(빈 판에서 Arrow 를 하나씩 되돌려 넣기 → 항상 해결 가능)로 생성하고 기획자가 파라미터를 정하고 검수한다. 후반(70+)은 100~200개 지구력형
 - 점유율: 3레벨부터 90~100% 가 표준 (레퍼런스와 동일)
 - 레벨 파일 `Assets/_Project/Levels/level_###.json`, 스키마 LEVEL_FORMAT v0.5. 작성·저장 담당 = 기획자
 - 검증기 필수 통과 규칙: 0 스키마 / 1 범위·Arrow 간 겹침 없음 / 2 경로: (a) 인접 (b) 자기 겹침 없음 (c) dir = 마지막 세그먼트 (d) 길이 ≤ maxArrowLength **(e) 자기 Lane 위에 자기 몸통 없음** / 3 Locked↔Key / 4 해결 가능(탐욕 시뮬) / 5 solution·minTaps 기록
@@ -121,3 +122,12 @@ Boot(설정·저장 로드) → Main(시작·레벨 선택·설정) → Game →
 - v0.7.1 (09-17) §10 보드 줌·팬 추가 (대표 요구사항)
 - v0.7 (09-17) 전면 재작성. maxArrowLength 40, 보드 가로·세로 분리, 셀 크기 규칙, 규칙 2-e, Lv4 튜토리얼, 게임 중 설정 없음 확정
 - v0.6.x 레퍼런스 확정, 경로형 전환 / v0.5.x Key·Frozen·Locked 세부, 코인 삭제, 보드 11/21/40 / v0.4 광고 확정 / v0.3 하트·Marked / v0.2 부스터 제외
+
+## 12. 난이도 정의 (2026-09-18)
+이 게임엔 조작 난이도가 없다. 난이도 = **한 번 탭할 때 틀릴 확률 × 탭 횟수** (하트 3개 = 허용 실수 3회). 네 축:
+1. **탐색** — 지금 쏠 수 있는 Arrow 수(free0)와 쏜 뒤 열리는 폭. 외길(free 1) vs 넓은 길(free 5+)
+2. **판독** — 머리에서 화면 끝까지 레인을 눈으로 따라가기 어려움: 긴 꼬불꼬불한 몸통, 레인을 스치는 남의 몸통 한 칸, 긴 레인, 나란한 같은 방향 Arrow
+3. **추론** — 의존 사슬 깊이(depth) + 기믹 상태 기억(얼음 횟수, 열쇠 위치)
+4. **지구력** — Arrow 수. 100개면 개당 틀릴 확률 3% 이하여야 통과
+레벨 설계 시 **어느 축으로 어렵게 할지 하나를 고른다** (LEVEL_DESIGN `meta.axis`: search/read/reason/stamina). 같은 축 3연속 금지. 레퍼런스 "어려움" 은 대부분 4+2.
+- v0.8 (09-18) §12 난이도 정의, 보드 상한 24×32, maxArrows 200, 자동 생성기 방침
