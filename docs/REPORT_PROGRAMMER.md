@@ -2,6 +2,51 @@
 > **프로그래머(클로드 코드)만 쓴다.** 작업 하나 끝날 때마다 맨 위에 새 항목 추가. 디렉터는 읽기만.
 > 형식: `### W-### 완료 (날짜) — 브랜치` / 변경 요약 / 가정·질문 / 팀장 에디터 할 일
 
+### W-028 완료 (2026-09-18) — 브랜치 `chore/assets-doc`
+
+- 테스트 **321/321**, 컴파일 에러 0. 토글 색이 테마에서 읽히는지 플레이로 확인
+
+**1. `docs/ASSETS.md` 신설** (디렉터가 docs 예외 허용)
+- 우리 아트 / 외부 SDK / 아직 없는 에셋 / 색을 정하는 곳 / 절대 커밋 금지 목록
+- **`FreeButtonSet` 은 폴더에 LICENSE·README 가 없어 출처를 확인할 수 없습니다.** "확인 필요 / 교체 필요(임시)" 로 명시했고, 정식 아트 교체 시 **폴더를 삭제하는 것이 가장 안전**하다고 적었습니다. 계속 쓰려면 팀장이 받은 곳·라이선스를 표에 채워야 합니다
+- 망고보드는 플랜별로 앱 배포 허용 범위가 갈리므로 **출시 직전 1회 확인** 항목으로 남겼습니다
+- 나눔고딕 OFL, SDK 4종 Apache 2.0 / Unity Companion 으로 정리. 개인정보처리방침에 AdMob·Firebase 명시 필요도 적었습니다
+
+**2. 코드에서 팔레트 제거 → `UITheme` SO**
+- 코드에 박혀 있던 팔레트 색은 **`LaneGuideToggleButton` 의 on/off 2개뿐**이었습니다 (나머지 UI 색은 전부 씬·프리팹 인스펙터 값)
+- **`UI/UITheme`** SO 신설 (`Settings/UITheme.asset`): navy `141A33` / lilac `E9E4FF` / heartRed `E8453C` / dim 검정 50% / toggleOn·toggleOff — GAME_RULES §9 값
+- `LaneGuideToggleButton` 이 `Color` 필드 대신 `UITheme` 를 참조. 테마가 비어 있으면 색을 건드리지 않습니다
+- Game 씬의 토글에 에셋 연결까지 마쳤습니다. 플레이 확인: 켜짐 `FFFFFF` ↔ 꺼짐 `BFBFC7` 로 바뀜
+- 보드 색은 원래부터 `ArrowViewStyle` 이 들고 있어 그대로 둡니다. 이제 아트 교체 시 볼 곳은 **`ArrowViewStyle` + `UITheme` + 씬 인스펙터** 세 곳이고 ASSETS.md §6 에 적었습니다
+- `Services/ScreenCaptureProtection` 의 `Color.black` 은 **캡처 가림용 기능색**(불투명 검정이어야 의미가 있음)이라 남겼습니다. 이 서비스는 자가 생성이라 인스펙터도 없습니다
+
+**3. `.gitignore`**
+- `Assets/Plugins/Android/FirebaseCrashlytics.androidlib/res/values/crashlytics_build_id.xml` 추가
+- 이미 **추적 중**이던 파일이라 `git rm --cached` 로 추적만 해제했습니다 (디스크의 파일은 그대로). 이제 빌드할 때마다 `git status` 를 더럽히지 않습니다
+
+**4. mask 밖 레인 통과** — 지시대로 현행 유지. 코드 변경 없음
+
+**⚠️ 디렉터께 — `LEVEL_FORMAT.md` 표가 머리말과 어긋납니다**
+
+v0.7 머리말은 `string[]` 로 잘 고쳐졌는데, **필드 표(65줄)가 아직 옛날 그대로**입니다:
+
+```
+| mask | int[][] | X | **예약 (v1.1)**. 비직사각 보드에서 사용할 수 있는 칸 목록. v1 로더는 무시 |
+```
+
+기획자가 표를 보면 **타입도 틀리고("int[][]"), 안 쓰이는 줄 알게 됩니다("v1 로더는 무시")**. 실제 구현은 `string[]` 이고 로더·검증기가 씁니다. 제 docs 예외는 `ASSETS.md` 에만 주셔서 고치지 않고 보고만 드립니다. 이렇게 바꾸시면 됩니다:
+
+```
+| mask | string[] | X | 비직사각 보드. 위→아래 행, `#` 포함 / `.` 제외. 행 수=height, 행 길이=width. 생략 시 전체 사각형 |
+```
+
+**팀장 에디터 할 일**
+- 없습니다. `UITheme.asset` 연결까지 끝냈습니다
+- 정식 아트로 교체하실 때 `Settings/UITheme.asset` 과 `Settings/ArrowViewStyle.asset` 두 개만 보시면 됩니다 (`docs/ASSETS.md` §6)
+
+---
+
+
 ### W-027 완료 (2026-09-18) — 브랜치 `feat/board-mask`
 
 - 테스트 **321/321** (+19), 컴파일 에러 0. 하트 모양 보드를 실제로 로드해 확인
