@@ -44,6 +44,8 @@ namespace NanaArrow.Core
         public GameSession Session { get; private set; }
         public LevelCatalog Catalog => catalog;
         public int CurrentLevel { get; private set; }
+        /// <summary>현재 판의 레벨 파일 (HUD 난이도 라벨이 meta.difficulty 를 읽는다). 로드 전엔 null.</summary>
+        public LevelData CurrentLevelData { get; private set; }
         /// <summary>현재 판의 애널리틱스 지표. 레벨 로드 전엔 null.</summary>
         public LevelStats Stats => _stats;
         public bool IsLastLevel => catalog != null && CurrentLevel >= catalog.Count;
@@ -53,6 +55,8 @@ namespace NanaArrow.Core
             tapInput.CellTapped += OnCellTapped;
             tapInput.LanePreviewRequested += OnLanePreviewRequested;
             tapInput.LanePreviewReleased += OnLanePreviewReleased;
+            // 격자 설정은 Core 에 있고 BoardView 는 Gameplay 라 Core 를 모른다 — 여기서 이어 준다.
+            SettingsStore.GridChanged += OnGridChanged;
         }
 
         private void OnDestroy()
@@ -60,8 +64,11 @@ namespace NanaArrow.Core
             tapInput.CellTapped -= OnCellTapped;
             tapInput.LanePreviewRequested -= OnLanePreviewRequested;
             tapInput.LanePreviewReleased -= OnLanePreviewReleased;
+            SettingsStore.GridChanged -= OnGridChanged;
             Unsubscribe();
         }
+
+        private void OnGridChanged(bool on) => boardView.SetGridVisible(on);
 
         private void Start()
         {
@@ -94,12 +101,14 @@ namespace NanaArrow.Core
             Unsubscribe();
             StopAllCoroutines();
 
+            CurrentLevelData = level;
             Session = new GameSession(level, gameConfig, arrowTypeConfig);
             Session.Tapped += OnTapped;
             Session.Cleared += OnCleared;
             Session.Failed += OnFailed;
 
             if (boardCamera != null) boardCamera.ResetZoom();
+            boardView.SetGridVisible(SettingsStore.GridOn);
             boardView.Build(Session.Board);
             boardView.Refresh(Session.Board, Session.Lives);
             if (boardCamera != null) boardCamera.Attach(boardView.Layout);

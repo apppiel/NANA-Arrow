@@ -8,11 +8,19 @@ namespace NanaArrow.Tests.EditMode
     {
         private const float Tolerance = 1e-4f;
 
-        // 보드 반폭 (1.15, 1.35), 화면 반폭 (3.7, 8) — 줌 1 에서는 보드가 화면보다 작다
-        private static BoardCameraModel NewModel(float zoomMax = 3f)
+        // 보드 반폭 (1.15, 1.35), 화면 반폭 (3.7, 8) — 기본 줌 1 에서는 보드가 화면보다 작다
+        private static BoardCameraModel NewModel(float zoomMax = 3f, float zoomMin = 0.5f, float zoomDefault = 1f)
         {
-            var model = new BoardCameraModel(1f, zoomMax, 0.3f);
+            var model = new BoardCameraModel(zoomMin, zoomDefault, zoomMax, 0.3f);
             model.Configure(new Vector2(1.15f, 1.35f), new Vector2(3.7f, 8f), 0.4f);
+            return model;
+        }
+
+        /// <summary>후반 레벨: 보드가 기본 줌에서 화면을 넘는다 (GAME_RULES v0.7.2 §10).</summary>
+        private static BoardCameraModel NewOversizedModel()
+        {
+            var model = new BoardCameraModel(0.5f, 1f, 3f, 0.3f);
+            model.Configure(new Vector2(5f, 10f), new Vector2(3.7f, 8f), 0.4f);
             return model;
         }
 
@@ -45,7 +53,63 @@ namespace NanaArrow.Tests.EditMode
             Assert.AreEqual(3f, model.Zoom, Tolerance);
 
             model.SetZoom(0.2f, Vector2.zero);
-            Assert.AreEqual(1f, model.Zoom, Tolerance);
+            Assert.AreEqual(0.5f, model.Zoom, Tolerance, "zoomMin 0.5 까지 축소된다 (v0.7.2)");
+            Assert.AreEqual(Vector2.zero, model.Offset);
+        }
+
+        [Test]
+        public void SetZoom_CanZoomOutBelowDefault()
+        {
+            var model = NewModel();
+
+            model.SetZoom(0.7f, Vector2.zero);
+
+            Assert.AreEqual(0.7f, model.Zoom, Tolerance);
+            Assert.IsFalse(model.IsDefault, "기본(1.0)보다 작으면 기본 상태가 아니다");
+        }
+
+        [Test]
+        public void Reset_ReturnsToDefaultZoom_NotZoomMin()
+        {
+            var model = NewModel();
+            model.SetZoom(0.5f, Vector2.zero);
+
+            model.Reset();
+
+            Assert.AreEqual(1f, model.Zoom, Tolerance, "리셋은 zoomMin 이 아니라 zoomDefault 로");
+        }
+
+        [Test]
+        public void Constructor_ClampsDefaultIntoRange()
+        {
+            var tooSmall = new BoardCameraModel(0.5f, 0.1f, 3f, 0.3f);
+            var tooBig = new BoardCameraModel(0.5f, 9f, 3f, 0.3f);
+
+            Assert.AreEqual(0.5f, tooSmall.Zoom, Tolerance);
+            Assert.AreEqual(3f, tooBig.Zoom, Tolerance);
+        }
+
+        [Test]
+        public void Pan_AtDefaultZoom_WhenBoardExceedsView_IsAllowed()
+        {
+            // v0.7.2: 후반 보드는 기본 줌에서 화면을 넘는다 → 줌 없이도 이동할 수 있어야 한다
+            var model = NewOversizedModel();
+
+            model.Pan(new Vector2(10f, 10f));
+
+            Assert.AreEqual(5f + 0.4f - 3.7f, model.Offset.x, 1e-3f);
+            Assert.AreEqual(10f + 0.4f - 8f, model.Offset.y, 1e-3f);
+        }
+
+        [Test]
+        public void Pan_AtZoomMin_WhenBoardFitsAgain_IsCentered()
+        {
+            // 큰 보드라도 0.5 배로 줄이면 화면(반폭 7.4, 16) 안에 들어온다 → 다시 중앙 고정
+            var model = NewOversizedModel();
+            model.SetZoom(0.5f, Vector2.zero);
+
+            model.Pan(new Vector2(10f, 10f));
+
             Assert.AreEqual(Vector2.zero, model.Offset);
         }
 

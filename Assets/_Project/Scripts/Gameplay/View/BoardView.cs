@@ -5,7 +5,7 @@ using UnityEngine;
 namespace NanaArrow.Gameplay.View
 {
     /// <summary>
-    /// 논리 Board → ArrowView 생성과 연출 재생. 격자·셀 배경은 그리지 않는다 (GAME_RULES v0.7 §9). 세로 중앙 = 이 오브젝트의 위치.
+    /// 논리 Board → ArrowView 생성과 연출 재생. 셀 배경은 없고 격자는 기본 꺼짐 (GAME_RULES v0.7.2 §9). 세로 중앙 = 이 오브젝트의 위치.
     /// 판정은 하지 않는다 (TapResult / FireResult 만 받는다).
     /// </summary>
     public sealed class BoardView : MonoBehaviour
@@ -19,8 +19,10 @@ namespace NanaArrow.Gameplay.View
         private readonly Dictionary<Arrow, ArrowView> _views = new Dictionary<Arrow, ArrowView>();
         private Transform _arrowsRoot;
         private LaneView _lane;
+        private GridOverlay _grid;
         private ArrowView _previewView;
         private int _firing;
+        private bool _gridVisible;
 
         public BoardLayout Layout { get; private set; }
         /// <summary>보드를 그리는 카메라 (UI 가 셀 → 화면 좌표로 바꿀 때).</summary>
@@ -28,6 +30,14 @@ namespace NanaArrow.Gameplay.View
 
         /// <summary>Fire 연출 중인 Arrow 가 있는지 (allowInputDuringFire = false 일 때 입력 차단용).</summary>
         public bool IsFiring => _firing > 0;
+
+        /// <summary>격자 표시 (GAME_RULES v0.7.2 §9). 설정값은 Core 쪽 SettingsStore 가 들고 있고 GameController 가 넘겨준다.</summary>
+        public void SetGridVisible(bool visible)
+        {
+            _gridVisible = visible;
+            if (_grid != null)
+                _grid.SetVisible(visible);
+        }
 
         private void Awake()
         {
@@ -40,6 +50,11 @@ namespace NanaArrow.Gameplay.View
             Clear();
             var cellSize = BoardLayout.CellSizeFor(CameraWidth(), board.Width, config.CellWidthFraction, config.MaxAreaFraction);
             Layout = new BoardLayout(board.Width, board.Height, cellSize, cellSize * config.CellGapRatio, transform.position);
+
+            _grid = new GameObject("Grid").AddComponent<GridOverlay>();
+            _grid.transform.SetParent(transform, false);
+            _grid.Build(Layout, style);
+            _grid.SetVisible(_gridVisible);
 
             _arrowsRoot = new GameObject("Arrows").transform;
             _arrowsRoot.SetParent(transform, false);
@@ -137,9 +152,11 @@ namespace NanaArrow.Gameplay.View
             StopAllCoroutines();
             if (_arrowsRoot != null) Destroy(_arrowsRoot.gameObject);
             if (_lane != null) Destroy(_lane.gameObject);
+            if (_grid != null) Destroy(_grid.gameObject);
             _views.Clear();
             _previewView = null;
             _lane = null;
+            _grid = null;
             _firing = 0;
             Layout = null;
         }

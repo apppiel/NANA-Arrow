@@ -33,7 +33,8 @@ MonoBehaviour:
   lockShakeDistance: 0.08
   allowInputDuringFire: 1
   longPressSeconds: 0.35
-  zoomMin: 1
+  zoomMin: 0.5
+  zoomDefault: 1
   zoomMax: 3
   dragThresholdCells: 0.3
   panMarginCells: 1

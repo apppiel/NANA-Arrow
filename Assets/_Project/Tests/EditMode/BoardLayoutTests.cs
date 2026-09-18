@@ -104,5 +104,28 @@ namespace NanaArrow.Tests.EditMode
             Assert.IsFalse(layout.TryWorldToCell(new Vector2(50f, 0f), out _));
             Assert.IsFalse(layout.TryWorldToCell(layout.CellToWorld(new Vector2Int(0, 0)) - new Vector2(layout.Pitch, 0f), out _));
         }
+
+        [Test]
+        public void Grid_SpansWholeBoard_CenteredOnCenter()
+        {
+            var layout = new BoardLayout(5, 7, CellSize, CellGap, Vector2.zero);
+
+            Assert.AreEqual(-5 * layout.Pitch * 0.5f, layout.GridMin.x, Tolerance);
+            Assert.AreEqual(-7 * layout.Pitch * 0.5f, layout.GridMin.y, Tolerance);
+            Assert.AreEqual(5 * layout.Pitch * 0.5f, layout.GridMax.x, Tolerance);
+            Assert.AreEqual(7 * layout.Pitch * 0.5f, layout.GridMax.y, Tolerance);
+        }
+
+        [Test]
+        public void Grid_CellCentersSitMidwayBetweenGridLines()
+        {
+            var layout = new BoardLayout(5, 7, CellSize, CellGap, new Vector2(3f, -2f));
+
+            for (var x = 0; x < layout.Width; x++)
+            {
+                var lineBefore = layout.GridMin.x + x * layout.Pitch;
+                Assert.AreEqual(lineBefore + layout.Pitch * 0.5f, layout.CellToWorld(new Vector2Int(x, 0)).x, Tolerance);
+            }
+        }
     }
 }
