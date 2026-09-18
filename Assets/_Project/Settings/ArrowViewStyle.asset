@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22d623e09a284470ca4f97c6214bf8d3, type: 3}
   m_Name: ArrowViewStyle
   m_EditorClassIdentifier: NanaArrow.Gameplay::NanaArrow.Gameplay.View.ArrowViewStyle
-  lineColor: {r: 0.078, g: 0.102, b: 0.2, a: 1}
+  lineColor: {r: 0.36078432, g: 0.18039216, b: 0, a: 1}
   lineWidthCellRatio: 0.15
   cornerVertices: 8
   capVertices: 8
@@ -22,9 +22,9 @@ MonoBehaviour:
   headSprite: {fileID: 0}
   markedColor: {r: 0.9, g: 0.22, b: 0.21, a: 1}
   laneFlashColor: {r: 0.93, g: 0.26, b: 0.26, a: 0.55}
-  lanePreviewColor: {r: 0.36, g: 0.42, b: 0.9, a: 0.45}
-  previewLineColor: {r: 0.36, g: 0.42, b: 0.9, a: 1}
-  laneWidthCellRatio: 0.5
+  lanePreviewColor: {r: 0.36, g: 0.18039216, b: 0, a: 0.45}
+  previewLineColor: {r: 0.36078432, g: 0.41960785, b: 0.9019608, a: 1}
+  laneWidthCellRatio: 0.2
   iconSizeCellRatio: 0.55
   iceColor: {r: 0.85, g: 0.95, b: 1, a: 0.7}
   iceSprite: {fileID: 0}
@@ -35,10 +35,10 @@ MonoBehaviour:
   - {r: 0.9, g: 0.64, b: 0.24, a: 1}
   - {r: 0.61, g: 0.15, b: 0.69, a: 1}
   - {r: 0.15, g: 0.65, b: 0.6, a: 1}
-  laneGuideColor: {r: 0.914, g: 0.894, b: 1, a: 1}
+  laneGuideColor: {r: 1, g: 0.7490196, b: 0, a: 1}
   laneGuideWidthCellRatio: 0.06
   showEmptyCellDots: 1
-  emptyCellDotColor: {r: 0.82, g: 0.83, b: 0.86, a: 1}
+  emptyCellDotColor: {r: 1, g: 0.7490196, b: 0, a: 1}
   emptyCellDotRadiusCellRatio: 0.12
   guideOrder: 0
   laneOrder: 5
