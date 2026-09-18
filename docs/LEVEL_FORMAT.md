@@ -1,4 +1,8 @@
-# NANA-Arrow — LEVEL_FORMAT.md (v0.6 — 2026-09-17 GAME_RULES v0.7 기준: 규칙 2-e, 길이 40, 보드 가로 10·세로 14)
+# NANA-Arrow — LEVEL_FORMAT.md (v0.7 — `mask` 구현 반영)
+> **v0.7 (2026-09-18)**: `mask` 는 **`string[]`** — 위→아래 행 순서, 각 행은 width 글자, `#` = 판에 포함되는 칸, `.` = 제외 칸. 행 수 = height. 생략하면 전체 사각형. 로더가 위→아래를 좌표(y=height-1-r)로 뒤집는다. 마스크 밖 칸은 **빈 칸 취급**(레인은 통과) — 표시·검증 전용. 검증 규칙 1: 모든 Arrow 셀이 mask 안, 크기 일치. Level Validator 창에서 아스키로 미리보기 가능.
+```json
+"mask": [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."]
+```
 > 레벨 파일: `Assets/_Project/Levels/level_###.json` (3자리 0패딩, 1부터). **레벨 파일 저장은 기획자 담당**
 > 로더: `NanaArrow.Data.LevelLoader`, 데이터 클래스: `LevelData`, `ArrowData`
 > v0.4 → v0.5 변경: `Long` 삭제, **모든 타입의 cells 가 꼬리→머리 순서의 경로**, 검증 규칙 2 교체, meta 권장 키 추가, `mask` 예약
